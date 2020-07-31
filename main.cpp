@@ -48,8 +48,8 @@ int main() {
     // ---------------------------------------------------------
 
     // Field of 2x3 (n=6) boreholes
-    int n1 = 17;
-    int n2 = 17;
+    int n1 = 2;
+    int n2 = 2;
     int nbh = n1 * n2;
     std::vector<gt::boreholes::Borehole> field(nbh);
     gt::boreholes::rectangle_field(field, n1, n2, B, B,H, D, r_b);

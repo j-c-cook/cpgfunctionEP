@@ -258,11 +258,11 @@ namespace gt::gfunction {
         vector<double> A_ (SIZE * SIZE);
         vector<double> b_ (SIZE);
         // LU decomposition gsl initialization
-        gsl_matrix * _A = gsl_matrix_alloc(SIZE, SIZE);
-        gsl_vector * _b = gsl_vector_alloc(SIZE);
-        gsl_vector *_x = gsl_vector_alloc (SIZE);
-        int s;
-        gsl_permutation * _p = gsl_permutation_alloc (SIZE);
+//        gsl_matrix * _A = gsl_matrix_alloc(SIZE, SIZE);
+//        gsl_vector * _b = gsl_vector_alloc(SIZE);
+//        gsl_vector *_x = gsl_vector_alloc (SIZE);
+//        int s;
+//        gsl_permutation * _p = gsl_permutation_alloc (SIZE);
 
         std::vector<std::vector <double>> A(nSources +1, std::vector<double> (nSources +1));
         std::vector<double> b(nSources + 1);
@@ -321,28 +321,28 @@ namespace gt::gfunction {
 
             // ------------- fill A ------------
             start = std::chrono::steady_clock::now();
-            auto _fillA = [_A, &Hb, &h_dt, &A, &A_](int i, int p, int SIZE) {
+            auto _fillA = [&Hb, &h_dt, &A, &A_](int i, int p, int SIZE) {
                 int n = SIZE - 1;
                 for (int j=0; j<SIZE; j++) {
                     if (i == n) { // then we are referring to Hb
                         if (j==n) {
-                            gsl_matrix_set (_A, i, n, 0);
+//                            gsl_matrix_set (_A, i, n, 0);
                             A_[i+j*SIZE] = 0;
-                            A[i][n] = 0;
+//                            A[i][n] = 0;
                         } else {
-                            gsl_matrix_set (_A, i, j, Hb[j]);
+//                            gsl_matrix_set (_A, i, j, Hb[j]);
                             A_[i+j*SIZE] = Hb[j];
-                            A[i][j] = Hb[j];
+//                            A[i][j] = Hb[j];
                         } // fi
                     } else {
                         if (j==A[i].size()-1) {
-                            gsl_matrix_set (_A, i, j, -1);
+//                            gsl_matrix_set (_A, i, j, -1);
                             A_[i+j*SIZE] = -1;
-                            A[i][j] = -1;
+//                            A[i][j] = -1;
                         } else {
-                            gsl_matrix_set (_A, j, i, h_dt[i][j][p]);
+//                            gsl_matrix_set (_A, j, i, h_dt[i][j][p]);
                             A_[j+i*SIZE] = h_dt[i][j][p];
-                            A[j][i] = h_dt[i][j][p];
+//                            A[j][i] = h_dt[i][j][p];
                         } // fi
                     } // fi
                 } // next k
@@ -453,7 +453,7 @@ namespace gt::gfunction {
 //            } // next i
 
             for (int i=0; i<b.size(); i++) {
-                gsl_vector_set(_b, i, b[i]);
+//                gsl_vector_set(_b, i, b[i]);
                 b_[i] = b[i];
             } // next i
 
@@ -519,10 +519,10 @@ namespace gt::gfunction {
         cout << LU_decomposition_time << "\t" << LU_decomposition_time/double(nt)
              << "\t" << "LU decomp time" << endl;
 
-        gsl_permutation_free (_p);
-        gsl_vector_free (_x);
-        gsl_vector_free (_b);
-        gsl_matrix_free (_A);
+//        gsl_permutation_free (_p);
+//        gsl_vector_free (_x);
+//        gsl_vector_free (_b);
+//        gsl_matrix_free (_A);
 
         auto end2 = std::chrono::steady_clock::now();
         if (disp) {
