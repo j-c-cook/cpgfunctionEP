@@ -1,0 +1,8 @@
+//
+// Created by jackcook on 7/11/20.
+//
+
+#ifndef CPPGFUNCTION_UTILITIES_H
+#define CPPGFUNCTION_UTILITIES_H
+
+#endif //CPPGFUNCTION_UTILITIES_H

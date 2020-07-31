@@ -1,0 +1,8 @@
+//
+// Created by jackcook on 7/11/20.
+//
+
+#ifndef CPPGFUNCTION_GFUNCTION_H
+#define CPPGFUNCTION_GFUNCTION_H
+
+#endif //CPPGFUNCTION_GFUNCTION_H
