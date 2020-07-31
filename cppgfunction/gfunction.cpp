@@ -7,17 +7,17 @@
 #include "gfunction.h"
 #include <chrono>
 #include "spline.h"
-#include <cstdio>
-#include <cstdlib>
-#include <numeric>
+//#include <cstdio>
+//#include <cstdlib>
+//#include <numeric>
 #include "gauss_jacobi.h"
 #include <gsl/gsl_linalg.h>
-#include <gsl/gsl_errno.h>
-#include <gsl/gsl_spline.h>
+//#include <gsl/gsl_errno.h>
+//#include <gsl/gsl_spline.h>
 #include "../jcc/interpolation.h"
 #include <thread>
 #include <boost/asio.hpp>
-#include <omp.h>
+//#include <omp.h>
 
 extern "C" void dgesv_( int *n, int *nrhs, double  *a, int *lda, int *ipiv, double *b, int *lbd, int *info  );
 
