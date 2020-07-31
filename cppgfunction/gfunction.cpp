@@ -706,36 +706,36 @@ namespace gt::gfunction {
         int a = 1;
     }  // _temporal_superposition
 
-    void _solve_eqn(std::vector<double>& x, std::vector<std::vector<double>>& A, std::vector<double>& b) {
-        int SIZE = x.size();
-        gsl_matrix * _A = gsl_matrix_alloc(SIZE, SIZE);
-        for (int i=0; i<A.size(); i++) {
-            for (int j=0; j<A[i].size(); j++) {
-                gsl_matrix_set (_A, i, j, A[i][j]);
-            } // next j
-        } // next i
-
-        gsl_vector * _b = gsl_vector_alloc(SIZE);
-        for (int i=0; i<b.size(); i++) {
-            gsl_vector_set(_b, i, b[i]);
-        } // next i
-
-        gsl_vector *_x = gsl_vector_alloc (SIZE);
-
-        int s;
-
-        gsl_permutation * p = gsl_permutation_alloc (SIZE);
-
-        gsl_linalg_LU_decomp (_A, p, &s);
-
-        gsl_linalg_LU_solve (_A, p, _b, _x);
-
-        for (int i=0; i<SIZE; i++) {
-            x[i] = gsl_vector_get(_x, i);
-        } // next i
-
-        gsl_permutation_free (p);
-        gsl_vector_free (_x);
-    } // _solve_eq
+//    void _solve_eqn(std::vector<double>& x, std::vector<std::vector<double>>& A, std::vector<double>& b) {
+//        int SIZE = x.size();
+//        gsl_matrix * _A = gsl_matrix_alloc(SIZE, SIZE);
+//        for (int i=0; i<A.size(); i++) {
+//            for (int j=0; j<A[i].size(); j++) {
+//                gsl_matrix_set (_A, i, j, A[i][j]);
+//            } // next j
+//        } // next i
+//
+//        gsl_vector * _b = gsl_vector_alloc(SIZE);
+//        for (int i=0; i<b.size(); i++) {
+//            gsl_vector_set(_b, i, b[i]);
+//        } // next i
+//
+//        gsl_vector *_x = gsl_vector_alloc (SIZE);
+//
+//        int s;
+//
+//        gsl_permutation * p = gsl_permutation_alloc (SIZE);
+//
+//        gsl_linalg_LU_decomp (_A, p, &s);
+//
+//        gsl_linalg_LU_solve (_A, p, _b, _x);
+//
+//        for (int i=0; i<SIZE; i++) {
+//            x[i] = gsl_vector_get(_x, i);
+//        } // next i
+//
+//        gsl_permutation_free (p);
+//        gsl_vector_free (_x);
+//    } // _solve_eq
 
 } // namespace gt::gfunction
