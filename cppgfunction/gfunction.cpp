@@ -7,17 +7,11 @@
 #include "gfunction.h"
 #include <chrono>
 #include "spline.h"
-//#include <cstdio>
-//#include <cstdlib>
-//#include <numeric>
 #include "gauss_jacobi.h"
-#include <gsl/gsl_linalg.h>
-//#include <gsl/gsl_errno.h>
-//#include <gsl/gsl_spline.h>
 #include "../jcc/interpolation.h"
 #include <thread>
 #include <boost/asio.hpp>
-//#include <omp.h>
+
 
 extern "C" void dgesv_( int *n, int *nrhs, double  *a, int *lda, int *ipiv, double *b, int *lbd, int *info  );
 
@@ -257,12 +251,6 @@ namespace gt::gfunction {
         int info;
         vector<double> A_ (SIZE * SIZE);
         vector<double> b_ (SIZE);
-        // LU decomposition gsl initialization
-//        gsl_matrix * _A = gsl_matrix_alloc(SIZE, SIZE);
-//        gsl_vector * _b = gsl_vector_alloc(SIZE);
-//        gsl_vector *_x = gsl_vector_alloc (SIZE);
-//        int s;
-//        gsl_permutation * _p = gsl_permutation_alloc (SIZE);
 
         std::vector<std::vector <double>> A(nSources +1, std::vector<double> (nSources +1));
         std::vector<double> b(nSources + 1);
@@ -326,21 +314,17 @@ namespace gt::gfunction {
                 for (int j=0; j<SIZE; j++) {
                     if (i == n) { // then we are referring to Hb
                         if (j==n) {
-//                            gsl_matrix_set (_A, i, n, 0);
                             A_[i+j*SIZE] = 0;
 //                            A[i][n] = 0;
                         } else {
-//                            gsl_matrix_set (_A, i, j, Hb[j]);
                             A_[i+j*SIZE] = Hb[j];
 //                            A[i][j] = Hb[j];
                         } // fi
                     } else {
                         if (j==A[i].size()-1) {
-//                            gsl_matrix_set (_A, i, j, -1);
                             A_[i+j*SIZE] = -1;
 //                            A[i][j] = -1;
                         } else {
-//                            gsl_matrix_set (_A, j, i, h_dt[i][j][p]);
                             A_[j+i*SIZE] = h_dt[i][j][p];
 //                            A[j][i] = h_dt[i][j][p];
                         } // fi
@@ -353,72 +337,11 @@ namespace gt::gfunction {
 //                _fillA(i, p, SIZE);
             }
             pool3.join();
-//            n = SIZE - 1;
-//            for (int i=0; i<SIZE; i++) {
-//                for (int j=0; j<SIZE; j++) {
-//                    if (i == n) { // then we are referring to Hb
-//                        if (j==n) {
-//                        gsl_matrix_set (_A, i, n, 0);
-////                            A[i][n] = 0;
-//                        } else {
-//                        gsl_matrix_set (_A, i, j, Hb[j]);
-////                            A[i][j] = Hb[j];
-//                        } // fi
-//                    } else {
-//                        if (j==A[i].size()-1) {
-//                        gsl_matrix_set (_A, i, j, -1);
-////                            A[i][j] = -1;
-//                        } else {
-//                        gsl_matrix_set (_A, j, i, h_dt[i][j][p]);
-////                            A[j][i] = h_dt[i][j][p];
-//                        } // fi
-//                    } // fi
-//                } // next k
-//            }
+
              // _fill_A
             end = std::chrono::steady_clock::now();
             milli = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
             fill_A_time += milli;
-
-//            for (int i=0; i<h_dt.size(); i++) {
-//                for (int j=0; j<A[i].size(); j++) {
-//                    if (j==A[i].size()-1) {
-////                        gsl_matrix_set (_A, i, j, -1);
-//                        A[i][j] = -1;
-//                    } else {
-////                        gsl_matrix_set (_A, j, i, h_dt[i][j][p]);
-//                        A[j][i] = h_dt[i][j][p];
-//                    }
-////                    h_ij_dt[j][i] = h_dt[i][j][p];
-//                } // next j
-//            }
-//
-//            for (int j=0; j<SIZE; j++) {
-//                if (j==n) {
-//                    gsl_matrix_set (_A, n, n, 0);
-//                    A[n][n] = 0;
-//                } else {
-//                    gsl_matrix_set (_A, n, j, Hb[j]);
-//                    A[n][j] = Hb[j];
-//                } // fi
-//            } // next j
-
-//            for (int i=0; i<h_dt.size(); i++) {
-//                _fill_h_ij_dt(i, p); // TODO: thread this
-//            } // next i
-
-//            // fill A with h_ij, and the last row with -1
-//            for (int i=0; i<h_ij_dt.size(); i++) {
-//                for (int j=0; j<A[i].size(); j++) {
-//                    if (j==A[i].size()-1) {
-//                        A[i][j] = -1;
-//                    } else {
-//                        A[i][j] = h_ij_dt[i][j];
-//                    } // fi
-//                } // next j
-//            } // next i
-
-            // TODO: join() threads
 
             // ----- load history reconstruction -------
             start = std::chrono::steady_clock::now();
@@ -446,24 +369,10 @@ namespace gt::gfunction {
 
             // ---- fill gsl matrix A and b -----
             start = std::chrono::steady_clock::now();
-//            for (int i=0; i<A.size(); i++) {
-//                for (int j=0; j<A[i].size(); j++) {
-//                    gsl_matrix_set (_A, i, j, A[i][j]);
-//                } // next j
-//            } // next i
 
             for (int i=0; i<b.size(); i++) {
-//                gsl_vector_set(_b, i, b[i]);
                 b_[i] = b[i];
             } // next i
-
-//            for (int i=0; i<SIZE; i++) {
-//                std::cout << i << ' ';
-//                for (int j=0; j<SIZE; j++) {
-//                    std::cout << gsl_matrix_get(_A, i, j) << ' ';
-//                }
-//                std::cout << '\n';
-//            }
 
             end = std::chrono::steady_clock::now();
             milli = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
@@ -473,12 +382,7 @@ namespace gt::gfunction {
             start = std::chrono::steady_clock::now();
             dgesv_( &n, &nrhs, &*A_.begin(), &lda, &*_ipiv.begin(), &*b_.begin(), &ldb, &info );
 
-//            gsl_linalg_LU_decomp (_A, _p, &s);
-//
-//            gsl_linalg_LU_solve (_A, _p, _b, _x);
-
             for (int i=0; i<SIZE; i++) {
-//                x[i] = gsl_vector_get(_x, i);
                 x[i] = b_[i];
             } // next i
             end = std::chrono::steady_clock::now();
@@ -492,7 +396,6 @@ namespace gt::gfunction {
             // the borehole wall temperatures are equal for all segments
             double Tb = x[x.size()-1];
             gfunction[p] = Tb;
-            int a = 1;
         } // next p
         segment_length_time /= 1000;
         time_vector_time /= 1000;
@@ -518,11 +421,6 @@ namespace gt::gfunction {
              << "\t" << "gsl fill matrices time" << endl;
         cout << LU_decomposition_time << "\t" << LU_decomposition_time/double(nt)
              << "\t" << "LU decomp time" << endl;
-
-//        gsl_permutation_free (_p);
-//        gsl_vector_free (_x);
-//        gsl_vector_free (_b);
-//        gsl_matrix_free (_A);
 
         auto end2 = std::chrono::steady_clock::now();
         if (disp) {
@@ -567,11 +465,6 @@ namespace gt::gfunction {
         std::vector<double> dt_reconstructed (p+1);
         for (int i=p; i>=0; i--) {
             dt_reconstructed[p-i] = dt[i];  // reverse the dt
-//            if (i==0) {
-//                dt_reconstructed[i] = time[0];
-//            } else {
-//                dt_reconstructed[i] = dt[p-i+1];  // reverse the dt
-//            }
         }
         // t_restructured is [0, cumsum(dt_reversed)]
         std::vector<double> t_reconstructed(p+2);  // will start at 0
@@ -598,17 +491,13 @@ namespace gt::gfunction {
                 if (j>=p+1) {
                     Q_dt[i][j] = Q_dt[i][j-1];
                 } else {
-                    double aa =Q[i][j-1];
-                    double ab = dt[j-1];
                     Q_dt[i][j] = Q[i][j-1] * dt[j-1] + Q_dt[i][j-1];
                 }  // fi
             } // next j
         };
         for (int i=0; i<nSources; i++) {
-            _Q_dot_dt(i);  // TODO: thread this
+            _Q_dot_dt(i);  // could be threaded here, if timings ever prove necessary
         } // next i
-        int a =1;
-        // TODO: join()
 
         auto _interpolate = [&Q_dt, &q_reconstructed, &t, &t_reconstructed, &dt_reconstructed, &p](const int i) {
             int n = t.size();
@@ -618,13 +507,8 @@ namespace gt::gfunction {
             }
 
             std::vector<double> yp(n);
-//            std::cout << p << std::endl;
-            if (p==2) {
-                int a = 1;
-            }
             jcc::interpolation::interp1d(t_reconstructed, yp, t, y);
 
-            n = q_reconstructed[0].size();
             for (int j=0; j<p; j++) {
                 double c = yp[j];
                 double d = yp[j+1];
@@ -634,9 +518,8 @@ namespace gt::gfunction {
             }
         }; // _interpolate
         for (int i=0; i<nSources; i++) {
-            _interpolate(i); // TODO: thread this
+            _interpolate(i); // could be threaded here, but this function doesn't take long at all
         }
-        // TODO: join()
     } // load_history_reconstruction
 
     void _temporal_superposition(vector<double>& Tb_0, vector<vector<vector<double> > >& dh_ij,
@@ -645,39 +528,13 @@ namespace gt::gfunction {
         const auto processor_count = thread::hardware_concurrency();
         // Launch the pool with n threads.
         boost::asio::thread_pool pool(processor_count);
-//
 
         std::fill(Tb_0.begin(), Tb_0.end(), 0);
-//        for (double & i : Tb_0) { // set all values in Tb_0 = 0
-//            i = 0;
-//        }
         // Number of heat sources
         int nSources = q_reconstructed.size();
         // Number of time steps
-//        int nt = q_reconstructed[0].size();
         int nt = p + 1;
 
-//        int k, j;
-//#pragma omp parallel for private(j)
-//        for (int k=0; k<nt; k++) {
-//            for (int j=0; j<nSources; j++) {
-//                for (int i=0; i<nSources; i++) {
-////#pragma omp critical (TEMPORAL_CRITICAL)
-//                    {
-//                        Tb_0[i] += dh_ij[i][j][k] * q_reconstructed[j][nt-k-1] ;
-//                    }
-//
-//                } // next i
-//            } // next j
-//        } // next k
-//#pragma omp parallel for collapse(3)
-//        for (int i=0; i<nSources; i++) {
-//            for (int j=0; j<nSources; j++) {
-//                for (int k=0; k<nt; k++) {
-//                    Tb_0[i] += dh_ij[i][j][k] * q_reconstructed[j][nt-k-1] ;
-//                }
-//            }
-//        }
         auto _borehole_wall_temp = [&dh_ij, &q_reconstructed, &Tb_0](const int i, const int nSources, const int nt){
             for (int j =0; j<nSources; j++) {
                 for (int k=0; k<nt; k++) {
@@ -691,51 +548,7 @@ namespace gt::gfunction {
 //            _borehole_wall_temp(i, nSources, nt);
         }
 
-//        for (int i=0; i<nSources; i++) {
-//            for (int k=0; k<nt; k++) {
-//                for (int j=0; j<nSources; j++) {
-//                    double a = dh_ij[i][j][k];
-//                    double ab = q_reconstructed[i][nt-j-1];
-//                    Tb_0[i] += dh_ij[i][j][k] * q_reconstructed[i][nt-k-1];
-//                } // next j
-//            } // next k
-//        } // next i
-
         pool.join();
-
-        int a = 1;
     }  // _temporal_superposition
-
-//    void _solve_eqn(std::vector<double>& x, std::vector<std::vector<double>>& A, std::vector<double>& b) {
-//        int SIZE = x.size();
-//        gsl_matrix * _A = gsl_matrix_alloc(SIZE, SIZE);
-//        for (int i=0; i<A.size(); i++) {
-//            for (int j=0; j<A[i].size(); j++) {
-//                gsl_matrix_set (_A, i, j, A[i][j]);
-//            } // next j
-//        } // next i
-//
-//        gsl_vector * _b = gsl_vector_alloc(SIZE);
-//        for (int i=0; i<b.size(); i++) {
-//            gsl_vector_set(_b, i, b[i]);
-//        } // next i
-//
-//        gsl_vector *_x = gsl_vector_alloc (SIZE);
-//
-//        int s;
-//
-//        gsl_permutation * p = gsl_permutation_alloc (SIZE);
-//
-//        gsl_linalg_LU_decomp (_A, p, &s);
-//
-//        gsl_linalg_LU_solve (_A, p, _b, _x);
-//
-//        for (int i=0; i<SIZE; i++) {
-//            x[i] = gsl_vector_get(_x, i);
-//        } // next i
-//
-//        gsl_permutation_free (p);
-//        gsl_vector_free (_x);
-//    } // _solve_eq
 
 } // namespace gt::gfunction
