@@ -18,6 +18,8 @@ extern "C" void dgesv_( int *n, int *nrhs, double  *a, int *lda, int *ipiv, doub
 using namespace std;  // lots of vectors, only namespace to be used
 
 namespace gt::gfunction {
+    // The uniform borehole wall temperature (UBWHT) g-function calculation. Originally presented in
+    // Cimmino and Bernier (2014) and a later paper on speed improvements by Cimmino (2018)
     void uniform_temperature(vector<double>& gfunction, vector<gt::boreholes::Borehole> boreholes,
                              vector<double>& time, const double alpha, const int nSegments,
                              const bool use_similarities, const bool disp) {
@@ -332,14 +334,14 @@ namespace gt::gfunction {
                 } // next k
             };
             boost::asio::thread_pool pool3(processor_count);
+            // A needs filled each loop because the _gsl partial pivot decomposition modifies the matrix
             for (int i=0; i<SIZE; i++) {
                 boost::asio::post(pool3, [&_fillA, i, p, SIZE]{ _fillA(i, p, SIZE) ;});
 //                _fillA(i, p, SIZE);
             }
             pool3.join();
 
-             // _fill_A
-            end = std::chrono::steady_clock::now();
+            end = std::chrono::steady_clock::now();  // _fill_A
             milli = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
             fill_A_time += milli;
 
