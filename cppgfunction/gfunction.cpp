@@ -105,16 +105,19 @@ namespace gt::gfunction {
         // ------ time vectors ---------
         start = std::chrono::steady_clock::now();
         // create new time vector that starts at 0
+        std::vector<double> _time_untouched(time.size()+1);
         std::vector<double> _time(time.size()+1);
         std::vector<double> dt(time.size());
 
-        auto _fill_time = [&_time, &time, &dt]() {
+        auto _fill_time = [&_time, &time, &dt, &_time_untouched]() {
             for (int i=0; i<_time.size(); i++) {
                 if (i==0) {
                     _time[0] = 0;
+                    _time_untouched[0] = 0;
                     dt[i] = time[i];
                 } else {
                     _time[i] = time[i-1];
+                    _time_untouched[i] = time[i-1];
                     dt[i] = time[i] - time[i-1];
                 } // fi
             } // next i
@@ -148,7 +151,7 @@ namespace gt::gfunction {
         /** Starting up pool2 here **/
         // Launch the pool with n threads.
         auto tic = std::chrono::steady_clock::now();
-        boost::asio::thread_pool pool2(processor_count);
+//        boost::asio::thread_pool pool2(processor_count);
         auto toc = std::chrono::steady_clock::now();
         if (disp) {
             double milli = std::chrono::duration_cast<std::chrono::milliseconds>(tic - toc).count();
@@ -162,46 +165,48 @@ namespace gt::gfunction {
         // h_dt : an interpolation through the k direction of the cube
 //        vector< vector< vector<double> > > h_dt(nSources ,
 //                vector< vector<double> > (nSources, vector<double> (nt)) );
-        vector< vector< vector<double> > > h_dt(nSources ,vector< vector<double> > (nSources, vector<double> (nt)) );
+//        vector< vector< vector<double> > > h_dt(nSources ,vector< vector<double> > (nSources, vector<double> (nt)) );
         // dh_ij is the difference of h_ij, ie. dh_[i][j][k] = h_ij[i][j][k]-h_ij[i][j][k-1], ie. \delta h_ij
 //        std::vector< std::vector< std::vector<double> > > dh_ij(nSources ,
 //                std::vector< std::vector<double> > (nSources, std::vector<double> (nt)) );
 
         // Thermal response factors evaluated at t=dt (h_dt)
-        auto _interpolate = [&h_ij, &h_dt, &_time, &dt](const int i) {
-            std::vector<double> y(_time.size());
-            for (int j=0; j <h_ij[i].size(); j++) {
-                for (int k=0; k<h_ij[i][j].size(); k++) {
-                    if (k==1) {
-                        ;
-//                        dh_ij[i][j][k-1] = h_ij[i][j][k];  // start at time "1"
-                    } else if (k>1) {
-                        ;
-//                        dh_ij[i][j][k-1] = h_ij[i][j][k] - h_ij[i][j][k-1];
+//        auto _interpolate = [&h_ij, &h_dt, &_time, &dt](const int i) {
+//            std::vector<double> y(_time.size());
+//            for (int j=0; j <h_ij[i].size(); j++) {
+//                for (int k=0; k<h_ij[i][j].size(); k++) {
+//                    if (k==1) {
+//                        ;
+////                        dh_ij[i][j][k-1] = h_ij[i][j][k];  // start at time "1"
+//                    } else if (k>1) {
+//                        ;
+////                        dh_ij[i][j][k-1] = h_ij[i][j][k] - h_ij[i][j][k-1];
+//
+//                    } // fi
+//                    y[k] = h_ij[i][j][k];
+//                } // end k
+//
+//                std::vector<double> yp(dt.size());
+//                jcc::interpolation::interp1d(dt, yp, _time, y );
+//
+//                for (int k=0; k<h_dt[i][j].size(); k++) {
+//                    h_dt[i][j][k] = yp[k];
+//                } // end k
+//            } // next j
 
-                    } // fi
-                    y[k] = h_ij[i][j][k];
-                } // end k
-
-                std::vector<double> yp(_time.size());
-                jcc::interpolation::interp1d(dt, yp, _time, y );
-
-                for (int k=0; k<h_dt[i][j].size(); k++) {
-                    h_dt[i][j][k] = yp[k];
-                } // end k
-            } // next j
-
-        }; // _interpolate
+//        }; // _interpolate
         // h_dt for loop
-        for (int i=0; i<h_ij.size(); i++) {
+//        for (int i=0; i<h_ij.size(); i++) {
+//            ;
 //            for (int j=0; j<h_ij[i].size(); j++) {
-                boost::asio::post(pool2, [&_interpolate, i]{ _interpolate(i) ;});
+//                boost::asio::post(pool2, [&_interpolate, i]{ _interpolate(i) ;});
 //                 _interpolate(i, j);
+
 //            } // end j
-        } // end i
+//        } // end i
 
         // if _interpolate threaded, join() pools here.
-        pool2.join();  // need interpolated values moving forward
+//        pool2.join();  // need interpolated values moving forward
         /** Starting up pool3 here **/
         // Launch the pool with n threads.
 //        boost::asio::thread_pool pool3(processor_count);
@@ -296,25 +301,27 @@ namespace gt::gfunction {
 
         for (int p=0; p<nt; p++) {
             // current thermal response factor matrix
-            auto _fill_h_ij_dt = [&h_dt, &A] (const int i, const int p) {
-                int m = h_dt[0].size();
-                for (int j=0; j<A[i].size(); j++) {
-                    if (j==A[i].size()-1) {
-                        A[i][j] = -1;
-                    } else {
-                        A[j][i] = h_dt[i][j][p];
-                    }
-//                    h_ij_dt[j][i] = h_dt[i][j][p];
-
-                } // next j
-                ;
-            }; // _fill_h_ij_dt
+//            auto _fill_h_ij_dt = [&h_dt, &A] (const int i, const int p) {
+//                int m = h_dt[0].size();
+//                for (int j=0; j<A[i].size(); j++) {
+//                    if (j==A[i].size()-1) {
+//                        A[i][j] = -1;
+//                    } else {
+//                        A[j][i] = h_dt[i][j][p];
+//                    }
+////                    h_ij_dt[j][i] = h_dt[i][j][p];
+//
+//                } // next j
+//                ;
+//            }; // _fill_h_ij_dt
             // _fill_A
             //        auto _fill_A = [&A, &Hb, &_A](const int i, const int SIZE) { // TODO: keep in mind this function can make use of threading
 
             // ------------- fill A ------------
             start = std::chrono::steady_clock::now();
-            auto _fillA = [&Hb, &h_dt, &A, &A_](int i, int p, int SIZE) {
+            auto _fillA = [&Hb, &A, &A_, &dt, &_time_untouched, &h_ij](int i, int p, int SIZE) {
+                double xp;
+                double yp;
                 int n = SIZE - 1;
                 for (int j=0; j<SIZE; j++) {
                     if (i == n) { // then we are referring to Hb
@@ -330,7 +337,11 @@ namespace gt::gfunction {
                             A_[i+j*SIZE] = -1;
 //                            A[i][j] = -1;
                         } else {
-                            A_[j+i*SIZE] = h_dt[i][j][p];
+                            xp = dt[p];
+
+                            jcc::interpolation::interp1d(xp, yp, _time_untouched, h_ij[i][j]);
+                            A_[j+i*SIZE] = yp;
+//                            A_[j+i*SIZE] = h_dt[i][j][p];
 //                            A[j][i] = h_dt[i][j][p];
                         } // fi
                     } // fi
@@ -339,8 +350,8 @@ namespace gt::gfunction {
             boost::asio::thread_pool pool3(processor_count);
             // A needs filled each loop because the _gsl partial pivot decomposition modifies the matrix
             for (int i=0; i<SIZE; i++) {
-                boost::asio::post(pool3, [&_fillA, i, p, SIZE]{ _fillA(i, p, SIZE) ;});
-//                _fillA(i, p, SIZE);
+//                boost::asio::post(pool3, [&_fillA, i, p, SIZE]{ _fillA(i, p, SIZE) ;});
+                _fillA(i, p, SIZE);
             }
             pool3.join();
 
