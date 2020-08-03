@@ -164,18 +164,21 @@ namespace gt::gfunction {
 //                vector< vector<double> > (nSources, vector<double> (nt)) );
         vector< vector< vector<double> > > h_dt(nSources ,vector< vector<double> > (nSources, vector<double> (nt)) );
         // dh_ij is the difference of h_ij, ie. dh_[i][j][k] = h_ij[i][j][k]-h_ij[i][j][k-1], ie. \delta h_ij
-        std::vector< std::vector< std::vector<double> > > dh_ij(nSources ,
-                std::vector< std::vector<double> > (nSources, std::vector<double> (nt)) );
+//        std::vector< std::vector< std::vector<double> > > dh_ij(nSources ,
+//                std::vector< std::vector<double> > (nSources, std::vector<double> (nt)) );
 
         // Thermal response factors evaluated at t=dt (h_dt)
-        auto _interpolate = [&h_ij, &h_dt, &_time, &dt, &dh_ij](const int i) {
+        auto _interpolate = [&h_ij, &h_dt, &_time, &dt](const int i) {
             std::vector<double> y(_time.size());
             for (int j=0; j <h_ij[i].size(); j++) {
                 for (int k=0; k<h_ij[i][j].size(); k++) {
                     if (k==1) {
-                        dh_ij[i][j][k-1] = h_ij[i][j][k];  // start at time "1"
+                        ;
+//                        dh_ij[i][j][k-1] = h_ij[i][j][k];  // start at time "1"
                     } else if (k>1) {
-                        dh_ij[i][j][k-1] = h_ij[i][j][k] - h_ij[i][j][k-1];
+                        ;
+//                        dh_ij[i][j][k-1] = h_ij[i][j][k] - h_ij[i][j][k-1];
+
                     } // fi
                     y[k] = h_ij[i][j][k];
                 } // end k
@@ -224,7 +227,7 @@ namespace gt::gfunction {
         // after threaded, join() pool here
 //        pool3.join();
 
-        h_ij = vector<vector<vector<double> >> ();  // destruct h_ij; no longer needed
+//        h_ij = vector<vector<vector<double> >> ();  // destruct h_ij; no longer needed
 
         end = std::chrono::steady_clock::now();
         milli = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
@@ -354,7 +357,7 @@ namespace gt::gfunction {
 
             // ----- temporal superposition
             start = std::chrono::steady_clock::now();
-            _temporal_superposition(Tb_0, dh_ij, q_reconstructed, p);
+            _temporal_superposition(Tb_0, h_ij, q_reconstructed, p);
             // fill b with -Tb
             for (int i=0; i<Tb_0.size(); i++) {
                 b[i] = -Tb_0[i];
@@ -524,8 +527,8 @@ namespace gt::gfunction {
         }
     } // load_history_reconstruction
 
-    void _temporal_superposition(vector<double>& Tb_0, vector<vector<vector<double> > >& dh_ij,
-            std::vector<std::vector<double>>& q_reconstructed, int p)
+    void _temporal_superposition(vector<double>& Tb_0, vector<vector<vector<double> > >& h_ij,
+                                 std::vector<std::vector<double>>& q_reconstructed, int p)
             {
         const auto processor_count = thread::hardware_concurrency();
         // Launch the pool with n threads.
@@ -537,17 +540,22 @@ namespace gt::gfunction {
         // Number of time steps
         int nt = p + 1;
 
-        auto _borehole_wall_temp = [&dh_ij, &q_reconstructed, &Tb_0](const int i, const int nSources, const int nt){
+        auto _borehole_wall_temp = [&h_ij, &q_reconstructed, &Tb_0](const int i, const int nSources, const int nt){
             for (int j =0; j<nSources; j++) {
                 for (int k=0; k<nt; k++) {
-                    Tb_0[i] += dh_ij[i][j][k] * q_reconstructed[j][nt-k-1] ;
+                    if (k==0) {
+                        Tb_0[i] += h_ij[i][j][k+1] * q_reconstructed[j][nt-k-1] ;
+                    } else if (k>0) {
+                        Tb_0[i] += (h_ij[i][j][k+1]- h_ij[i][j][k]) * q_reconstructed[j][nt-k-1] ;
+                    }
+
                 }
             }
         };
         for (int i=0; i<nSources; i++) {
-            boost::asio::post(pool, [&_borehole_wall_temp, i, nSources, nt]
-            { _borehole_wall_temp(i, nSources, nt); });
-//            _borehole_wall_temp(i, nSources, nt);
+//            boost::asio::post(pool, [&_borehole_wall_temp, i, nSources, nt]
+//            { _borehole_wall_temp(i, nSources, nt); });
+            _borehole_wall_temp(i, nSources, nt);
         }
 
         pool.join();
