@@ -564,9 +564,9 @@ namespace gt::gfunction {
             }
         };
         for (int i=0; i<nSources; i++) {
-//            boost::asio::post(pool, [&_borehole_wall_temp, i, nSources, nt]
-//            { _borehole_wall_temp(i, nSources, nt); });
-            _borehole_wall_temp(i, nSources, nt);
+            boost::asio::post(pool, [&_borehole_wall_temp, i, nSources, nt]
+            { _borehole_wall_temp(i, nSources, nt); });
+//            _borehole_wall_temp(i, nSources, nt);
         }
 
         pool.join();
