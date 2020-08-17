@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <thread>
 #include <boost/asio.hpp>
+#include "SegmentResponse.h"
 
 using namespace boost::math::quadrature;
 
@@ -49,8 +50,11 @@ namespace gt::heat_transfer {
     } // void finite_line_source
 
     void
-    thermal_response_factors(std::vector< std::vector< std::vector<double> > >& h_ij, std::vector<gt::boreholes::Borehole> &boreSegments,
-                             std::vector<double> &time, const double alpha, bool use_similaries, bool disp) {
+    thermal_response_factors(SegmentResponse &SegRes, unordered_map<nKey, double, KeyHasher> &h_map,
+                             std::vector< std::vector< std::vector<double> > >& h_ij,
+                             std::vector<gt::boreholes::Borehole> &boreSegments,
+                             std::vector<double> &time, int &hash_mode,
+                             const double alpha, bool use_similaries, bool disp) {
         // total number of line sources
         int nSources = boreSegments.size();
         // number of time values
@@ -67,6 +71,18 @@ namespace gt::heat_transfer {
         SimilaritiesType SimReal; // positive
         SimilaritiesType SimImage; // negative
 
+        int COUNT=0;
+//        auto check_key = [&h_map](Key &sim_key) {
+//            // Key is not present
+//            if (h_map.find(sim_key) == h_map.end())
+//                return false;
+//            return true;
+//        }; // check_key
+
+        auto sum_to_n = [](const int n) {
+            return n * (n + 1) / 2;
+        };
+
         if (use_similaries) {
             auto start = std::chrono::steady_clock::now();
             // Calculations with similarities
@@ -77,10 +93,103 @@ namespace gt::heat_transfer {
             double disTol = 0.1;
             double tol = 1.0e-6;
             gt::heat_transfer::Similarity sim;
+            auto start_sim = std::chrono::steady_clock::now();
             sim.similarities(SimReal, SimImage, boreSegments, splitRealAndImage, disTol, tol);
+            auto end_sim = std::chrono::steady_clock::now();
+            double milli_ = std::chrono::duration_cast<std::chrono::milliseconds>(end_sim - start_sim).count();
+            double seconds_ = milli_ / 1000;
+            cout << "Sim Calc time: " << seconds_ << endl;
+
+            //---
+            // Adaptive hashing scheme if statement
+            // Determine the Segment Response storing mode here
+            SegRes.storage_mode = 1;  // TODO: fix this later on, for now it will be 1
+            int Ntot = sum_to_n(nSources);
+            auto start_resize = std::chrono::steady_clock::now();
+//            SegRes.ReSizeContainers(Ntot, nt); // TODO: extend resize containers function for other storage_modes
+            auto end_resize = std::chrono::steady_clock::now();
+            milli_ = std::chrono::duration_cast<std::chrono::milliseconds>(end_resize - start_resize).count();
+            seconds_ = milli_ / 1000;
+            cout << "Resize time: " << seconds_ << endl;
+
+//            if (SimReal.nSim + SimImage.nSim < sum_to_n(nSources)) {
+//                // if the field contains high similarity, then store both REAL and IMAGE separately
+//                hash_mode = 0; // first option, could reduce the most
+//            } else {
+//                // if there is is not high similarity, then store each i->j combination REALandIMAGECombined
+//                hash_mode = 1; // second option, still reduces to sum_to_n(nSources)
+//            }
+            hash_mode = 1;
+            cout << "Hash Mode: " << hash_mode << endl;
+//            double ti = time[1];
+//            int i = 1;
+//            int j = 2;
+//            // hash_mode = 0
+//            h_ij_Key _h_map_key_calc(ti, i, j, boreSegments, 0, false);
+//            Key hij_map_key(_h_map_key_calc);
+//            h_map[hij_map_key] = 22.2;
+//            double test = h_map[hij_map_key];
+            // TODO: possibly remove create_map entirely, ReSizeContainers handles this
+//            auto create_map = [&boreSegments, &time, &h_map, &COUNT, &nSources, &SegRes](SimilaritiesType &SimReal, int s,
+//                    const int hash_mode, bool Real=true) {
+//                // begin function
+//                int n1;
+//                int n2;
+//                if (hash_mode==0) {
+//                    n1 = get<0>(SimReal.Sim[s][0]);
+//                    n2 = get<1>(SimReal.Sim[s][0]);
+//                    COUNT++;
+//                    for (int t=0; t<time.size(); t++){
+//                        if (n1 > n2) {
+//                            swap(n1, n2);
+//                        }
+//                        h_map[make_tuple(n1, n2, t)] = 0;
+////                        h_ij_Key _h_map_key_calc(time[t], n1, n2, t,  boreSegments, hash_mode, Real);
+////                        Key hij_map_key(_h_map_key_calc);
+////                        h_map[hij_map_key] = 0; // non-critical race condition
+//                    }
+//                } else if (hash_mode==1) {
+//                    for (int i = 0; i < nSources; i++) {
+//                        for (int j = i; j < nSources; j++) {
+//                            COUNT++;
+//                            for (int k = 0; k < time.size(); k++) {
+//                                if (n1 > n2) {
+//                                    swap(n1, n2);
+//                                }
+//                                h_map[make_tuple(n1, n2, k)] = 0;
+////                                h_ij_Key _h_map_key_calc(time[k], i, j, k, boreSegments, hash_mode);
+////                                Key hij_map_key(_h_map_key_calc);
+////                                h_map[hij_map_key] = 0; // non-critical race condition
+//                            }
+//                        }
+//                    }
+//                }
+//            };
+//            if (hash_mode==0) {
+//                // for this case the most we can have is sum_to_n(nSources) - 1
+//                for (int s=0; s<SimReal.nSim; s++) {
+//                    create_map(SimReal, s, hash_mode, true);
+//                }
+//                for (int s=0; s<SimImage.nSim; s++) {
+//                    create_map(SimImage, s, hash_mode, false);
+//                }
+//
+//            } else if (hash_mode==1) {
+//                // this case will used sum_to_n(nSources)
+//                create_map(SimReal, 0, hash_mode);
+//            }
+            // TODO: end of create_map code
+            int a = 1;
+
             // lambda function for calulating h at each time step
-            auto _calculate_h = [&boreSegments, &splitRealAndImage, &time, &alpha, &nt, &h_ij](SimilaritiesType &SimReal,
-                    int s, bool reaSource, bool imgSource) {
+            auto _calculate_h = [&boreSegments, &splitRealAndImage, &time, &alpha, &nt, &h_ij, &SegRes, &Ntot](SimilaritiesType &SimReal,
+                    int s, bool reaSource, bool imgSource, const int hash_mode) {
+//                auto check_key = [&h_map](Key &sim_key) {
+//                    // Key is not present
+//                    if (h_map.find(sim_key) == h_map.end())
+//                        return false;
+//                    return true;
+//                }; // check_key
                 // begin function
                 int n1;
                 int n2;
@@ -91,30 +200,86 @@ namespace gt::heat_transfer {
                 n2 = get<1>(SimReal.Sim[s][0]);
                 b1 = boreSegments[n1];
                 b2 = boreSegments[n2];
+                double tol = 1e-03;
+                if (b1.H - 10 < tol && b2.H-10>tol || b1.H-10>tol && b2.H-10<tol) {
+                    int a = 1;
+                }
                 vector<double> hPos(nt);
                 if (splitRealAndImage) {
                     for (int k=0; k<nt; k++) {
                         hPos[k] = finite_line_source(time[k], alpha, b1, b2, reaSource, imgSource);
+                        if (k==5) {
+                            double _hPos = finite_line_source(time[k], alpha, b1, b2, true, false);
+                            double _hNeg = finite_line_source(time[k], alpha, b1, b2, false, true);
+                            int a = 1;
+                        }
                     }
+                    // -----------
+                    // adaptive hash
+                    // TODO: combine with create_map
                     int i;
                     int j;
-                    for (int k=0; k<SimReal.Sim[s].size(); k++) {
-                        i = get<0>(SimReal.Sim[s][k]);
-                        j = get<1>(SimReal.Sim[s][k]);
-                        for (int t=0; t<nt; t++) {
-                            // assign thermal response factors to similar segment pairs
-                            if (reaSource && not imgSource) {
-                                // real code
-                                h_ij[j][i][t+1] = hPos[t];
-                                h_ij[i][j][t+1] = hPos[t] * b2.H / b1.H;
-                            } else if (not reaSource && imgSource) {
-                                // image code
-                                h_ij[j][i][t+1] = hPos[t] + h_ij[j][i][t+1];
-                                h_ij[i][j][t+1] = b2.H / b1.H * h_ij[j][i][t+1];
+                    if (hash_mode==0) {
+                        // not looping through every (i, j), real and image stored separately
+                        ;
+////                        i = get<0>(SimReal.Sim[s][0]);
+////                        j = get<1>(SimReal.Sim[s][0]);
+//                        for (int t=0; t<time.size(); t++){
+//                            if (n1==0 && n2 == 6 || n2 == 6 && n1 == 0) {
+//                                int a = 1;
+//                            }
+//                            if (n1 > n2) {
+//                                // we want to store n2, n1
+//                                h_map[make_tuple(n2, n1, t)] += hPos[t]; // non-critical race condition
+////                                h_ij_Key _h_map_key_calc(time[t], n2, n1, t, boreSegments, hash_mode, reaSource);
+////                                Key hij_map_key(_h_map_key_calc);
+////                                h_map[hij_map_key] += hPos[t]; // non-critical race condition
+//                            } else {
+//                                h_map[make_tuple(n1, n2, t)] += b2.H / b1.H * hPos[t]; // non-critical race condition
+////                                h_ij_Key _h_map_key_calc(time[t], n1, n2, t, boreSegments, hash_mode, reaSource);
+////                                Key hij_map_key(_h_map_key_calc);
+////                                h_map[hij_map_key] += b2.H / b1.H * hPos[t]; // non-critical race condition
+//                            }
+//
+//                        }
+                    } else if (SegRes.storage_mode==1) {
+                        // will loop through every (i, j), will combine real+image
+                        int index;
+                        for (int k=0; k<SimReal.Sim[s].size(); k++) {
+                            i = get<0>(SimReal.Sim[s][k]);
+                            j = get<1>(SimReal.Sim[s][k]);
+                            for (int t=0; t<time.size(); t++){
+                                // must consider real and image source separate when combining
+                                if (i <= j) {
+                                    // we want to store n2, n1
+                                    SegRes.get_index_value(index, i, j);
+                                    SegRes.h_ij[index][t] += b2.H / b1.H * hPos[t]; // non-critical race condition
+                                } else {
+                                    SegRes.get_index_value(index, j, i);
+                                    SegRes.h_ij[index][t] += hPos[t]; // non-critical race condition
+                                }
                             }
                         }
-                        int a = 1;
-                    } // next k
+                    }
+                    // TODO: end combine with create_map
+
+//                    for (int k=0; k<SimReal.Sim[s].size(); k++) {
+//                        i = get<0>(SimReal.Sim[s][k]);
+//                        j = get<1>(SimReal.Sim[s][k]);
+//                        for (int t=0; t<nt; t++) {
+//                            // assign thermal response factors to similar segment pairs
+//                            if (reaSource && not imgSource) {
+//                                // real code
+//                                h_ij[j][i][t+1] = hPos[t];
+//                                h_ij[i][j][t+1] = hPos[t] * b2.H / b1.H;
+//                            } else if (not reaSource && imgSource) {
+//                                // image code
+//                                h_ij[j][i][t+1] = hPos[t] + h_ij[j][i][t+1];
+//                                h_ij[i][j][t+1] = b2.H / b1.H * h_ij[j][i][t+1];
+//                            }
+//                        }
+//                        int a = 1;
+//                    } // next k
 
                 } else {
                     throw std::invalid_argument( "Not yet written yet.");
@@ -136,17 +301,17 @@ namespace gt::heat_transfer {
             for (int s=0; s<SimReal.nSim; s++) {
                 reaSource = true;
                 imgSource = false;
-                boost::asio::post(pool, [&_calculate_h, &SimReal, s, reaSource, imgSource]
-                { _calculate_h(SimReal, s, reaSource, imgSource); });
-//                _calculate_h(SimReal, s, reaSource, imgSource);
+                boost::asio::post(pool, [&_calculate_h, &SimReal, s, reaSource, imgSource, hash_mode]
+                { _calculate_h(SimReal, s, reaSource, imgSource, hash_mode); });
+//                _calculate_h(SimReal, s, reaSource, imgSource, hash_mode);
             } // next s
             if (splitRealAndImage) {
                 reaSource = false;
                 imgSource = true;
                 for (int s=0; s<SimImage.nSim; s++) {
-                    boost::asio::post(pool, [&_calculate_h, &SimImage, s, reaSource, imgSource]
-                    { _calculate_h(SimImage, s, reaSource, imgSource); });
-//                    _calculate_h(SimImage, s, reaSource, imgSource);
+                    boost::asio::post(pool, [&_calculate_h, &SimImage, s, reaSource, imgSource, hash_mode]
+                    { _calculate_h(SimImage, s, reaSource, imgSource, hash_mode); });
+//                    _calculate_h(SimImage, s, reaSource, imgSource, hash_mode);
                 }
             }
             pool.join();
@@ -226,9 +391,48 @@ namespace gt::heat_transfer {
                           << seconds
                           << " sec" << std::endl;
             }
-            int a =1;
             // Iterate over the thread vector
         } // fi similarity
+
+//        for (int i = 0; i < nSources; i++) {
+//            for (int j=0; j<nSources; j++) {
+//                for (int k=0; k<nt; k++) {
+//                    std::cout << h_ij[i][j][k+1] << "\t";
+//                }
+//                std::cout << std::endl;
+//            }
+//            int a = 1;
+//        }
+//        gt::boreholes::Borehole b1;
+//        gt::boreholes::Borehole b2;
+//        int Ntot = sum_to_n(nSources);
+//        for (int i = 0; i < nSources; i++) {
+//            for (int j=0; j<nSources; j++) {
+//                for (int k=0; k<nt; k++) {
+//                    double v;
+//                    double h;
+//                    double hij;
+//                    double ratio;
+//                    if (i <= j) {
+//                        int index = SegRes.get_index_value(i, j);
+//                        h = SegRes.h_ij[index][k];
+//                    } else {
+//                        int index = SegRes.get_index_value(j, i);
+//                        b1 = boreSegments[i];
+//                        b2 = boreSegments[j];
+//                        h = b2.H/b1.H * SegRes.h_ij[index][k];
+//                    }
+////                    hij = h_ij[i][j][k+1];
+//                    SegRes.get_h_value(v, i, j, k);
+//                    h_ij[i][j][k+1] = h;
+//                    if (h - v > 1.0e-6) {
+//                        ratio = h / hij;
+//                        int a = 1;
+//                    }
+//                }
+//            }
+//        }
+        int a =1;
     } // void thermal_response_factors
 
     void Similarity::similarities(SimilaritiesType &SimReal, SimilaritiesType &SimImage,
@@ -432,9 +636,12 @@ namespace gt::heat_transfer {
         for (int i=1; i<pairs.size(); i++) {
             ibor = get<0>(pairs[i]);
             jbor = get<1>(pairs[i]);
+            if (ibor > jbor) {
+                swap(ibor, jbor);
+            }
             b1 = boreSegments[ibor];
             b2 = boreSegments[jbor];
-            // Verify if the current pair should be included in the previously idenified symmetries
+            // Verify if the current pair should be included in the previously identified symmetries
             for (int j=0; j<SimT.nSim; j++) {
                 H1 = get<0>(SimT.HSim[j]);
                 H2 = get<1>(SimT.HSim[j]);
@@ -466,6 +673,51 @@ namespace gt::heat_transfer {
 
         int a = 1;
     }  // Similarity::_similarities_one_distance
+
+//    void SegmentResponse::ReSizeContainers(const int n, const int nt) {
+//        switch(storage_mode) {
+//            case 0 :
+//                cout << "Case 0 not written yet" << endl;
+//                break;
+//            case 1 :
+//                h_ij.resize(n, vector<vector<double>>(n, vector<double>(nt, 0)));
+//                break;
+//            default:
+//                throw invalid_argument("The case selected is not currently implemented.");
+//        }
+//
+//    }
+
+    void SegmentResponse::get_h_value(double &h, const int i, const int j, const int k) {
+        int index;
+        switch (storage_mode) {
+            case 0 :
+                cout << "Case 0 not written yet" << endl;
+                break;
+            case 1 :
+                if (i <= j) {
+                    get_index_value(index, i, j);
+                    h = h_ij[index][k];
+                } else {
+                    get_index_value(index, j, i);
+                    h = boreSegments[j].H/boreSegments[i].H * h_ij[index][k];
+                }
+                break;
+            default:
+                throw invalid_argument("The case selected is not currently implemented.");
+
+        }
+        int a = 1;
+
+    }
+
+    void SegmentResponse::get_index_value(int &index, const int i, const int j) {
+//        int n = nSources;
+//        int index = i * (2*n - i - 1) / 2 + j;
+        index = i * (2*nSources - i - 1) / 2 + j;
+//        int index = (n * (n - 1) / 2) - (n - i) * ((n - i) - 1) / 2 + j;
+//        return index;
+    }
 
 
 } // namespace gt::heat_transfer
