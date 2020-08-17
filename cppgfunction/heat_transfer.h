@@ -7,19 +7,42 @@
 
 #include <iostream>
 #include <vector>
-#include "gfunction.h"
+//#include "gfunction.h"
 #include "boreholes.h"
 #include <boost/math/quadrature/gauss_kronrod.hpp>
 #include <boost/asio.hpp>
+#include "SegmentResponse.h"
 
 using namespace std;
 
 
 namespace gt::heat_transfer {
+
+    struct SegmentResponse {
+        ~SegmentResponse() {} // destructor
+
+        int nSources;
+        int nSum;
+        vector < vector < double > > h_ij;
+        vector<gt::boreholes::Borehole> boreSegments;
+
+        SegmentResponse(int nSources, int nSum, int nt) : nSources(nSources), boreSegments(nSources),
+        h_ij(nSum, vector<double>(nt, 0)), nSum(nSum)
+        {} // constructor
+
+        int storage_mode = 0;
+
+//        void ReSizeContainers(int n, int nt);
+        void get_h_value(double &h, int i, int j, int k);
+        void get_index_value(int &index, int i, int j);
+
+    };
+
     double finite_line_source(double time_, double alpha, gt::boreholes::Borehole& b1, gt::boreholes::Borehole& b2,
             bool reaSource=true, bool imgSource=true);
-    void thermal_response_factors(std::vector< std::vector< std::vector<double> > >& h_ij,
-            std::vector<gt::boreholes::Borehole>& boreSegments, std::vector<double>& time,
+    void thermal_response_factors(SegmentResponse &SegRes, unordered_map<nKey, double, KeyHasher> &h_map,
+                                  std::vector< std::vector< std::vector<double> > >& h_ij,
+            std::vector<gt::boreholes::Borehole>& boreSegments, std::vector<double>& time, int &hash_mode,
             double alpha, bool use_similaries, bool disp=false);
 
     struct SimilaritiesType {
