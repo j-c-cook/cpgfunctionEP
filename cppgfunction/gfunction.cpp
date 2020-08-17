@@ -11,6 +11,7 @@
 #include "../jcc/interpolation.h"
 #include <thread>
 #include <boost/asio.hpp>
+#include "SegmentResponse.h"
 
 
 extern "C" void dgesv_( int *n, int *nrhs, double  *a, int *lda, int *ipiv, double *b, int *lbd, int *info  );
@@ -52,17 +53,44 @@ namespace gt::gfunction {
         // Number of time values
         int nt = time.size();
 
+        auto sum_to_n = [](const int n) {
+            return n * (n + 1) / 2;
+        };
+        int nSum = sum_to_n(nSources);
+
+        // Segment Response struct
+        auto start_ = std::chrono::steady_clock::now();
+        gt::heat_transfer::SegmentResponse SegRes(nSources, nSum, nt);
+        auto end_ = std::chrono::steady_clock::now();
+        auto milli_ = std::chrono::duration_cast<std::chrono::milliseconds>(end_ - start_).count();
+        auto seconds_ = milli_ / 1000;
+        cout << "Time to create large 3d Vector in struct: " << seconds_ << endl;
+
         // Split boreholes into segments
         vector<gt::boreholes::Borehole> boreSegments(nSources);
         _borehole_segments(boreSegments, boreholes, nSegments);
 
+        // TODO: make SegRes hold all Segment Response specific stuff
+        _borehole_segments(SegRes.boreSegments, boreholes, nSegments);
+
+        // h_ij_unordered_map
+        unordered_map<gt::heat_transfer::nKey, double, gt::heat_transfer::KeyHasher> h_map;
+        int hash_mode=0;
+
         // Initialize segment-to-segment response factors (https://slaystudy.com/initialize-3d-vector-in-c/)
         // NOTE: (nt + 1), the first row will be full of zeros for later interpolation
-        vector< vector< vector<double> > > h_ij(nSources ,
-                vector< vector<double> > (nSources, vector<double> (nt+1, 0.0)) );
+        start_ = std::chrono::steady_clock::now();
+//        vector< vector< vector<double> > > h_ij(nSources ,
+//                vector< vector<double> > (nSources, vector<double> (nt+1, 0.0)) );
+        vector< vector< vector<double> > > h_ij(1 ,
+                                                vector< vector<double> > (1, vector<double> (1, 0.0)) );
+        end_ = std::chrono::steady_clock::now();
+        milli_ = std::chrono::duration_cast<std::chrono::milliseconds>(end_ - start_).count();
+        seconds_ = milli_ / 1000;
+        cout << "Time to create large 3d Vector: " << seconds_ << endl;
         // Calculate segment to segment thermal response factors
         auto start = std::chrono::steady_clock::now();
-        gt::heat_transfer::thermal_response_factors(h_ij, boreSegments, time, alpha, use_similarities, disp);
+        gt::heat_transfer::thermal_response_factors(SegRes, h_map, h_ij, boreSegments, time, hash_mode, alpha, use_similarities, disp);
         auto end = std::chrono::steady_clock::now();
 
         if (disp) {
@@ -129,8 +157,6 @@ namespace gt::gfunction {
         milli = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
         time_vector_time += milli;
 
-//         TODO: come back to thinking about how to thread this or another (depracated)
-
 //        auto _fill_dt = [&dt, &time]() {
 //            for (int i=0; i<time.size(); i++) {
 //                if (i==0) {
@@ -171,16 +197,16 @@ namespace gt::gfunction {
 //                std::vector< std::vector<double> > (nSources, std::vector<double> (nt)) );
 
         // Thermal response factors evaluated at t=dt (h_dt)
-//        auto _interpolate = [&h_ij, &h_dt, &_time, &dt](const int i) {
+//        auto _interpolate = [&h_ij, &h_dt, &_time, &dt, &dh_ij](const int i) {
 //            std::vector<double> y(_time.size());
 //            for (int j=0; j <h_ij[i].size(); j++) {
 //                for (int k=0; k<h_ij[i][j].size(); k++) {
 //                    if (k==1) {
 //                        ;
-////                        dh_ij[i][j][k-1] = h_ij[i][j][k];  // start at time "1"
+//                        dh_ij[i][j][k-1] = h_ij[i][j][k];  // start at time "1"
 //                    } else if (k>1) {
 //                        ;
-////                        dh_ij[i][j][k-1] = h_ij[i][j][k] - h_ij[i][j][k-1];
+//                        dh_ij[i][j][k-1] = h_ij[i][j][k] - h_ij[i][j][k-1];
 //
 //                    } // fi
 //                    y[k] = h_ij[i][j][k];
@@ -193,17 +219,18 @@ namespace gt::gfunction {
 //                    h_dt[i][j][k] = yp[k];
 //                } // end k
 //            } // next j
-
+//
 //        }; // _interpolate
         // h_dt for loop
 //        for (int i=0; i<h_ij.size(); i++) {
-//            ;
+//            _interpolate(i);
+//        }
+            ;
 //            for (int j=0; j<h_ij[i].size(); j++) {
 //                boost::asio::post(pool2, [&_interpolate, i]{ _interpolate(i) ;});
-//                 _interpolate(i, j);
+
 
 //            } // end j
-//        } // end i
 
         // if _interpolate threaded, join() pools here.
 //        pool2.join();  // need interpolated values moving forward
@@ -300,6 +327,9 @@ namespace gt::gfunction {
         std::vector<std::vector<double>> q_reconstructed (nSources, std::vector<double> (nt));
 
         for (int p=0; p<nt; p++) {
+            if (p==1) {
+                int a = 1;
+            }
             // current thermal response factor matrix
 //            auto _fill_h_ij_dt = [&h_dt, &A] (const int i, const int p) {
 //                int m = h_dt[0].size();
@@ -319,7 +349,7 @@ namespace gt::gfunction {
 
             // ------------- fill A ------------
             start = std::chrono::steady_clock::now();
-            auto _fillA = [&Hb, &A, &A_, &dt, &_time_untouched, &h_ij](int i, int p, int SIZE) {
+            auto _fillA = [&Hb, &A, &A_, &dt, &_time_untouched, &h_map, &hash_mode, &boreSegments, &h_ij, &time, &SegRes](int i, int p, int SIZE) {
                 double xp;
                 double yp;
                 int n = SIZE - 1;
@@ -327,22 +357,30 @@ namespace gt::gfunction {
                     if (i == n) { // then we are referring to Hb
                         if (j==n) {
                             A_[i+j*SIZE] = 0;
-//                            A[i][n] = 0;
+                            A[i][n] = 0;
                         } else {
                             A_[i+j*SIZE] = Hb[j];
-//                            A[i][j] = Hb[j];
+                            A[i][j] = Hb[j];
                         } // fi
                     } else {
                         if (j==A[i].size()-1) {
                             A_[i+j*SIZE] = -1;
-//                            A[i][j] = -1;
+                            A[i][j] = -1;
                         } else {
                             xp = dt[p];
-
-                            jcc::interpolation::interp1d(xp, yp, _time_untouched, h_ij[i][j]);
-                            A_[j+i*SIZE] = yp;
+                            double yp_tmp;
+//                            if (i==0 && j==5 && p==0) {
+//                                int a = 1;
+//                            }
+//                            jcc::interpolation::interp1d(xp, yp, time, h_map, boreSegments, i, j, hash_mode);
+                            jcc::interpolation::interp1d(xp, yp, time, SegRes, i, j, p);
+//                            jcc::interpolation::interp1d(xp, yp, _time_untouched, h_ij[i][j]);
+//                            if (yp - yp_tmp > 1.0e-6) {
+//                                int a = 1;
+//                            }
+                            A_[i+j*SIZE] = yp;
 //                            A_[j+i*SIZE] = h_dt[i][j][p];
-//                            A[j][i] = h_dt[i][j][p];
+//                            A[i][j] = h_dt[i][j][p];
                         } // fi
                     } // fi
                 } // next k
@@ -350,8 +388,8 @@ namespace gt::gfunction {
             boost::asio::thread_pool pool3(processor_count);
             // A needs filled each loop because the _gsl partial pivot decomposition modifies the matrix
             for (int i=0; i<SIZE; i++) {
-//                boost::asio::post(pool3, [&_fillA, i, p, SIZE]{ _fillA(i, p, SIZE) ;});
-                _fillA(i, p, SIZE);
+                boost::asio::post(pool3, [&_fillA, i, p, SIZE]{ _fillA(i, p, SIZE) ;});
+//                _fillA(i, p, SIZE);
             }
             pool3.join();
 
@@ -368,7 +406,11 @@ namespace gt::gfunction {
 
             // ----- temporal superposition
             start = std::chrono::steady_clock::now();
-            _temporal_superposition(Tb_0, h_ij, q_reconstructed, p);
+            _temporal_superposition(Tb_0,
+                                    SegRes,
+                                    time,
+                                    boreSegments,
+                                    h_ij, q_reconstructed, p, hash_mode);
             // fill b with -Tb
             for (int i=0; i<Tb_0.size(); i++) {
                 b[i] = -Tb_0[i];
@@ -538,8 +580,11 @@ namespace gt::gfunction {
         }
     } // load_history_reconstruction
 
-    void _temporal_superposition(vector<double>& Tb_0, vector<vector<vector<double> > >& h_ij,
-                                 std::vector<std::vector<double>>& q_reconstructed, int p)
+    void _temporal_superposition(vector<double>& Tb_0,
+                                 gt::heat_transfer::SegmentResponse &SegRes,
+                                 vector<double> &time, vector<gt::boreholes::Borehole> &boreSegments,
+                                 vector<vector<vector<double> > >& h_ij,
+                                 std::vector<std::vector<double>>& q_reconstructed, const int p, const int hash_mode)
             {
         const auto processor_count = thread::hardware_concurrency();
         // Launch the pool with n threads.
@@ -551,13 +596,25 @@ namespace gt::gfunction {
         // Number of time steps
         int nt = p + 1;
 
-        auto _borehole_wall_temp = [&h_ij, &q_reconstructed, &Tb_0](const int i, const int nSources, const int nt){
+        auto _borehole_wall_temp = [&q_reconstructed, &Tb_0, &time, &SegRes, &boreSegments, &hash_mode, &h_ij]
+                (const int i, const int nSources, const int nt){
             for (int j =0; j<nSources; j++) {
                 for (int k=0; k<nt; k++) {
+                    double h1;
+                    double h2;
                     if (k==0) {
-                        Tb_0[i] += h_ij[i][j][k+1] * q_reconstructed[j][nt-k-1] ;
+                        SegRes.get_h_value(h1, i, j, k);
+                        Tb_0[i] += h1 * q_reconstructed[j][nt-k-1] ;
+//                        hash_table_lookup(h1, h_map, time, boreSegments, i, j, k, hash_mode);
+                        Tb_0[i] += h1 * q_reconstructed[j][nt-k-1] ;
+//                        Tb_0[i] += h_ij[i][j][k+1] * q_reconstructed[j][nt-k-1] ;
                     } else if (k>0) {
-                        Tb_0[i] += (h_ij[i][j][k+1]- h_ij[i][j][k]) * q_reconstructed[j][nt-k-1] ;
+                        SegRes.get_h_value(h1, i, j, k);
+                        SegRes.get_h_value(h2, i, j, k-1);
+//                        hash_table_lookup(h1, h_map, time, boreSegments, i, j, k, hash_mode);
+//                        hash_table_lookup(h2, h_map, time, boreSegments, i, j, k-1, hash_mode);
+                        Tb_0[i] += (h1-h2) * q_reconstructed[j][nt-k-1] ;
+//                        Tb_0[i] += (h_ij[i][j][k+1]- h_ij[i][j][k]) * q_reconstructed[j][nt-k-1] ;
                     }
 
                 }
