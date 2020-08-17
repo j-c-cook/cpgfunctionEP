@@ -4,6 +4,7 @@
 
 #include "interpolation.h"
 #include <csignal>
+#include "../cppgfunction/SegmentResponse.h"
 
 using namespace std;
 
@@ -33,7 +34,6 @@ namespace jcc::interpolation {
                 } // fi
             } // next j
         } // next i
-        return;
     } // interp1d
 
     void interp1d(double &xp, double &yp, vector<double>& x, vector<double>& y) {
@@ -43,18 +43,82 @@ namespace jcc::interpolation {
             throw invalid_argument("Need to add extrapolation");
         }
         for (int j = counter; j<y.size();j++) {
-            if (xp - x[j] < 10) {
+            if (xp - x[j] < 1e-07) {
                 yp = y[j];
-                break;
+                return;
             } else if (xp >= x[j] && xp <= x[j+1]) {
                 yp = linterp(xp, x[j], y[j], x[j + 1], y[j + 1]);
-                break;
+                return;
             } else {
                 counter++;
             } // fi
         } // next j
-        return;
     } // interp1d
+
+    void interp1d(double &xp, double &yp, vector<double> &x,
+                  unordered_map<gt::heat_transfer::nKey, double, gt::heat_transfer::KeyHasher> &h_map,
+                   vector<gt::boreholes::Borehole> &boreSegments,
+                  const int i, const int j, const int hash_mode) {
+        if (xp < 0 || xp > x[x.size()-1]) {
+            throw invalid_argument("Need to add extrapolation");
+        }
+        if (0 < xp && xp < x[0]) {
+            double h;
+            gt::heat_transfer::hash_table_lookup(h, h_map, x, boreSegments, i, j, 0, hash_mode);
+            yp = linterp(xp, 0, 0, x[0], h);
+            return;
+        }
+        int counter=0;
+        double h1;
+        gt::heat_transfer::hash_table_lookup(h1, h_map, x, boreSegments, i, j, 0, hash_mode);
+        double h2;
+        gt::heat_transfer::hash_table_lookup(h2, h_map, x, boreSegments, i, j, 1, hash_mode);
+        for (int k=counter; k<x.size()-1; k++) {
+            if (xp>=x[k] && xp <=x[k+1]) {
+                yp = linterp(xp, x[k], h1, x[k+1], h2);
+                return;
+            } else {
+                counter++;
+                h1 = h2;
+                gt::heat_transfer::hash_table_lookup(h2, h_map, x, boreSegments, i, j, counter+1, hash_mode);
+            }
+
+        }
+        int a = 1;
+    }
+
+    void interp1d(double &xp, double &yp, vector<double> &time,
+                  gt::heat_transfer::SegmentResponse &SegRes, int &i, int &j, int &k) {
+        // if the x point is out of bounds, then tell the user that extrapolation is not possible
+        if (xp < 0 || xp > time[time.size()-1]) {
+            throw invalid_argument("Need to add extrapolation");
+        }
+        // if the time value falls in between 0 and the first time value, then interpolate 0 to t1
+        if (0 < xp && xp < time[0]) {
+            double h;
+            SegRes.get_h_value(h, i, j, k);
+            yp = linterp(xp, 0, 0, time[0], h);
+            return;
+        }
+        // loop until the value for interpolation is found
+        int counter=0;
+        double h1;
+        SegRes.get_h_value(h1, i, j, 0);
+        double h2;
+        SegRes.get_h_value(h2, i, j, 1);
+        for (int k=counter; k<time.size()-1; k++) {
+            if (xp>=time[k] && xp <=time[k+1]) {
+                yp = linterp(xp, time[k], h1, time[k+1], h2);
+                return;
+            } else {
+                counter++;
+                h1 = h2;
+                SegRes.get_h_value(h2, i, j, counter+1);
+            }
+
+        }
+        int a = 1;
+    }
 
 } // jcc::interpolation
 
