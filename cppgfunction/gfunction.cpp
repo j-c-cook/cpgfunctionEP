@@ -561,8 +561,8 @@ namespace gt::gfunction {
             for (int j=0; j<n; j++) {
                 y[j] = Q_dt[i][j];
             }
-
-            std::vector<double> yp(n);
+            int n2 = t_reconstructed.size();
+            std::vector<double> yp(n2);
             jcc::interpolation::interp1d(t_reconstructed, yp, t, y);
 
             for (int j=0; j<p; j++) {
