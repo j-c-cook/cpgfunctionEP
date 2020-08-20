@@ -6,7 +6,6 @@
 
 #include "gfunction.h"
 #include <chrono>
-#include "spline.h"
 #include "gauss_jacobi.h"
 #include "../jcc/interpolation.h"
 #include <thread>
