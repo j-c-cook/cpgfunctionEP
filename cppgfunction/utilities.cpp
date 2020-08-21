@@ -36,5 +36,26 @@ namespace gt {
             } // end if
         } // void time_geometric
 
+        void cook_spitler_time (std::vector<double> &logtime){
+            int np = 31; // 31 total points
+            if (logtime.size() != np) {
+                logtime.resize(np);
+            }
+            for (int i=1; i<np+1; i++) {
+                logtime[i-1] = 0.0005*pow(i, 3) - 0.0303 * pow(i, 2) + 0.8491*i - 9.4028;
+            }
+        } // cook_spitler_time
+
+        void convert_time(std::vector<double> &logtime, std::vector<double> &time, const double H, const double alpha) {
+            int nt = logtime.size();
+            if (time.size() != nt) {
+                time.resize(nt);
+            }
+            double ts = pow(H, 2) / (9 * alpha);
+            for (int i=0; i<nt; i++) {
+                time[i] = exp(logtime[i]) * ts;
+            }
+        } // convert_time
+
     } // namespace utilities
 } // namespace gt
