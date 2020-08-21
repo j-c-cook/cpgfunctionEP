@@ -123,7 +123,7 @@ namespace gt::gfunction {
         // create new time vector that starts at 0
         std::vector<double> _time_untouched(time.size()+1);
         std::vector<double> _time(time.size()+1);
-        std::vector<double> dt(time.size());
+        std::vector<double> dt(_time_untouched.size());
 
         auto _fill_time = [&_time, &time, &dt, &_time_untouched]() {
             for (int i=0; i<_time.size(); i++) {
@@ -548,6 +548,10 @@ namespace gt::gfunction {
         } // next i
 
         auto _interpolate = [&Q_dt, &q_reconstructed, &t, &t_reconstructed, &dt_reconstructed, &p](const int i) {
+            cout << "p: " << p << " i: " << i << endl;
+            if (i==99 && p==30) {
+                int a =1;
+            }
             int n = t.size();
             std::vector<double> y(n);
             for (int j=0; j<n; j++) {
@@ -557,7 +561,11 @@ namespace gt::gfunction {
             std::vector<double> yp(n2);
             jcc::interpolation::interp1d(t_reconstructed, yp, t, y);
 
+
             for (int j=0; j<p; j++) {
+                if (j==29) {
+                    int a =1;
+                }
                 double c = yp[j];
                 double d = yp[j+1];
                 double e = dt_reconstructed[j];
