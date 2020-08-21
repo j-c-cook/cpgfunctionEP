@@ -57,12 +57,7 @@ namespace gt::gfunction {
         int nSum = sum_to_n(nSources);
 
         // Segment Response struct
-        auto start_ = std::chrono::steady_clock::now();
         gt::heat_transfer::SegmentResponse SegRes(nSources, nSum, nt);
-        auto end_ = std::chrono::steady_clock::now();
-        auto milli_ = std::chrono::duration_cast<std::chrono::milliseconds>(end_ - start_).count();
-        auto seconds_ = milli_ / 1000;
-        cout << "Time to create large 3d Vector in struct: " << seconds_ << endl;
 
         // Split boreholes into segments
         vector<gt::boreholes::Borehole> boreSegments(nSources);
@@ -77,15 +72,10 @@ namespace gt::gfunction {
 
         // Initialize segment-to-segment response factors (https://slaystudy.com/initialize-3d-vector-in-c/)
         // NOTE: (nt + 1), the first row will be full of zeros for later interpolation
-        start_ = std::chrono::steady_clock::now();
 //        vector< vector< vector<double> > > h_ij(nSources ,
 //                vector< vector<double> > (nSources, vector<double> (nt+1, 0.0)) );
         vector< vector< vector<double> > > h_ij(1 ,
                                                 vector< vector<double> > (1, vector<double> (1, 0.0)) );
-        end_ = std::chrono::steady_clock::now();
-        milli_ = std::chrono::duration_cast<std::chrono::milliseconds>(end_ - start_).count();
-        seconds_ = milli_ / 1000;
-        cout << "Time to create large 3d Vector: " << seconds_ << endl;
         // Calculate segment to segment thermal response factors
         auto start = std::chrono::steady_clock::now();
         gt::heat_transfer::thermal_response_factors(SegRes, h_map, h_ij, boreSegments, time, hash_mode, alpha, use_similarities, disp);
@@ -463,20 +453,22 @@ namespace gt::gfunction {
         fill_gsl_matrices_time /= 1000;
         LU_decomposition_time /= 1000;
 
-        cout << "------ timings report -------" << endl;
-        cout << " t\t " << " t/p\t" << "name" << endl;
-        cout << segment_length_time << "\t" << segment_length_time << "\t" << "segment length time" << endl;
-        cout << time_vector_time << "\t" << time_vector_time << "\t" << "time vector time" << endl;
-        cout << segment_h_values_time << "\t" << segment_h_values_time << "\t" << "segment h values time" << endl;
-        cout << fill_A_time << "\t" << fill_A_time / double(nt) << "\t" << "time to fill vector A" << endl;
-        cout << load_history_reconstruction_time << "\t" << load_history_reconstruction_time / double(nt)
-        << "\t" << "load hist reconstruction" << endl;
-        cout << temporal_superposition_time << "\t" << temporal_superposition_time / double(nt)
-             << "\t" << "temporal superposition time:" << endl;
-        cout << fill_gsl_matrices_time << "\t" << fill_gsl_matrices_time / double(nt)
-             << "\t" << "gsl fill matrices time" << endl;
-        cout << LU_decomposition_time << "\t" << LU_decomposition_time/double(nt)
-             << "\t" << "LU decomp time" << endl;
+        if (disp) {
+            cout << "------ timings report -------" << endl;
+            cout << " t\t " << " t/p\t" << "name" << endl;
+            cout << segment_length_time << "\t" << segment_length_time << "\t" << "segment length time" << endl;
+            cout << time_vector_time << "\t" << time_vector_time << "\t" << "time vector time" << endl;
+            cout << segment_h_values_time << "\t" << segment_h_values_time << "\t" << "segment h values time" << endl;
+            cout << fill_A_time << "\t" << fill_A_time / double(nt) << "\t" << "time to fill vector A" << endl;
+            cout << load_history_reconstruction_time << "\t" << load_history_reconstruction_time / double(nt)
+                 << "\t" << "load hist reconstruction" << endl;
+            cout << temporal_superposition_time << "\t" << temporal_superposition_time / double(nt)
+                 << "\t" << "temporal superposition time:" << endl;
+            cout << fill_gsl_matrices_time << "\t" << fill_gsl_matrices_time / double(nt)
+                 << "\t" << "gsl fill matrices time" << endl;
+            cout << LU_decomposition_time << "\t" << LU_decomposition_time/double(nt)
+                 << "\t" << "LU decomp time" << endl;
+        }
 
         auto end2 = std::chrono::steady_clock::now();
         if (disp) {

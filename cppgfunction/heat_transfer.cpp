@@ -66,7 +66,9 @@ namespace gt::heat_transfer {
         const auto processor_count = thread::hardware_concurrency();
         // Launch the pool with n threads.
         boost::asio::thread_pool pool(processor_count);
-        cout << "\tDetected " << processor_count << " as the number of available threads" << endl;
+        if (disp) {
+            cout << "\tDetected " << processor_count << " as the number of available threads" << endl;
+        }
 
         SimilaritiesType SimReal; // positive
         SimilaritiesType SimImage; // negative
@@ -93,24 +95,13 @@ namespace gt::heat_transfer {
             double disTol = 0.1;
             double tol = 1.0e-6;
             gt::heat_transfer::Similarity sim;
-            auto start_sim = std::chrono::steady_clock::now();
             sim.similarities(SimReal, SimImage, boreSegments, splitRealAndImage, disTol, tol);
-            auto end_sim = std::chrono::steady_clock::now();
-            double milli_ = std::chrono::duration_cast<std::chrono::milliseconds>(end_sim - start_sim).count();
-            double seconds_ = milli_ / 1000;
-            cout << "Sim Calc time: " << seconds_ << endl;
 
             //---
             // Adaptive hashing scheme if statement
             // Determine the Segment Response storing mode here
             SegRes.storage_mode = 1;  // TODO: fix this later on, for now it will be 1
             int Ntot = sum_to_n(nSources);
-            auto start_resize = std::chrono::steady_clock::now();
-//            SegRes.ReSizeContainers(Ntot, nt); // TODO: extend resize containers function for other storage_modes
-            auto end_resize = std::chrono::steady_clock::now();
-            milli_ = std::chrono::duration_cast<std::chrono::milliseconds>(end_resize - start_resize).count();
-            seconds_ = milli_ / 1000;
-            cout << "Resize time: " << seconds_ << endl;
 
 //            if (SimReal.nSim + SimImage.nSim < sum_to_n(nSources)) {
 //                // if the field contains high similarity, then store both REAL and IMAGE separately
@@ -120,7 +111,7 @@ namespace gt::heat_transfer {
 //                hash_mode = 1; // second option, still reduces to sum_to_n(nSources)
 //            }
             hash_mode = 1;
-            cout << "Hash Mode: " << hash_mode << endl;
+//            cout << "Hash Mode: " << hash_mode << endl;
 //            double ti = time[1];
 //            int i = 1;
 //            int j = 2;
