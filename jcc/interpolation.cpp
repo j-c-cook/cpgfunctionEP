@@ -8,7 +8,7 @@
 
 using namespace std;
 
-namespace jcc::interpolation {
+namespace jcc { namespace interpolation {
 
     double linterp(double xp, double x0, double y0, double x1, double y1) {
         double yp;
@@ -120,6 +120,6 @@ namespace jcc::interpolation {
         int a = 1;
     }
 
-} // jcc::interpolation
+} } // jcc::interpolation
 
 
