@@ -9,8 +9,8 @@
 #include <vector>
 //#include "gfunction.h"
 #include "boreholes.h"
-#include "boost/math/quadrature/gauss_kronrod.hpp"
-#include "boost/asio.hpp"
+#include <boost/math/quadrature/gauss_kronrod.hpp>
+#include <boost/asio.hpp>
 #include "SegmentResponse.h"
 
 using namespace std;
