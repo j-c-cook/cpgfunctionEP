@@ -10,7 +10,7 @@
 
 using namespace boost::math::quadrature;
 
-namespace gt::heat_transfer {
+namespace gt { namespace heat_transfer {
     double finite_line_source(const double time_, const double alpha, gt::boreholes::Borehole &b1,
                               gt::boreholes::Borehole &b2, bool reaSource, bool imgSource) {
 
@@ -711,4 +711,4 @@ namespace gt::heat_transfer {
     }
 
 
-} // namespace gt::heat_transfer
+} } // namespace gt::heat_transfer

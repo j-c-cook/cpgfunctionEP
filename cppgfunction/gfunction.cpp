@@ -16,7 +16,7 @@ extern "C" void dgesv_( int *n, int *nrhs, double  *a, int *lda, int *ipiv, doub
 
 using namespace std;  // lots of vectors, only namespace to be used
 
-namespace gt::gfunction {
+namespace gt { namespace gfunction {
     // The uniform borehole wall temperature (UBWHT) g-function calculation. Originally presented in
     // Cimmino and Bernier (2014) and a later paper on speed improvements by Cimmino (2018)
     void uniform_temperature(vector<double>& gfunction, vector<gt::boreholes::Borehole> boreholes,
@@ -627,4 +627,4 @@ namespace gt::gfunction {
         pool.join();
     }  // _temporal_superposition
 
-} // namespace gt::gfunction
+} } // namespace gt::gfunction

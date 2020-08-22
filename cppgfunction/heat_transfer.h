@@ -16,7 +16,7 @@
 using namespace std;
 
 
-namespace gt::heat_transfer {
+namespace gt { namespace heat_transfer {
 
     struct SegmentResponse {
         ~SegmentResponse() {} // destructor
@@ -88,6 +88,6 @@ namespace gt::heat_transfer {
                 vector<gt::boreholes::Borehole> &boreSegments, const string& kind, double tol=1.0e-6);
     };
 
-} // namespace gt::heat_transfer
+} } // namespace gt::heat_transfer
 
 #endif //CPPGFUNCTION_HEAT_TRANSFER_H

@@ -17,7 +17,7 @@ using namespace std;
 
 /** The functions will be listed here in the order which they appear in the associated cpp file **/
 
-namespace gt::gfunction {
+namespace gt { namespace gfunction {
         /**
          * Uniform borehole wall temperature (UBWHT) g-function calculation method
          *
@@ -46,6 +46,6 @@ namespace gt::gfunction {
                 std::vector<std::vector<double>>& q_reconstructed, int p, int hash_mode);
         void _solve_eqn(vector<double>& x, vector<vector<double>>& A, vector<double>& b);
 
-} // namespace gt::gfunction
+} } // namespace gt::gfunction
 
 #endif //CPPGFUNCTION_GFUNCTION_H

@@ -6,7 +6,7 @@
 using std::size_t;
 using std::hash;
 
-namespace gt::heat_transfer {
+namespace gt { namespace heat_transfer {
     void h_ij_Key::func(double & ti, const int _i, const int _j, const int _k,
                         vector<gt::boreholes::Borehole> &boreSegments, const int _hash_mode, bool Real) {
         hash_mode = _hash_mode;  // set hash mode for when Key hash function gets called
@@ -136,4 +136,4 @@ namespace gt::heat_transfer {
         }
     }
 
-} // gt::heat_transfer
+} } // gt::heat_transfer

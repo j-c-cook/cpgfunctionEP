@@ -12,7 +12,7 @@
 
 using namespace std;
 
-namespace gt::heat_transfer {
+namespace gt { namespace heat_transfer {
 
     using nKey = tuple<int, int, int>;
 
@@ -82,6 +82,6 @@ namespace gt::heat_transfer {
     double hash_table_lookup(double &h, unordered_map<nKey, double, KeyHasher> &h_map,
                            vector<double> &time, vector<gt::boreholes::Borehole> &boreSegments,
                            int i, int j, int k, int hash_mode);
-}
+} }
 
 #endif //CPPGFUNCTION_SEGMENTRESPONSE_H
