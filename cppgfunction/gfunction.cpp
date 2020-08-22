@@ -548,10 +548,6 @@ namespace gt { namespace gfunction {
         } // next i
 
         auto _interpolate = [&Q_dt, &q_reconstructed, &t, &t_reconstructed, &dt_reconstructed, &p](const int i) {
-            cout << "p: " << p << " i: " << i << endl;
-            if (i==99 && p==30) {
-                int a =1;
-            }
             int n = t.size();
             std::vector<double> y(n);
             for (int j=0; j<n; j++) {
@@ -563,9 +559,6 @@ namespace gt { namespace gfunction {
 
 
             for (int j=0; j<p; j++) {
-                if (j==29) {
-                    int a =1;
-                }
                 double c = yp[j];
                 double d = yp[j+1];
                 double e = dt_reconstructed[j];
