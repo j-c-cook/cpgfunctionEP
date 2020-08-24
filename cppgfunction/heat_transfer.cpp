@@ -50,10 +50,9 @@ namespace gt { namespace heat_transfer {
     } // void finite_line_source
 
     void
-    thermal_response_factors(SegmentResponse &SegRes, unordered_map<nKey, double, KeyHasher> &h_map,
-                             std::vector< std::vector< std::vector<double> > >& h_ij,
+    thermal_response_factors(SegmentResponse &SegRes, std::vector< std::vector< std::vector<double> > >& h_ij,
                              std::vector<gt::boreholes::Borehole> &boreSegments,
-                             std::vector<double> &time, int &hash_mode,
+                             std::vector<double> &time,
                              const double alpha, bool use_similaries, bool disp) {
         // total number of line sources
         int nSources = boreSegments.size();
@@ -103,78 +102,9 @@ namespace gt { namespace heat_transfer {
             SegRes.storage_mode = 1;  // TODO: fix this later on, for now it will be 1
             int Ntot = sum_to_n(nSources);
 
-//            if (SimReal.nSim + SimImage.nSim < sum_to_n(nSources)) {
-//                // if the field contains high similarity, then store both REAL and IMAGE separately
-//                hash_mode = 0; // first option, could reduce the most
-//            } else {
-//                // if there is is not high similarity, then store each i->j combination REALandIMAGECombined
-//                hash_mode = 1; // second option, still reduces to sum_to_n(nSources)
-//            }
-            hash_mode = 1;
-//            cout << "Hash Mode: " << hash_mode << endl;
-//            double ti = time[1];
-//            int i = 1;
-//            int j = 2;
-//            // hash_mode = 0
-//            h_ij_Key _h_map_key_calc(ti, i, j, boreSegments, 0, false);
-//            Key hij_map_key(_h_map_key_calc);
-//            h_map[hij_map_key] = 22.2;
-//            double test = h_map[hij_map_key];
-            // TODO: possibly remove create_map entirely, ReSizeContainers handles this
-//            auto create_map = [&boreSegments, &time, &h_map, &COUNT, &nSources, &SegRes](SimilaritiesType &SimReal, int s,
-//                    const int hash_mode, bool Real=true) {
-//                // begin function
-//                int n1;
-//                int n2;
-//                if (hash_mode==0) {
-//                    n1 = get<0>(SimReal.Sim[s][0]);
-//                    n2 = get<1>(SimReal.Sim[s][0]);
-//                    COUNT++;
-//                    for (int t=0; t<time.size(); t++){
-//                        if (n1 > n2) {
-//                            swap(n1, n2);
-//                        }
-//                        h_map[make_tuple(n1, n2, t)] = 0;
-////                        h_ij_Key _h_map_key_calc(time[t], n1, n2, t,  boreSegments, hash_mode, Real);
-////                        Key hij_map_key(_h_map_key_calc);
-////                        h_map[hij_map_key] = 0; // non-critical race condition
-//                    }
-//                } else if (hash_mode==1) {
-//                    for (int i = 0; i < nSources; i++) {
-//                        for (int j = i; j < nSources; j++) {
-//                            COUNT++;
-//                            for (int k = 0; k < time.size(); k++) {
-//                                if (n1 > n2) {
-//                                    swap(n1, n2);
-//                                }
-//                                h_map[make_tuple(n1, n2, k)] = 0;
-////                                h_ij_Key _h_map_key_calc(time[k], i, j, k, boreSegments, hash_mode);
-////                                Key hij_map_key(_h_map_key_calc);
-////                                h_map[hij_map_key] = 0; // non-critical race condition
-//                            }
-//                        }
-//                    }
-//                }
-//            };
-//            if (hash_mode==0) {
-//                // for this case the most we can have is sum_to_n(nSources) - 1
-//                for (int s=0; s<SimReal.nSim; s++) {
-//                    create_map(SimReal, s, hash_mode, true);
-//                }
-//                for (int s=0; s<SimImage.nSim; s++) {
-//                    create_map(SimImage, s, hash_mode, false);
-//                }
-//
-//            } else if (hash_mode==1) {
-//                // this case will used sum_to_n(nSources)
-//                create_map(SimReal, 0, hash_mode);
-//            }
-            // TODO: end of create_map code
-            int a = 1;
-
             // lambda function for calulating h at each time step
             auto _calculate_h = [&boreSegments, &splitRealAndImage, &time, &alpha, &nt, &h_ij, &SegRes, &Ntot](SimilaritiesType &SimReal,
-                    int s, bool reaSource, bool imgSource, const int hash_mode) {
+                    int s, bool reaSource, bool imgSource) {
 //                auto check_key = [&h_map](Key &sim_key) {
 //                    // Key is not present
 //                    if (h_map.find(sim_key) == h_map.end())
@@ -210,7 +140,7 @@ namespace gt { namespace heat_transfer {
                     // TODO: combine with create_map
                     int i;
                     int j;
-                    if (hash_mode==0) {
+                    if (SegRes.storage_mode==0) {
                         // not looping through every (i, j), real and image stored separately
                         ;
 ////                        i = get<0>(SimReal.Sim[s][0]);
@@ -292,16 +222,16 @@ namespace gt { namespace heat_transfer {
             for (int s=0; s<SimReal.nSim; s++) {
                 reaSource = true;
                 imgSource = false;
-                boost::asio::post(pool, [&_calculate_h, &SimReal, s, reaSource, imgSource, hash_mode]
-                { _calculate_h(SimReal, s, reaSource, imgSource, hash_mode); });
+                boost::asio::post(pool, [&_calculate_h, &SimReal, s, reaSource, imgSource]
+                { _calculate_h(SimReal, s, reaSource, imgSource); });
 //                _calculate_h(SimReal, s, reaSource, imgSource, hash_mode);
             } // next s
             if (splitRealAndImage) {
                 reaSource = false;
                 imgSource = true;
                 for (int s=0; s<SimImage.nSim; s++) {
-                    boost::asio::post(pool, [&_calculate_h, &SimImage, s, reaSource, imgSource, hash_mode]
-                    { _calculate_h(SimImage, s, reaSource, imgSource, hash_mode); });
+                    boost::asio::post(pool, [&_calculate_h, &SimImage, s, reaSource, imgSource]
+                    { _calculate_h(SimImage, s, reaSource, imgSource); });
 //                    _calculate_h(SimImage, s, reaSource, imgSource, hash_mode);
                 }
             }

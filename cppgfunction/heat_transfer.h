@@ -40,9 +40,8 @@ namespace gt { namespace heat_transfer {
 
     double finite_line_source(double time_, double alpha, gt::boreholes::Borehole& b1, gt::boreholes::Borehole& b2,
             bool reaSource=true, bool imgSource=true);
-    void thermal_response_factors(SegmentResponse &SegRes, unordered_map<nKey, double, KeyHasher> &h_map,
-                                  std::vector< std::vector< std::vector<double> > >& h_ij,
-            std::vector<gt::boreholes::Borehole>& boreSegments, std::vector<double>& time, int &hash_mode,
+    void thermal_response_factors(SegmentResponse &SegRes, std::vector< std::vector< std::vector<double> > >& h_ij,
+            std::vector<gt::boreholes::Borehole>& boreSegments, std::vector<double>& time,
             double alpha, bool use_similaries, bool disp=false);
 
     struct SimilaritiesType {

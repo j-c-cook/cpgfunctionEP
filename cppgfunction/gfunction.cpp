@@ -41,7 +41,6 @@ namespace gt { namespace gfunction {
         //may return 0 when not able to detect
         const auto processor_count = thread::hardware_concurrency();
 //        // Launch the pool with n threads.
-//        boost::asio::thread_pool pool(processor_count);
 //        cout << "\tDetected " << processor_count << " as the number of available threads" << endl;
 
         // Number of boreholes
@@ -66,10 +65,6 @@ namespace gt { namespace gfunction {
         // TODO: make SegRes hold all Segment Response specific stuff
         _borehole_segments(SegRes.boreSegments, boreholes, nSegments);
 
-        // h_ij_unordered_map
-        unordered_map<gt::heat_transfer::nKey, double, gt::heat_transfer::KeyHasher> h_map;
-        int hash_mode=0;
-
         // Initialize segment-to-segment response factors (https://slaystudy.com/initialize-3d-vector-in-c/)
         // NOTE: (nt + 1), the first row will be full of zeros for later interpolation
 //        vector< vector< vector<double> > > h_ij(nSources ,
@@ -78,7 +73,7 @@ namespace gt { namespace gfunction {
                                                 vector< vector<double> > (1, vector<double> (1, 0.0)) );
         // Calculate segment to segment thermal response factors
         auto start = std::chrono::steady_clock::now();
-        gt::heat_transfer::thermal_response_factors(SegRes, h_map, h_ij, boreSegments, time, hash_mode, alpha, use_similarities, disp);
+        gt::heat_transfer::thermal_response_factors(SegRes,h_ij, boreSegments, time, alpha, use_similarities, disp);
         auto end = std::chrono::steady_clock::now();
 
         if (disp) {
@@ -103,6 +98,7 @@ namespace gt { namespace gfunction {
         double LU_decomposition_time = 0;
 
         auto start2 = std::chrono::steady_clock::now();
+        boost::asio::thread_pool pool(processor_count);
 
         // ------ Segment lengths -------
         start = std::chrono::steady_clock::now();
@@ -112,8 +108,8 @@ namespace gt { namespace gfunction {
                 Hb[b] = boreSegments[b].H;
             } // next b
         }; // auto _segmentlengths
-//        boost::asio::post(pool, [nSources, &boreSegments, &Hb, &_segmentlengths]{ _segmentlengths(nSources); });
-        _segmentlengths(nSources);
+        boost::asio::post(pool, [nSources, &boreSegments, &Hb, &_segmentlengths]{ _segmentlengths(nSources); });
+//        _segmentlengths(nSources);
         end = std::chrono::steady_clock::now();
         milli = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
         segment_length_time += milli;
@@ -138,28 +134,14 @@ namespace gt { namespace gfunction {
                 } // fi
             } // next i
         }; // auto _fill_time
-//        boost::asio::post(pool, [&_fill_time, &time, &_time]{ _fill_time() ;});
-        _fill_time();
+        boost::asio::post(pool, [&_fill_time, &time, &_time]{ _fill_time() ;});
+//        _fill_time();
 
         end = std::chrono::steady_clock::now();
         milli = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
         time_vector_time += milli;
 
-//        auto _fill_dt = [&dt, &time]() {
-//            for (int i=0; i<time.size(); i++) {
-//                if (i==0) {
-//                    dt[i] = time[i];
-//                } else {
-//                    dt[i] = time[i] - time[i-1];
-//                } // fi
-//            } // end i
-//        };
-//        _fill_dt();
-
-//        pool.join(); // starting up a new idea after this, pool will close here
-
-
-//        cout << "\tDetected " << processor_count << " as the number of available threads" << endl;
+        pool.join(); // starting up a new idea after this, pool will close here
 
         // ---------- segment h values -------------
         /** Starting up pool2 here **/
@@ -176,78 +158,6 @@ namespace gt { namespace gfunction {
         }
 
         start = std::chrono::steady_clock::now();
-        // h_dt : an interpolation through the k direction of the cube
-//        vector< vector< vector<double> > > h_dt(nSources ,
-//                vector< vector<double> > (nSources, vector<double> (nt)) );
-//        vector< vector< vector<double> > > h_dt(nSources ,vector< vector<double> > (nSources, vector<double> (nt)) );
-        // dh_ij is the difference of h_ij, ie. dh_[i][j][k] = h_ij[i][j][k]-h_ij[i][j][k-1], ie. \delta h_ij
-//        std::vector< std::vector< std::vector<double> > > dh_ij(nSources ,
-//                std::vector< std::vector<double> > (nSources, std::vector<double> (nt)) );
-
-        // Thermal response factors evaluated at t=dt (h_dt)
-//        auto _interpolate = [&h_ij, &h_dt, &_time, &dt, &dh_ij](const int i) {
-//            std::vector<double> y(_time.size());
-//            for (int j=0; j <h_ij[i].size(); j++) {
-//                for (int k=0; k<h_ij[i][j].size(); k++) {
-//                    if (k==1) {
-//                        ;
-//                        dh_ij[i][j][k-1] = h_ij[i][j][k];  // start at time "1"
-//                    } else if (k>1) {
-//                        ;
-//                        dh_ij[i][j][k-1] = h_ij[i][j][k] - h_ij[i][j][k-1];
-//
-//                    } // fi
-//                    y[k] = h_ij[i][j][k];
-//                } // end k
-//
-//                std::vector<double> yp(dt.size());
-//                jcc::interpolation::interp1d(dt, yp, _time, y );
-//
-//                for (int k=0; k<h_dt[i][j].size(); k++) {
-//                    h_dt[i][j][k] = yp[k];
-//                } // end k
-//            } // next j
-//
-//        }; // _interpolate
-        // h_dt for loop
-//        for (int i=0; i<h_ij.size(); i++) {
-//            _interpolate(i);
-//        }
-            ;
-//            for (int j=0; j<h_ij[i].size(); j++) {
-//                boost::asio::post(pool2, [&_interpolate, i]{ _interpolate(i) ;});
-
-
-//            } // end j
-
-        // if _interpolate threaded, join() pools here.
-//        pool2.join();  // need interpolated values moving forward
-        /** Starting up pool3 here **/
-        // Launch the pool with n threads.
-//        boost::asio::thread_pool pool3(processor_count);
-//        cout << "\tDetected " << processor_count << " as the number of available threads" << endl;
-
-//        auto _dh_ij = [&h_ij, &dh_ij](const int i, const int j) {
-//            for (int k=1; k<h_ij[i][j].size(); k++) {
-//                if (k==1) {
-//                    dh_ij[i][j][k-1] = h_ij[i][j][k];  // start at time "1"
-//                } else {
-//                    dh_ij[i][j][k-1] = h_ij[i][j][k] - h_ij[i][j][k-1];
-//                } // fi
-//            } // next k
-//        }; // +dh_ij
-//        // Thermal response factor increments
-//        for (int i=0; i<h_ij.size(); i++) {
-//            for (int j=0; j<h_ij[0].size(); j++) {
-////                boost::asio::post(pool3, [&_dh_ij, i, j]{ _dh_ij(i, j) ;});
-//                _dh_ij(i, j);
-//            } // next j
-//        } // next i
-
-        // after threaded, join() pool here
-//        pool3.join();
-
-//        h_ij = vector<vector<vector<double> >> ();  // destruct h_ij; no longer needed
 
         end = std::chrono::steady_clock::now();
         milli = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
@@ -277,31 +187,17 @@ namespace gt { namespace gfunction {
         vector<double> A_ (SIZE * SIZE);
         vector<double> b_ (SIZE);
 
-        std::vector<std::vector <double>> A(nSources +1, std::vector<double> (nSources +1));
-        std::vector<double> b(nSources + 1);
+//        std::vector<std::vector <double>> A(nSources +1, std::vector<double> (nSources +1));
+//        std::vector<double> b(nSources + 1);
 
         // Fill A
         int n = SIZE - 1;
-//        for (int j=0; j<SIZE; j++) {
-//            if (j==n) {
-//                gsl_matrix_set (_A, n, n, 0);
-//                A[n][n] = 0;
-//            } else {
-//                gsl_matrix_set (_A, n, j, Hb[j]);
-//                A[n][j] = Hb[j];
-//            } // fi
-//        } // next j
-
-        // Energy conservation: sum([Qb*Hb)] = sum([Hb])
-//        int n = A.size() - 1;
-//        int n = SIZE -1;
-//        _fill_A(n, SIZE);
-        n = b.size() - 1;
+        n = b_.size() - 1;
         double Hb_sum=0;
         for (auto & _hb : Hb) {
             Hb_sum += _hb;
         }
-        b[n] = Hb_sum;
+//        b[n] = Hb_sum;
 
         // Build and solve the system of equations at all times
 
@@ -337,7 +233,7 @@ namespace gt { namespace gfunction {
 
             // ------------- fill A ------------
             start = std::chrono::steady_clock::now();
-            auto _fillA = [&Hb, &A, &A_, &dt, &_time_untouched, &h_map, &hash_mode, &boreSegments, &h_ij, &time, &SegRes](int i, int p, int SIZE) {
+            auto _fillA = [&Hb, &A_, &dt, &_time_untouched, &boreSegments, &h_ij, &time, &SegRes](int i, int p, int SIZE) {
                 double xp;
                 double yp;
                 int n = SIZE - 1;
@@ -345,15 +241,15 @@ namespace gt { namespace gfunction {
                     if (i == n) { // then we are referring to Hb
                         if (j==n) {
                             A_[i+j*SIZE] = 0;
-                            A[i][n] = 0;
+//                            A[i][n] = 0;
                         } else {
                             A_[i+j*SIZE] = Hb[j];
-                            A[i][j] = Hb[j];
+//                            A[i][j] = Hb[j];
                         } // fi
                     } else {
-                        if (j==A[i].size()-1) {
+                        if (j==SIZE-1) {
                             A_[i+j*SIZE] = -1;
-                            A[i][j] = -1;
+//                            A[i][j] = -1;
                         } else {
                             xp = dt[p];
                             double yp_tmp;
@@ -398,27 +294,24 @@ namespace gt { namespace gfunction {
                                     SegRes,
                                     time,
                                     boreSegments,
-                                    h_ij, q_reconstructed, p, hash_mode);
+                                    h_ij, q_reconstructed, p);
             // fill b with -Tb
+            b_[SIZE-1] = Hb_sum;
             for (int i=0; i<Tb_0.size(); i++) {
-                b[i] = -Tb_0[i];
+                b_[i] = -Tb_0[i];
             }
             end = std::chrono::steady_clock::now();
             milli = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
             temporal_superposition_time += milli;
 
-            int m = A.size();
-            int n = A[0].size();
-            vector<double> x(b.size());
+            int m = SIZE;
+            int n = SIZE;
+            vector<double> x(b_.size());
 //            _solve_eqn(x, A, b);
             /** was _solve_eqn **/
 
             // ---- fill gsl matrix A and b -----
             start = std::chrono::steady_clock::now();
-
-            for (int i=0; i<b.size(); i++) {
-                b_[i] = b[i];
-            } // next i
 
             end = std::chrono::steady_clock::now();
             milli = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
@@ -575,7 +468,7 @@ namespace gt { namespace gfunction {
                                  gt::heat_transfer::SegmentResponse &SegRes,
                                  vector<double> &time, vector<gt::boreholes::Borehole> &boreSegments,
                                  vector<vector<vector<double> > >& h_ij,
-                                 std::vector<std::vector<double>>& q_reconstructed, const int p, const int hash_mode)
+                                 std::vector<std::vector<double>>& q_reconstructed, const int p)
             {
         const auto processor_count = thread::hardware_concurrency();
         // Launch the pool with n threads.
@@ -587,7 +480,7 @@ namespace gt { namespace gfunction {
         // Number of time steps
         int nt = p + 1;
 
-        auto _borehole_wall_temp = [&q_reconstructed, &Tb_0, &time, &SegRes, &boreSegments, &hash_mode, &h_ij]
+        auto _borehole_wall_temp = [&q_reconstructed, &Tb_0, &time, &SegRes, &boreSegments, &h_ij]
                 (const int i, const int nSources, const int nt){
             for (int j =0; j<nSources; j++) {
                 for (int k=0; k<nt; k++) {
