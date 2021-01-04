@@ -4,12 +4,12 @@
 // Created by jackcook on 7/11/20.
 //
 
-#include "gfunction.h"
+#include <cpgfunction/gfunction.h>
 #include <chrono>
-#include "../jcc/interpolation.h"
+#include <cpgfunction/interpolation.h>
 #include <thread>
 #include <boost/asio.hpp>
-#include "SegmentResponse.h"
+#include <cpgfunction/SegmentResponse.h>
 
 
 extern "C" void dgesv_( int *n, int *nrhs, double  *a, int *lda, int *ipiv, double *b, int *lbd, int *info  );

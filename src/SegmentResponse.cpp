@@ -2,7 +2,7 @@
 // Created by jackcook on 8/4/20.
 //
 
-#include "SegmentResponse.h"
+#include <cpgfunction/SegmentResponse.h>
 using std::size_t;
 using std::hash;
 

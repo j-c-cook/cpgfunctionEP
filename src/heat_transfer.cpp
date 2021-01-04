@@ -2,11 +2,11 @@
 // Created by jackcook on 7/11/20.
 //
 
-#include "heat_transfer.h"
+#include <cpgfunction/heat_transfer.h>
 #include <stdexcept>
 #include <thread>
 #include <boost/asio.hpp>
-#include "SegmentResponse.h"
+#include <cpgfunction/SegmentResponse.h>
 
 using namespace boost::math::quadrature;
 

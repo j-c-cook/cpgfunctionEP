@@ -2,9 +2,9 @@
 // Created by jackcook on 7/15/20.
 //
 
-#include "interpolation.h"
+#include <cpgfunction/interpolation.h>
 #include <csignal>
-#include "../cppgfunction/SegmentResponse.h"
+#include <cpgfunction/SegmentResponse.h>
 
 using namespace std;
 

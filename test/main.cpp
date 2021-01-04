@@ -1,10 +1,10 @@
 #include <iostream>
-#include "cppgfunction/boreholes.h"
+#include <cpgfunction/boreholes.h>
 #include <vector>
 #include <cmath>
-#include "cppgfunction/utilities.h"
-#include "cppgfunction/gfunction.h"
-#include "jcc/interpolation.h"
+#include <cpgfunction/utilities.h>
+#include <cpgfunction/gfunction.h>
+#include <cpgfunction/interpolation.h>
 
 int main() {
     // ---------------------------------------------------------

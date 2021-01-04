@@ -4,8 +4,8 @@
 
 #include <iostream>
 #include <vector>
-#include "../cppgfunction/SegmentResponse.h"
-#include "../cppgfunction/heat_transfer.h"
+#include <cpgfunction/SegmentResponse.h>
+#include <cpgfunction/heat_transfer.h>
 
 using namespace std;
 
