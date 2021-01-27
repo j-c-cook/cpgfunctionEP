@@ -2,6 +2,8 @@ cmake_minimum_required(VERSION 2.8)
 project(CpGFunction)
 
 set(CMAKE_CXX_STANDARD 11)
+# Compiler requests -std=c++11 be set for compiler option
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 # Everything will need to access this
 include_directories(include)
@@ -18,6 +20,7 @@ if(Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIRS})
 else()
     # ERROR
+    message(STATUS "MY_VARIABLE=${Boost_FOUND}")
 endif()
 target_link_libraries(cpgfunction ${Boost_LIBRARIES})
 
