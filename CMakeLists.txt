@@ -15,12 +15,15 @@ add_library(cpgfunction SHARED src/boreholes.cpp src/gfunction.cpp src/heat_tran
 set(Boost_USE_STATIC_LIBS OFF)
 set(Boost_USE_MULTITHREADED ON)
 set(Boost_USE_STATIC_RUNTIME OFF)
+# If the boost installation already on your computer is garbage or if you don't have one, uncomment this and
+# manually set the path to BOOST_ROOT (https://stackoverflow.com/a/58447515/11637415)
+# set(BOOST_ROOT /path/to/boost)
 find_package(Boost)
+message(STATUS "Boost_FOUND=${Boost_FOUND}")
 if(Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIRS})
 else()
     # ERROR
-    message(STATUS "MY_VARIABLE=${Boost_FOUND}")
 endif()
 target_link_libraries(cpgfunction ${Boost_LIBRARIES})
 
