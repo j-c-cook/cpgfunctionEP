@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 project(CpGFunction)
 
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 11)
 
 # Everything will need to access this
 include_directories(include)
