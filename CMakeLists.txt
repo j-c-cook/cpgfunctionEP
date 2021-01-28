@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 2.8)
-project(CpgFunction)
+project(CpGFunction)
 
 set(CMAKE_CXX_STANDARD 11)
 # Compiler requests -std=c++11 be set for compiler option
