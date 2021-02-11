@@ -1,5 +1,5 @@
 # cpgfunction
-An open source low level (C++) implementation of Massimo Cimmino's
+An open source low level (C++) implementation of [Massimo Cimmino][1]'s
 g-function methodology. The g-function calculation has to do with the distribution
 of heat in a ground heat exchanger (GHE). The g-function, after computed,
 can be used to simulate a
@@ -20,7 +20,8 @@ solve a major limitation (problem) associated with
 computing large sets of g-functions for borefields containing anywhere from 1
 to 1024 boreholes. Massimo Cimmino's open source implementation of the g-function
 calculation
-in Python (pygfunction) has a limitation; the memory consumption is massive.
+in Python ([pygfunction][2]) has a limitation; at times the memory consumption is
+inordinate.
 This library was implemented so that computing g-functions would require
 significantly less memory to increase throughput on high performance clusters
 which contain many "low memory" nodes, and only a few "high memory" nodes.
@@ -31,6 +32,9 @@ is a checklist of boundary conditions contained in this library:
 - [ ] Uniform heat flux (UHF)
 - [x] Uniform borehole wall temperature (UBHWT)
 - [ ] Uniform inlet fluid temperature (UIFT)
+
+[1]: https://github.com/MassimoCimmino
+[2]: https://github.com/MassimoCimmino/pygfunction
 
 # Build
 
