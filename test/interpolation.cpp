@@ -2,6 +2,8 @@
 // Created by jackcook on 2/27/21.
 //
 
+#include <iostream>
+#include <vector>
 #include <cpgfunction/interpolation.h>
 
 int main() {
@@ -11,4 +13,11 @@ int main() {
     std::vector<double>  xp {90, 210, 310};
     std::vector<double>  yp (3);
     jcc::interpolation::interp1d(xp, yp, x, y);
+
+    std::cout << "The y points for linear interpolation" << std::endl;
+    for (const auto& i: yp) {
+        std:: cout << i << std::endl;
+    }
+
+    return 0;
 }

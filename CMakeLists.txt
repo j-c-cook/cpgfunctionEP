@@ -41,6 +41,7 @@ target_link_libraries(cpgfunction ${BLAS_LIBRARIES})
 add_executable(test1 test/main.cpp)
 add_executable(test2 test/interpolation.cpp)
 target_link_libraries(test1 cpgfunction)
+target_link_libraries(test2 cpgfunction)
 
 
 # Turn on testing
@@ -48,3 +49,4 @@ enable_testing()
 
 # Test the test binary itself
 add_test(NAME RunTest1 COMMAND "${CMAKE_BINARY_DIR}/test1")
+add_test(NAME RunTest2 COMMAND "${CMAKE_BINARY_DIR}/test2")
