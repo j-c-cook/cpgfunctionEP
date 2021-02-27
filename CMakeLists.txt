@@ -39,6 +39,7 @@ target_link_libraries(cpgfunction ${BLAS_LIBRARIES})
 
 # Create a test binary that depends on the DLL
 add_executable(test1 test/main.cpp)
+add_executable(test2 test/interpolation.cpp)
 target_link_libraries(test1 cpgfunction)
 
 
