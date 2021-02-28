@@ -26,15 +26,9 @@ namespace gt {
         };
 
     // ------ Create Fields --------
-    void rectangle_field(std::vector<Borehole>& field, int N_1, int N_2, double B_1, double B_2, double H, double D, double r_b) {
-        int len = field.size(); // check to see if there is enough space in the vector
-        double nbh = N_1 * N_2;
-
-        // TODO: place this resizing into a "general" namespace
-        // if need be, resize the vector to be the same size as the number of boreholes needed
-        if (len != nbh) {
-            field.resize(nbh);
-        } else ; // else do nothing
+    std::vector<Borehole> rectangle_field(int N_1, int N_2, double B_1, double B_2, double H, double D, double r_b) {
+        int nbh = N_1 * N_2;
+        std::vector<Borehole> borefield(nbh);
 
         double pos_x;
         double pos_y;
@@ -43,10 +37,11 @@ namespace gt {
             for (int i = 0; i < N_1; i++) {
                 pos_x = double(i) * B_1;
                 pos_y = double(j) * B_2;
-                field[point_nb] = Borehole(H, D, r_b, pos_x, pos_y);
+                borefield[point_nb] = Borehole(H, D, r_b, pos_x, pos_y);
                 point_nb++;
             } // end i
         } // end j
+        return borefield;
     } // rectangular field function
 
     } // boreholes name space

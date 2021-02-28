@@ -31,7 +31,7 @@ namespace gt {
             std::tuple<double, double> position();
         };
 
-        void rectangle_field(std::vector<Borehole>& field, int N_1, int N_2, double B_1, double B_2, double H, double D, double r_b);
+        std::vector<Borehole> rectangle_field(int N_1, int N_2, double B_1, double B_2, double H, double D, double r_b);
 
     } // boreholes name space
 

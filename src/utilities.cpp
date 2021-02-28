@@ -6,13 +6,8 @@
 
 namespace gt {
     namespace utilities {
-        void time_geometric(std::vector<double>& time, float dt, double tmax, int Nt) {
-            // TODO: place this resizing into a "general" namespace
-            int len = time.size(); // check to see if there is enough space in the vector
-            // if need be, resize the vector to be the same size as the number of boreholes needed
-            if (len != Nt) {
-                time.resize(Nt);
-            } else ; // else do nothing
+        std::vector<double> time_geometric(float dt, double tmax, int Nt) {
+            std::vector<double> time(Nt);  // create a time vector of size Nt
 
             double value;
             double tmax_calc = double(Nt) * double(dt);
@@ -34,7 +29,8 @@ namespace gt {
                     time[j] = value;
                 } // end for
             } // end if
-        } // void time_geometric
+            return time;
+        } // vector<double> time_geometric
 
         void cook_spitler_time (std::vector<double> &logtime){
             int np = 31; // 31 total points

@@ -9,7 +9,13 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 include_directories(include)
 
 # Create a DLL with an API
-add_library(cpgfunction SHARED src/boreholes.cpp src/gfunction.cpp src/heat_transfer.cpp src/interpolation.cpp src/SegmentResponse.cpp src/utilities.cpp)
+add_library(cpgfunction SHARED src/boreholes.cpp
+        src/gfunction.cpp
+        src/heat_transfer.cpp
+        src/interpolation.cpp
+        src/SegmentResponse.cpp
+        src/utilities.cpp
+        third_party/nlohmann/json.hpp)
 
 # It depends on boost
 set(Boost_USE_STATIC_LIBS OFF)

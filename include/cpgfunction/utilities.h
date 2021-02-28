@@ -11,7 +11,7 @@
 
 namespace gt {
     namespace utilities {
-        void time_geometric(std::vector<double>& time, float dt, double tmax, int Nt);
+        std::vector<double> time_geometric(float dt, double tmax, int Nt);
         void cook_spitler_time (std::vector<double> &logtime);
         void convert_time(std::vector<double> &logtime, std::vector<double> &time, double H, double alpha);
     } // namespace utilities
