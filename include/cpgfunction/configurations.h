@@ -38,6 +38,7 @@ namespace gt {  // g-function namespace
             std::vector<std::tuple<double, double>> bottom_right();
             std::vector<std::tuple<double, double>> top_right();
             std::vector<std::tuple<double, double>> top_left();
+            void export_coordinates(std::vector<std::tuple<double, double>>& coordinates, std::string output_path);
 
         };
     }

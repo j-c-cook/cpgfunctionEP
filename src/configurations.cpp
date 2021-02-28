@@ -5,10 +5,13 @@
 #include <cpgfunction/configurations.h>
 #include <cmath>
 #include <cpgfunction/boreholes.h>
+#include <fstream>
+#include <nlohmann/json.hpp>
+#include <iomanip>
 
 
 void Append_Unique(std::vector<std::tuple<double, double>>& Existing,
-                   const std::vector<std::tuple<double, double>>& NewCoordinates) {
+                   std::vector<std::tuple<double, double>>& NewCoordinates) {
     // Append the unique coordinates to the existing vector of coordinates
 
     int n = Existing.size();
@@ -16,27 +19,43 @@ void Append_Unique(std::vector<std::tuple<double, double>>& Existing,
 
     std::vector<std::tuple<double, double>> AppendThese;
 
-    for (int i=0; i<n; i++) {
-        for (int j=i; j<m; j++) {
-            std::tuple<double, double> existing_pair = Existing[i];
-            std::tuple<double, double> new_pair = NewCoordinates[j];
+    if (n==0) {  // if nothing exists in the existing vector of coordinates
+        // Call this function recursively to make sure new coordinates has no duplicates
+        std::vector<std::tuple<double, double>> TmpNewCoordinates = NewCoordinates;
+        Append_Unique(NewCoordinates, TmpNewCoordinates);
+        // Insert the unique values from new coordinates into the existing vector
+        Existing.insert(Existing.end(), NewCoordinates.begin(), NewCoordinates.end());
+    } else {
+        if (m!=0) {
+            for (int i=0; i<n; i++) {
+                bool unique_pair = true;
+                for (int j=0; j<m; j++) {
+                    std::tuple<double, double> existing_pair = Existing[i];
+                    std::tuple<double, double> new_pair = NewCoordinates[j];
 
-            double x1 = std::get<0>(existing_pair);
-            double y1 = std::get<1>(existing_pair);
+                    double x1 = std::get<0>(existing_pair);
+                    double y1 = std::get<1>(existing_pair);
 
-            double x2 = std::get<0>(new_pair);
-            double y2 = std::get<1>(new_pair);
+                    double x2 = std::get<0>(new_pair);
+                    double y2 = std::get<1>(new_pair);
 
-            double d = gt::Distance_Formula(x1, y1, x2, y2);
+                    double d = gt::Distance_Formula(x1, y1, x2, y2);
 
-            if (d > 1.0E-06) {
-                AppendThese.push_back(new_pair);
-            } // FI
-        }  // Next j
-    }  // Next i
-
-    Existing.insert(Existing.end(), AppendThese.begin(), AppendThese.end());
-}
+                    if (d < 1.0E-06) {
+                        unique_pair = false;
+                        break;
+                        AppendThese.push_back(new_pair);
+                    } // FI
+                }  // Next j
+                if (unique_pair) {  // if the i pair is unique, then push it back
+                    AppendThese.push_back(Existing[i]);
+                }
+            }  // Next i
+            // if there are new coordinates to append, then do so
+            Existing.insert(Existing.end(), AppendThese.begin(), AppendThese.end());
+            }  // FI
+        }  // FI
+    }  // Append_Unique function
 
 
 namespace gt {
@@ -173,6 +192,28 @@ namespace gt {
             }  // FI
             return top_left_coordinates;
         }  // top_left function
+
+        void Uniform::export_coordinates(std::vector<std::tuple<double, double>> &coordinates, std::string output_path) {
+            // Use nlohmann json to expor the coordinates to a path
+
+            std::vector<double> x_values(coordinates.size());
+            std::vector<double> y_values(coordinates.size());
+
+            for (int i=0; i<x_values.size(); i++) {
+                x_values[i] = std::get<0>(coordinates[i]);
+                y_values[i] = std::get<1>(coordinates[i]);
+            }
+
+            std::ofstream o(output_path);
+
+            nlohmann::json j;
+
+            j["x"] = x_values;
+            j["y"] = y_values;
+
+            o << std::setw(4) << j << std::endl;
+        }
+
     }  // Configurations Namespace
 }  // g-function name space
 

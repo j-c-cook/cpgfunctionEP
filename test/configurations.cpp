@@ -26,7 +26,9 @@ int main() {
 
     std::vector<std::tuple<double, double>> coordinates = uni.generate_coordinates();
 
-    int a = 1;
+    std::string output_path = "Coordinates.json";
+
+    uni.export_coordinates(coordinates, output_path);
 
     return 0;
 }
