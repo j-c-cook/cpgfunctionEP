@@ -11,6 +11,9 @@
 #include <vector>
 
 namespace gt {
+
+    double Distance_Formula(double x1, double y1, double x2, double y2);
+
     namespace boreholes {
 
         struct Borehole {
