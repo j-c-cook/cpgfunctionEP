@@ -17,7 +17,6 @@ add_library(cpgfunction SHARED src/boreholes.cpp
         src/SegmentResponse.cpp
         src/utilities.cpp
         third_party/nlohmann/json.hpp
-        src/configurations.cpp
         src/coordinates.cpp)
 
 # It depends on boost
