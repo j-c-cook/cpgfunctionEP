@@ -4,31 +4,48 @@
 
 // tests for creating coordinates
 
-#include <cpgfunction/configurations.h>
+#include <cpgfunction/coordinates.h>
 
 int main() {
+    // -- Definitions --
+    // Coordinate geometry
+    int Nx = 3;
+    int Ny = 3;
+    double Bx = 6.;
+    double By = 4.5;
 
-    // create a rectangle
+    // -- Configurations --
+    // Get x,y coordinates for a rectangle
+    std::string shape = "Rectangle";
+    std::vector<std::tuple<double, double>> coordinates =
+            gt::coordinates::configuration(shape, Nx, Ny, Bx, By);
+    std::string output_path = shape + ".json";
+    gt::coordinates::export_coordinates_to_file(coordinates, output_path);
 
-    int BottomY = 10;  // nrows in Y from bottom
-    int LeftX = 10;    // nrows in x from left
-    int TopY = 0;     // nrows in y from top
-    int RightX = 0;   // nrows in x from right
+    // Get x,y coordinates for an open-rectangle
+    shape = "OpenRectangle";
+    coordinates = gt::coordinates::configuration(shape, Nx, Ny, Bx, By);
+    output_path = shape + ".json";
+    gt::coordinates::export_coordinates_to_file(coordinates, output_path);
 
-    double SpaceX = 5;   // borehole spacing in the x
-    double SpaceY = 5;   // borehole spacing in the y
+    // Get x,y coordinates for a U shape
+    shape = "U";
+    coordinates = gt::coordinates::configuration(shape, Nx, Ny, Bx, By);
+    output_path = shape + ".json";
+    gt::coordinates::export_coordinates_to_file(coordinates, output_path);
 
-    double DistanceX = (LeftX - 1) * SpaceX;  // total distance covered in the x
-    double DistanceY = (BottomY - 1) * SpaceY;  // total distance covered in the y
+    // Get x,y coordinates for a U shape
+    shape = "L";
+    coordinates = gt::coordinates::configuration(shape, Nx, Ny, Bx, By);
+    output_path = shape + ".json";
+    gt::coordinates::export_coordinates_to_file(coordinates, output_path);
 
-    gt::configurations::Uniform uni(BottomY=BottomY, LeftX=LeftX, TopY=TopY, RightX=RightX, SpaceX=SpaceX,
-                                    SpaceY=SpaceY, DistanceX=DistanceX, DistanceY=DistanceY);
-
-    std::vector<std::tuple<double, double>> coordinates = uni.generate_coordinates();
-
-    std::string output_path = "Coordinates.json";
-
-    uni.export_coordinates(coordinates, output_path);
+    // Read in custom configuration from (.json) file
+    shape = "custom";
+    std::string input_path = "U.json";
+    coordinates = gt::coordinates::configuration(shape,input_path);
+    output_path = shape + ".json";
+    gt::coordinates::export_coordinates_to_file(coordinates, output_path);
 
     return 0;
 }
