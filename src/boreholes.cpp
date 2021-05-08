@@ -62,6 +62,6 @@ namespace gt {
         return borefield;
     } // rectangular field function
 
-    } // boreholes name space
+    } // namespace boreholes
 
-} // gt name space
+} // namespace gt

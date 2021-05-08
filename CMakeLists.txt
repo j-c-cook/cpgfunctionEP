@@ -50,10 +50,12 @@ add_executable(test1 test/main.cpp)
 add_executable(test2 test/interpolation.cpp)
 add_executable(test3 test/configurations.cpp)
 add_executable(test4 test/borefield_definition.cpp)
+add_executable(test5 test/time_definition.cpp)
 target_link_libraries(test1 cpgfunction)
 target_link_libraries(test2 cpgfunction)
 target_link_libraries(test3 cpgfunction)
 target_link_libraries(test4 cpgfunction)
+target_link_libraries(test5 cpgfunction)
 
 
 # Turn on testing
@@ -64,3 +66,4 @@ add_test(NAME RunTest1 COMMAND "${CMAKE_BINARY_DIR}/test1")
 add_test(NAME RunTest2 COMMAND "${CMAKE_BINARY_DIR}/test2")
 add_test(NAME RunTest3 COMMAND "${CMAKE_BINARY_DIR}/test3")
 add_test(NAME RunTest4 COMMAND "${CMAKE_BINARY_DIR}/test4")
+add_test(NAME RunTest5 COMMAND "${CMAKE_BINARY_DIR}/test5")
