@@ -27,6 +27,22 @@ namespace gt {
             return t;
         };
 
+        std::vector<Borehole> boreField(const std::vector<std::tuple<double, double>> &coordinates, const double &r_b,
+                                        const double &H, const double &D){
+            std::vector<Borehole> bores(coordinates.size());
+
+            double x;
+            double y;
+
+            for (int i = 0; i < coordinates.size(); i++) {
+                x = std::get<0>(coordinates[i]);
+                y = std::get<1>(coordinates[i]);
+                bores[i] = Borehole(H, D, r_b, x, y);
+            }  // next i
+
+            return bores;
+        }  // boreField();
+
     // ------ Create Fields --------
     std::vector<Borehole> rectangle_field(int N_1, int N_2, double B_1, double B_2, double H, double D, double r_b) {
         int nbh = N_1 * N_2;

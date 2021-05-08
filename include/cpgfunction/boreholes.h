@@ -36,6 +36,9 @@ namespace gt {
 
         std::vector<Borehole> rectangle_field(int N_1, int N_2, double B_1, double B_2, double H, double D, double r_b);
 
+        std::vector<Borehole> boreField(const std::vector<std::tuple<double, double>> &coordinates, const double &r_b,
+                                        const double &H, const double &D);
+
     } // boreholes name space
 
 } // gt namespace
