@@ -16,34 +16,22 @@ jobs:
 
       - name: Install Apt Dependencies
         run: sudo apt-get install libboost-dev libblas-dev liblapack-dev
-        
-      - name: Create Build Directory
-        run: cmake -E make_directory ./build/
-        
-      - name: changeDirectory
+
+      - name: Configure CMake
+        working-directory: ./
         shell: bash
-        run: cd build
+        run: cmake -DCMAKE_BUILD_TYPE=Release .
+
+      - name: Build
+        working-directory: ./
+        shell: bash
+        run: cmake --build . -j 2
         
       - name: listFiles
         working-directory: ./
         shell: bash
         run: ls
 
-      - name: Configure CMake
-        working-directory: .
-        shell: bash
-        run: cmake -DCMAKE_BUILD_TYPE=Release ../
-
-      - name: Build
-        working-directory: .
-        shell: bash
-        run: cmake --build . -j 2
-        
-      - name: listFiles
-        working-directory: .
-        shell: bash
-        run: ls
-
       - name: Run Tests
-        working-directory: .
+        working-directory: ./
         run: ctest --verbose
