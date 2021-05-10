@@ -68,7 +68,7 @@ file(GLOB CustomLayout test/custom_configurations/*.json)
 
 file(COPY ${JsonValidation} DESTINATION ${CMAKE_BINARY_DIR})
 file(COPY ${CustomLayout} DESTINATION ${CMAKE_BINARY_DIR})
-message(STATUS ${CMAKE_BINARY_DIR})
+message(STATUS "The binary directory: ${CMAKE_BINARY_DIR}")
 
 # Turn on testing
 enable_testing()
