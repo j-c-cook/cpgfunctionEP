@@ -64,7 +64,10 @@ target_link_libraries(test6 cpgfunction)
 # target_compile_definitions(cpgfunction PUBLIC TEST_RESOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 # Copy validation files to build directory so tests can open
 file(GLOB JsonValidation test/validation/*.json)
+file(GLOB CustomLayout test/custom_configurations/*.json)
+
 file(COPY ${JsonValidation} DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY ${CustomLayout} DESTINATION ${CMAKE_BINARY_DIR})
 
 # Turn on testing
 enable_testing()

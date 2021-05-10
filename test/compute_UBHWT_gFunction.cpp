@@ -52,8 +52,8 @@ int main(){
 
     // -- Definitions --
     // Coordinate geometry
-    int Nx = 8;
-    int Ny = 8;
+    int Nx = 10;
+    int Ny = 10;
     double Bx = 6.;
     double By = 4.5;
 
@@ -72,15 +72,22 @@ int main(){
     std::vector<double> logtime = gt::utilities::Eskilson_original_points();
 
     // -- Configurations --
-    std::vector<std::string> shapes{"Rectangle", "OpenRectangle", "U", "L"};
+    std::vector<std::string> shapes{"Rectangle", "OpenRectangle", "U", "L", "custom"};
+    std::string custom_path = "Poisson_Disk_120_30.0_101.json";
 
     for (int i = 0; i < shapes.size(); i++) {
         // Field shape
         std::string shape = shapes[i];
+        std::vector<std::tuple<double, double>> coordinates;
         // Define a path
         std::string path = shape + ".json";
-        // Get x,y coordinates
-        std::vector<std::tuple<double, double>> coordinates = gt::coordinates::configuration(shape, Nx, Ny, Bx, By);
+        if (shape != "custom") {
+            // Get x,y coordinates
+            coordinates = gt::coordinates::configuration(shape, Nx, Ny, Bx, By);
+        } else {
+            coordinates = gt::coordinates::configuration(shape, custom_path);
+        }
+
         // Define borehole field
         std::vector<gt::boreholes::Borehole> boreField = gt::boreholes::boreField(coordinates, r_b, H, D);
         std::cout << "Compute g-function for borefield of shape: " + shape << std::endl;
@@ -88,7 +95,7 @@ int main(){
         // Compute uniform borehole wall temperature g-function
         vector<double> gFunction = gt::gfunction::uniform_borehole_wall_temperature(boreField, time, alpha,
                                                                                     12, true,
-                                                                                    false);
+                                                                                    true);
         auto end = std::chrono::steady_clock::now();
         auto milli = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
         double seconds = double(milli) / 1000;
@@ -119,6 +126,8 @@ int main(){
             std::cout.precision(5);
         }
     }
+
+    // A test for a custom configuration
 
     return 0;
 }
