@@ -6,13 +6,11 @@
 
 namespace gt {
     namespace utilities {
-        void time_geometric(std::vector<double>& time, float dt, double tmax, int Nt) {
-            // TODO: place this resizing into a "general" namespace
-            int len = time.size(); // check to see if there is enough space in the vector
-            // if need be, resize the vector to be the same size as the number of boreholes needed
-            if (len != Nt) {
-                time.resize(Nt);
-            } else ; // else do nothing
+        std::vector<double> time_geometric(double dt, double tmax, int Nt) {
+            if (Nt < 6) {
+                Nt = 6;
+            }
+            std::vector<double> time(Nt);  // create a time vector of size Nt
 
             double value;
             double tmax_calc = double(Nt) * double(dt);
@@ -34,7 +32,36 @@ namespace gt {
                     time[j] = value;
                 } // end for
             } // end if
-        } // void time_geometric
+            return time;
+        } // vector<double> time_geometric
+
+        std::vector<double> Eskilson_original_points() {
+            // Eskilsons original 27 time steps
+            std::vector<double> logtime = {-8.5, -7.8, -7.2, -6.5, -5.9, -5.2, -4.5, -3.963, -3.27, -2.864,-2.577,
+                                           -2.171, -1.884, -1.191, -0.497, -0.274, -0.051, 0.196, 0.419, 0.642, 0.873,
+                                           1.112, 1.335, 1.679, 2.028, 2.275, 3.003};
+            return logtime;
+
+        }
+
+        std::vector<double> time_Eskilson(const double &H, const double &alpha){
+            std::vector<double> logtime = Eskilson_original_points();
+            std::vector<double> time = convert_time(logtime, H, alpha);
+
+            return time;
+        }  // time_Eskilson();
+
+        std::vector<double> convert_time(std::vector<double> &logtime, const double &H, const double &alpha) {
+            int nt = logtime.size();
+            std::vector<double> time(nt);
+
+            double ts = pow(H, 2) / (9 * alpha);
+            for (int i=0; i<nt; i++) {
+                time[i] = exp(logtime[i]) * ts;
+            }
+
+            return time;
+        } // convert_time();
 
         void cook_spitler_time (std::vector<double> &logtime){
             int np = 31; // 31 total points

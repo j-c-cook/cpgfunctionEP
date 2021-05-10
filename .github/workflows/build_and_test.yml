@@ -1,3 +1,4 @@
+
 name: Build and Test
 
 on: [push]
@@ -29,7 +30,13 @@ jobs:
         working-directory: ./build
         shell: bash
         run: cmake --build . -j 2
+        
+      - name: listFiles
+        working-directory: ./build
+        shell: bash
+        run: ls
 
       - name: Run Tests
         working-directory: ./build
+        shell: bash
         run: ctest --verbose

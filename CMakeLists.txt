@@ -7,9 +7,18 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 # Everything will need to access this
 include_directories(include)
+include_directories(third_party)
 
 # Create a DLL with an API
-add_library(cpgfunction SHARED src/boreholes.cpp src/gfunction.cpp src/heat_transfer.cpp src/interpolation.cpp src/SegmentResponse.cpp src/utilities.cpp)
+add_library(cpgfunction SHARED src/boreholes.cpp
+        src/gfunction.cpp
+        src/heat_transfer.cpp
+        src/interpolation.cpp
+        src/SegmentResponse.cpp
+        src/utilities.cpp
+        third_party/nlohmann/json.hpp
+        src/coordinates.cpp
+        src/statistics.cpp)
 
 # It depends on boost
 set(Boost_USE_STATIC_LIBS OFF)
@@ -39,11 +48,36 @@ target_link_libraries(cpgfunction ${BLAS_LIBRARIES})
 
 # Create a test binary that depends on the DLL
 add_executable(test1 test/main.cpp)
-target_link_libraries(test1 cpgfunction)
+add_executable(test2 test/interpolation.cpp)
+# add_executable(test3 test/configurations.cpp)
+add_executable(test4 test/borefield_definition.cpp)
+add_executable(test5 test/time_definition.cpp)
+add_executable(test6 test/compute_UBHWT_gFunction.cpp)
 
+target_link_libraries(test1 cpgfunction)
+target_link_libraries(test2 cpgfunction)
+# target_link_libraries(test3 cpgfunction)
+target_link_libraries(test4 cpgfunction)
+target_link_libraries(test5 cpgfunction)
+target_link_libraries(test6 cpgfunction)
+
+# target_compile_definitions(cpgfunction PUBLIC TEST_RESOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
+# Copy validation files to build directory so tests can open
+file(GLOB JsonValidation test/validation/*.json)
+file(GLOB CustomLayout test/custom_configurations/*.json)
+
+file(COPY ${JsonValidation} DESTINATION ${CMAKE_BINARY_DIR})
+file(COPY ${CustomLayout} DESTINATION ${CMAKE_BINARY_DIR})
+message(STATUS "The binary directory: ${CMAKE_BINARY_DIR}")
 
 # Turn on testing
 enable_testing()
 
 # Test the test binary itself
 add_test(NAME RunTest1 COMMAND "${CMAKE_BINARY_DIR}/test1")
+add_test(NAME RunTest2 COMMAND "${CMAKE_BINARY_DIR}/test2")
+# add_test(NAME RunTest3 COMMAND "${CMAKE_BINARY_DIR}/test3")
+add_test(NAME RunTest4 COMMAND "${CMAKE_BINARY_DIR}/test4")
+add_test(NAME RunTest5 COMMAND "${CMAKE_BINARY_DIR}/test5")
+# Pass variable path into test 6 for json files
+add_test(NAME RunTest6 COMMAND ${CMAKE_BINARY_DIR}/test6)
