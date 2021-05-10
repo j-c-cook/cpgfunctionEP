@@ -73,7 +73,7 @@ int main(){
 
     // -- Configurations --
     std::vector<std::string> shapes{"Rectangle", "OpenRectangle", "U", "L", "custom"};
-    std::string custom_path = "Poisson_Disk_120_30.0_101.json";
+    std::string custom_path = "Poisson_Disk_120_30_101.json";
 
     for (int i = 0; i < shapes.size(); i++) {
         // Field shape
