@@ -23,6 +23,11 @@ jobs:
       - name: changeDirectory
         shell: bash
         run: cd build
+        
+      - name: listFiles
+        working-directory: ./
+        shell: bash
+        run: ls
 
       - name: Configure CMake
         working-directory: .
