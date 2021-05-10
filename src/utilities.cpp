@@ -35,11 +35,17 @@ namespace gt {
             return time;
         } // vector<double> time_geometric
 
-        std::vector<double> time_Eskilson(const double &H, const double &alpha){
+        std::vector<double> Eskilson_original_points() {
             // Eskilsons original 27 time steps
             std::vector<double> logtime = {-8.5, -7.8, -7.2, -6.5, -5.9, -5.2, -4.5, -3.963, -3.27, -2.864,-2.577,
                                            -2.171, -1.884, -1.191, -0.497, -0.274, -0.051, 0.196, 0.419, 0.642, 0.873,
                                            1.112, 1.335, 1.679, 2.028, 2.275, 3.003};
+            return logtime;
+
+        }
+
+        std::vector<double> time_Eskilson(const double &H, const double &alpha){
+            std::vector<double> logtime = Eskilson_original_points();
             std::vector<double> time = convert_time(logtime, H, alpha);
 
             return time;

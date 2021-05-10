@@ -43,7 +43,7 @@ int main() {
     // Read in custom configuration from (.json) file
     shape = "custom";
     std::string input_path = "U.json";
-    coordinates = gt::coordinates::configuration(shape,input_path);
+    coordinates = gt::coordinates::configuration(shape, input_path);
     output_path = shape + ".json";
     gt::coordinates::export_coordinates_to_file(coordinates, output_path);
 

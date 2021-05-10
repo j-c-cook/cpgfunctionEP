@@ -9,9 +9,9 @@
 
 #include <iostream>
 #include <vector>
-#include "boreholes.h"
-#include "heat_transfer.h"
-#include "SegmentResponse.h"
+#include <cpgfunction/boreholes.h>
+#include <cpgfunction/heat_transfer.h>
+#include <cpgfunction/SegmentResponse.h>
 
 using namespace std;
 
@@ -35,6 +35,11 @@ namespace gt { namespace gfunction {
          */
         void uniform_temperature(vector<double>& gfunction, vector<gt::boreholes::Borehole> boreholes,
                 vector<double>& time, double alpha, int nSegments=12, bool use_similarities=true ,bool disp=false);
+
+        vector<double> uniform_borehole_wall_temperature(vector<gt::boreholes::Borehole> &boreField,
+                                                         vector<double> &time, double alpha, int nSegments=12,
+                                                         bool use_similarities=true, bool display=false);
+
         void _borehole_segments(vector<gt::boreholes::Borehole>& boreSegments,
                                 vector<gt::boreholes::Borehole>& boreholes, int nSegments);
         void load_history_reconstruction(vector<vector<double>>& q_reconstructed, vector<double>& time, vector<double>& _time,
