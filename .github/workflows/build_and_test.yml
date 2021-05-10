@@ -32,4 +32,4 @@ jobs:
 
       - name: Run Tests
         working-directory: ./build
-        run: ctest
+        run: ctest --verbose
