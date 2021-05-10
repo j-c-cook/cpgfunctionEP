@@ -20,7 +20,8 @@ namespace gt {
                     != acceptable_arguments.end());
 
             if (!acceptable) {
-                throw std::invalid_argument("The shape described is not an available input.");
+                throw std::invalid_argument("The shape described (" + shape + ") is not an available input for "
+                                                                              "gt::coordinates::configuration().");
             }
 
             std::vector<std::tuple<double, double>> coordinates;
@@ -46,7 +47,8 @@ namespace gt {
                                != acceptable_arguments.end());
 
             if (!acceptable) {
-                throw std::invalid_argument("The shape described is not an available input.");
+                throw std::invalid_argument("The shape described (" + shape + ") is not an available input for "
+                                                                              "gt::coordinates::configuration().");
             }
 
             std::vector<std::tuple<double, double>> custom = import_coordinates_from_file(input_path);
