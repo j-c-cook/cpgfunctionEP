@@ -16,6 +16,13 @@ jobs:
 
       - name: Install Apt Dependencies
         run: sudo apt-get install libboost-dev libblas-dev liblapack-dev
+        
+      - name: Create Build Directory
+        run: cmake -E make_directory ./build/
+        
+      - name: changeDirectory
+        shell: bash
+        run: cd build
 
       - name: Configure CMake
         working-directory: .
