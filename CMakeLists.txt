@@ -43,6 +43,7 @@ target_link_libraries(cpgfunction ${CMAKE_THREAD_LIBS_INIT})
 find_package(LAPACK)
 target_link_libraries(cpgfunction ${LAPACK_LIBRARIES})
 
+# OpenBLAS is specified because the default (Netlib BLAS) is much slower for LU decomposition (dgesv_)
 set(BLA_VENDOR OpenBLAS)
 find_package(BLAS)
 if (BLAS_FOUND)
