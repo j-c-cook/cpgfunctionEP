@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.6)
 project(CpGFunction)
 
 set(CMAKE_CXX_STANDARD 11)
@@ -27,7 +27,7 @@ set(Boost_USE_STATIC_RUNTIME OFF)
 # If the boost installation already on your computer is garbage or if you don't have one, uncomment this and
 # manually set the path to BOOST_ROOT (https://stackoverflow.com/a/58447515/11637415)
 # set(BOOST_ROOT /path/to/boost)
-find_package(Boost)
+find_package(Boost 1.71.0)  # needs a minimum of 1.74.0 for Gaussian Quadrature integration of FLS
 message(STATUS "Boost_FOUND=${Boost_FOUND}")
 if(Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIRS})
@@ -43,8 +43,14 @@ target_link_libraries(cpgfunction ${CMAKE_THREAD_LIBS_INIT})
 find_package(LAPACK)
 target_link_libraries(cpgfunction ${LAPACK_LIBRARIES})
 
+set(BLA_VENDOR OpenBLAS)
 find_package(BLAS)
-target_link_libraries(cpgfunction ${BLAS_LIBRARIES})
+if (BLAS_FOUND)
+    target_link_libraries(cpgfunction ${BLAS_LIBRARIES})
+else()
+    # ERROR
+endif()
+
 
 # Create a test binary that depends on the DLL
 add_executable(test1 test/main.cpp)
