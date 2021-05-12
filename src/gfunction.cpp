@@ -20,7 +20,7 @@ namespace gt { namespace gfunction {
     // Cimmino and Bernier (2015) and a later paper on speed improvements by Cimmino (2018)
     vector<double> uniform_borehole_wall_temperature(vector<gt::boreholes::Borehole> &boreField,
                                                      vector<double> &time, double alpha, int nSegments,
-                                                     bool use_similarities, bool display){
+                                                     bool use_similarities, bool multithread, bool display){
         vector<double> gFunction(time.size());
 
         if (display) {
