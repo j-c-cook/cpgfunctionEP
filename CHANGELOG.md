@@ -2,6 +2,12 @@
 
 ## Current Version
 
+## New features
+
+* [Issue 12](https://github.com/j-c-cook/cpgfunction/issues/12) -
+  A boolean toggle option is added for multi-threading for computing the 
+  uniform borehole wall temperature (UBHWT) g-function
+
 ## Version 1.0.0 (2021-05-12)
 
 ### New features

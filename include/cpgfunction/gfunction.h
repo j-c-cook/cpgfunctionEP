@@ -45,7 +45,7 @@ namespace gt { namespace gfunction {
                                      gt::heat_transfer::SegmentResponse &SegRes,
                                      vector<double> &time, vector<gt::boreholes::Borehole> &boreSegments,
                                      vector<vector<vector<double> > >& h_ij,
-                std::vector<std::vector<double>>& q_reconstructed, int p);
+                std::vector<std::vector<double>>& q_reconstructed, int p, bool multithread);
         void _solve_eqn(vector<double>& x, vector<vector<double>>& A, vector<double>& b);
 
 } } // namespace gt::gfunction

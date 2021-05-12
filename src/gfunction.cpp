@@ -101,8 +101,12 @@ namespace gt { namespace gfunction {
                 Hb[b] = boreSegments[b].H;
             } // next b
         }; // auto _segmentlengths
-        boost::asio::post(pool, [nSources, &boreSegments, &Hb, &_segmentlengths]{ _segmentlengths(nSources); });
-//        _segmentlengths(nSources);
+        if (multithread) {
+            boost::asio::post(pool, [nSources, &boreSegments, &Hb, &_segmentlengths]{ _segmentlengths(nSources); });
+        } else {
+            _segmentlengths(nSources);
+        }  // if (multithread);
+
         end = std::chrono::steady_clock::now();
         milli = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
         segment_length_time += milli;
@@ -127,8 +131,11 @@ namespace gt { namespace gfunction {
                 } // fi
             } // next i
         }; // auto _fill_time
-        boost::asio::post(pool, [&_fill_time, &time, &_time]{ _fill_time() ;});
-//        _fill_time();
+        if (multithread) {
+            boost::asio::post(pool, [&_fill_time, &time, &_time]{ _fill_time() ;});
+        } else {
+            _fill_time();
+        }  // if (multithread);
 
         end = std::chrono::steady_clock::now();
         milli = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
@@ -265,9 +272,12 @@ namespace gt { namespace gfunction {
             boost::asio::thread_pool pool3(processor_count);
             // A needs filled each loop because the _gsl partial pivot decomposition modifies the matrix
             for (int i=0; i<SIZE; i++) {
-                boost::asio::post(pool3, [&_fillA, i, p, SIZE]{ _fillA(i, p, SIZE) ;});
-//                _fillA(i, p, SIZE);
-            }
+                if (multithread) {
+                    boost::asio::post(pool3, [&_fillA, i, p, SIZE]{ _fillA(i, p, SIZE) ;});
+                } else {
+                    _fillA(i, p, SIZE);
+                }  // if (multithread);
+            }  // next i
             pool3.join();
 
             end = std::chrono::steady_clock::now();  // _fill_A
@@ -287,7 +297,7 @@ namespace gt { namespace gfunction {
                                     SegRes,
                                     time,
                                     boreSegments,
-                                    h_ij, q_reconstructed, p);
+                                    h_ij, q_reconstructed, p, multithread);
             // fill b with -Tb
             b_[SIZE-1] = Hb_sum;
             for (int i=0; i<Tb_0.size(); i++) {
@@ -462,7 +472,8 @@ namespace gt { namespace gfunction {
                                  gt::heat_transfer::SegmentResponse &SegRes,
                                  vector<double> &time, vector<gt::boreholes::Borehole> &boreSegments,
                                  vector<vector<vector<double> > >& h_ij,
-                                 std::vector<std::vector<double>>& q_reconstructed, const int p)
+                                 std::vector<std::vector<double>>& q_reconstructed, const int p,
+                                 bool multithread)
             {
         const auto processor_count = thread::hardware_concurrency();
         // Launch the pool with n threads.
@@ -499,11 +510,13 @@ namespace gt { namespace gfunction {
             }
         };
         for (int i=0; i<nSources; i++) {
-            boost::asio::post(pool, [&_borehole_wall_temp, i, nSources, nt]
-            { _borehole_wall_temp(i, nSources, nt); });
-//            _borehole_wall_temp(i, nSources, nt);
-        }
-
+            if (multithread) {
+                boost::asio::post(pool, [&_borehole_wall_temp, i, nSources, nt]
+                { _borehole_wall_temp(i, nSources, nt); });
+            } else {
+                _borehole_wall_temp(i, nSources, nt);
+            }  // if (multithread);
+        }  // next i
         pool.join();
     }  // _temporal_superposition
 
