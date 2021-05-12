@@ -81,11 +81,10 @@ namespace jcc { namespace interpolation {
                 counter++;
                 h1 = h2;
                 SegRes.get_h_value(h2, i, j, counter+1);
-            }
+            }  // else()
 
-        }
-        int a = 1;
-    }
+        }  // next k
+    }  // interp1d();
 
 } } // jcc::interpolation
 
