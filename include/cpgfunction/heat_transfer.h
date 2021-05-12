@@ -28,13 +28,13 @@ namespace gt { namespace heat_transfer {
         h_ij(nSum, vector<double>(nt, 0)), nSum(nSum)
         {} // constructor
 
-        int storage_mode = 0;
+        // storage_mode = 1 is the reduced segment response vector
+        int storage_mode = 1;
 
 //        void ReSizeContainers(int n, int nt);
         void get_h_value(double &h, int i, int j, int k);
         void get_index_value(int &index, int i, int j);
-
-    };
+    };  // struct SegmentResponse();
 
     double finite_line_source(double time_, double alpha, gt::boreholes::Borehole& b1, gt::boreholes::Borehole& b2,
             bool reaSource=true, bool imgSource=true);

@@ -99,18 +99,11 @@ namespace gt { namespace heat_transfer {
             //---
             // Adaptive hashing scheme if statement
             // Determine the Segment Response storing mode here
-            SegRes.storage_mode = 1;  // TODO: fix this later on, for now it will be 1
             int Ntot = sum_to_n(nSources);
 
-            // lambda function for calulating h at each time step
+            // lambda function for calculating h at each time step
             auto _calculate_h = [&boreSegments, &splitRealAndImage, &time, &alpha, &nt, &h_ij, &SegRes, &Ntot](boreholes::SimilaritiesType &SimReal,
                     int s, bool reaSource, bool imgSource) {
-//                auto check_key = [&h_map](Key &sim_key) {
-//                    // Key is not present
-//                    if (h_map.find(sim_key) == h_map.end())
-//                        return false;
-//                    return true;
-//                }; // check_key
                 // begin function
                 int n1;
                 int n2;
@@ -121,48 +114,17 @@ namespace gt { namespace heat_transfer {
                 n2 = get<1>(SimReal.Sim[s][0]);
                 b1 = boreSegments[n1];
                 b2 = boreSegments[n2];
-                double tol = 1e-03;
-                if (b1.H - 10 < tol && b2.H-10>tol || b1.H-10>tol && b2.H-10<tol) {
-                    int a = 1;
-                }
                 vector<double> hPos(nt);
                 if (splitRealAndImage) {
                     for (int k=0; k<nt; k++) {
                         hPos[k] = finite_line_source(time[k], alpha, b1, b2, reaSource, imgSource);
-                        if (k==5) {
-                            double _hPos = finite_line_source(time[k], alpha, b1, b2, true, false);
-                            double _hNeg = finite_line_source(time[k], alpha, b1, b2, false, true);
-                            int a = 1;
-                        }
-                    }
-                    // -----------
-                    // adaptive hash
-                    // TODO: combine with create_map
+                    }  // next k
                     int i;
                     int j;
                     if (SegRes.storage_mode==0) {
                         // not looping through every (i, j), real and image stored separately
-                        ;
-////                        i = get<0>(SimReal.Sim[s][0]);
-////                        j = get<1>(SimReal.Sim[s][0]);
-//                        for (int t=0; t<time.size(); t++){
-//                            if (n1==0 && n2 == 6 || n2 == 6 && n1 == 0) {
-//                                int a = 1;
-//                            }
-//                            if (n1 > n2) {
-//                                // we want to store n2, n1
-//                                h_map[make_tuple(n2, n1, t)] += hPos[t]; // non-critical race condition
-////                                h_ij_Key _h_map_key_calc(time[t], n2, n1, t, boreSegments, hash_mode, reaSource);
-////                                Key hij_map_key(_h_map_key_calc);
-////                                h_map[hij_map_key] += hPos[t]; // non-critical race condition
-//                            } else {
-//                                h_map[make_tuple(n1, n2, t)] += b2.H / b1.H * hPos[t]; // non-critical race condition
-////                                h_ij_Key _h_map_key_calc(time[t], n1, n2, t, boreSegments, hash_mode, reaSource);
-////                                Key hij_map_key(_h_map_key_calc);
-////                                h_map[hij_map_key] += b2.H / b1.H * hPos[t]; // non-critical race condition
-//                            }
-//
-//                        }
+                        // TODO: make the option to store entire matrix
+                        throw std::invalid_argument("This storage mode does not currently exist.");
                     } else if (SegRes.storage_mode==1) {
                         // will loop through every (i, j), will combine real+image
                         int index;
@@ -178,30 +140,10 @@ namespace gt { namespace heat_transfer {
                                 } else {
                                     SegRes.get_index_value(index, j, i);
                                     SegRes.h_ij[index][t] += hPos[t]; // non-critical race condition
-                                }
-                            }
-                        }
-                    }
-                    // TODO: end combine with create_map
-
-//                    for (int k=0; k<SimReal.Sim[s].size(); k++) {
-//                        i = get<0>(SimReal.Sim[s][k]);
-//                        j = get<1>(SimReal.Sim[s][k]);
-//                        for (int t=0; t<nt; t++) {
-//                            // assign thermal response factors to similar segment pairs
-//                            if (reaSource && not imgSource) {
-//                                // real code
-//                                h_ij[j][i][t+1] = hPos[t];
-//                                h_ij[i][j][t+1] = hPos[t] * b2.H / b1.H;
-//                            } else if (not reaSource && imgSource) {
-//                                // image code
-//                                h_ij[j][i][t+1] = hPos[t] + h_ij[j][i][t+1];
-//                                h_ij[i][j][t+1] = b2.H / b1.H * h_ij[j][i][t+1];
-//                            }
-//                        }
-//                        int a = 1;
-//                    } // next k
-
+                                }  // else ()
+                            }  // next t
+                        }  // next k
+                    }  // else if(SegRes.storage_mode==1)
                 } else {
                     throw std::invalid_argument( "Not yet written yet.");
                 }
@@ -387,19 +329,12 @@ namespace gt { namespace heat_transfer {
                 break;
             default:
                 throw invalid_argument("The case selected is not currently implemented.");
-
-        }
-        int a = 1;
-
-    }
+        }  // switch();
+    }  // SegmentResponse::get_h_value();
 
     void SegmentResponse::get_index_value(int &index, const int i, const int j) {
-//        int n = nSources;
-//        int index = i * (2*n - i - 1) / 2 + j;
         index = i * (2*nSources - i - 1) / 2 + j;
-//        int index = (n * (n - 1) / 2) - (n - i) * ((n - i) - 1) / 2 + j;
-//        return index;
-    }
+    }  // SegmentResponse::get_index_value();
 
 
 } } // namespace gt::heat_transfer
