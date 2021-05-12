@@ -14,7 +14,6 @@ add_library(cpgfunction SHARED src/boreholes.cpp
         src/gfunction.cpp
         src/heat_transfer.cpp
         src/interpolation.cpp
-        src/SegmentResponse.cpp
         src/utilities.cpp
         third_party/nlohmann/json.hpp
         src/coordinates.cpp
