@@ -4,6 +4,8 @@
 #include <cmath>
 #include <cpgfunction/utilities.h>
 #include <cpgfunction/gfunction.h>
+#include <cpgfunction/coordinates.h>
+
 
 int main() {
     // ---------------------------------------------------------
@@ -37,17 +39,19 @@ int main() {
     // Field of 2x3 (n=6) boreholes
     int n1 = 2;
     int n2 = 2;
-    std::vector<gt::boreholes::Borehole> borefield = gt::boreholes::rectangle_field(n1, n2, B, B,H, D, r_b);
-    borefield[1].x +=2;
-    borefield[2].x -=1;
-    borefield[2].y -=1;
-    borefield[3].y -=1;
+    // Coordinates
+    std::vector<std::tuple<double, double>> coordinates = gt::coordinates::rectangle(n1, n2, B, B);
+    // Move boreholes slightly off of symmetric
+    std::get<0>(coordinates[1]) += 2;  // move position 1 borehole x
+    std::get<0>(coordinates[2]) -= 1;  // move position 2 borehole x
+    std::get<1>(coordinates[2]) -= 1;  // move position 2 borehole y
+    std::get<1>(coordinates[3]) -= 1;  // move position 3 borehole y
+    // Create borehole field
+    std::vector<gt::boreholes::Borehole> boreField = gt::boreholes::boreField(coordinates, r_b, H, D);
 
-    std::vector<double> gfunction(Nt);
+    std::vector<double> gFunction = gt::gfunction::uniform_borehole_wall_temperature(boreField, time, alpha, nSegments,true, true);
 
-    gt::gfunction::uniform_temperature(gfunction, borefield, time, alpha, nSegments,true, true);
-
-    for (double i : gfunction) {
+    for (double i : gFunction) {
         std::cout << i << std::endl;
     }
 

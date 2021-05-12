@@ -54,7 +54,7 @@ endif()
 
 
 # Create a test binary that depends on the DLL
-add_executable(test1 test/main.cpp)
+add_executable(test1 test/gFunction_minimal.cpp)
 add_executable(test2 test/interpolation.cpp)
 # add_executable(test3 test/configurations.cpp)
 add_executable(test4 test/borefield_definition.cpp)
