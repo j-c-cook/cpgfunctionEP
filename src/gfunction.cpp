@@ -9,7 +9,6 @@
 #include <cpgfunction/interpolation.h>
 #include <thread>
 #include <boost/asio.hpp>
-#include <cpgfunction/SegmentResponse.h>
 
 
 extern "C" void dgesv_( int *n, int *nrhs, double  *a, int *lda, int *ipiv, double *b, int *lbd, int *info  );

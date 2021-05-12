@@ -11,7 +11,6 @@
 #include <vector>
 #include <cpgfunction/boreholes.h>
 #include <cpgfunction/heat_transfer.h>
-#include <cpgfunction/SegmentResponse.h>
 
 using namespace std;
 

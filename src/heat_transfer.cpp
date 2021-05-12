@@ -6,7 +6,6 @@
 #include <stdexcept>
 #include <thread>
 #include <boost/asio.hpp>
-#include <cpgfunction/SegmentResponse.h>
 #include <cpgfunction/boreholes.h>
 
 using namespace boost::math::quadrature;

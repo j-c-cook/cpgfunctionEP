@@ -7,11 +7,9 @@
 
 #include <iostream>
 #include <vector>
-//#include "gfunction.h"
 #include <cpgfunction/boreholes.h>
 #include <boost/math/quadrature/gauss_kronrod.hpp>
 #include <boost/asio.hpp>
-#include <cpgfunction/SegmentResponse.h>
 
 using namespace std;
 
