@@ -34,7 +34,8 @@ namespace gt { namespace gfunction {
          */
         vector<double> uniform_borehole_wall_temperature(vector<gt::boreholes::Borehole> &boreField,
                                                          vector<double> &time, double alpha, int nSegments=12,
-                                                         bool use_similarities=true, bool display=false);
+                                                         bool use_similarities=true, bool multithread=true,
+                                                         bool display=false);
 
         void _borehole_segments(vector<gt::boreholes::Borehole>& boreSegments,
                                 vector<gt::boreholes::Borehole>& boreholes, int nSegments);
@@ -44,7 +45,7 @@ namespace gt { namespace gfunction {
                                      gt::heat_transfer::SegmentResponse &SegRes,
                                      vector<double> &time, vector<gt::boreholes::Borehole> &boreSegments,
                                      vector<vector<vector<double> > >& h_ij,
-                std::vector<std::vector<double>>& q_reconstructed, int p);
+                std::vector<std::vector<double>>& q_reconstructed, int p, bool multithread);
         void _solve_eqn(vector<double>& x, vector<vector<double>>& A, vector<double>& b);
 
 } } // namespace gt::gfunction
