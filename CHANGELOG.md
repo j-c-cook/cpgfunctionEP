@@ -1,5 +1,7 @@
 # History of changes 
 
+## Current Version
+
 ## Version 1.0.0 (2021-05-12)
 
 ### New features

@@ -4,7 +4,6 @@
 
 #include <cpgfunction/interpolation.h>
 #include <csignal>
-#include <cpgfunction/SegmentResponse.h>
 
 using namespace std;
 
@@ -54,38 +53,6 @@ namespace jcc { namespace interpolation {
             } // fi
         } // next j
     } // interp1d
-
-    void interp1d(double &xp, double &yp, vector<double> &x,
-                  unordered_map<gt::heat_transfer::nKey, double, gt::heat_transfer::KeyHasher> &h_map,
-                   vector<gt::boreholes::Borehole> &boreSegments,
-                  const int i, const int j, const int hash_mode) {
-        if (xp < 0 || xp > x[x.size()-1]) {
-            throw invalid_argument("Need to add extrapolation");
-        }
-        if (0 < xp && xp < x[0]) {
-            double h;
-            gt::heat_transfer::hash_table_lookup(h, h_map, x, boreSegments, i, j, 0, hash_mode);
-            yp = linterp(xp, 0, 0, x[0], h);
-            return;
-        }
-        int counter=0;
-        double h1;
-        gt::heat_transfer::hash_table_lookup(h1, h_map, x, boreSegments, i, j, 0, hash_mode);
-        double h2;
-        gt::heat_transfer::hash_table_lookup(h2, h_map, x, boreSegments, i, j, 1, hash_mode);
-        for (int k=counter; k<x.size()-1; k++) {
-            if (xp>=x[k] && xp <=x[k+1]) {
-                yp = linterp(xp, x[k], h1, x[k+1], h2);
-                return;
-            } else {
-                counter++;
-                h1 = h2;
-                gt::heat_transfer::hash_table_lookup(h2, h_map, x, boreSegments, i, j, counter+1, hash_mode);
-            }
-
-        }
-        int a = 1;
-    }
 
     void interp1d(double &xp, double &yp, vector<double> &time,
                   gt::heat_transfer::SegmentResponse &SegRes, int &i, int &j, int &k) {

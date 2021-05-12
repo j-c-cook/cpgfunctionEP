@@ -14,7 +14,6 @@ add_library(cpgfunction SHARED src/boreholes.cpp
         src/gfunction.cpp
         src/heat_transfer.cpp
         src/interpolation.cpp
-        src/SegmentResponse.cpp
         src/utilities.cpp
         third_party/nlohmann/json.hpp
         src/coordinates.cpp
@@ -54,7 +53,7 @@ endif()
 
 
 # Create a test binary that depends on the DLL
-add_executable(test1 test/main.cpp)
+add_executable(test1 test/gFunction_minimal.cpp)
 add_executable(test2 test/interpolation.cpp)
 # add_executable(test3 test/configurations.cpp)
 add_executable(test4 test/borefield_definition.cpp)

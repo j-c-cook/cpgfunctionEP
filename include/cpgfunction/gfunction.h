@@ -11,7 +11,6 @@
 #include <vector>
 #include <cpgfunction/boreholes.h>
 #include <cpgfunction/heat_transfer.h>
-#include <cpgfunction/SegmentResponse.h>
 
 using namespace std;
 
@@ -33,9 +32,6 @@ namespace gt { namespace gfunction {
          * @param use_similarities
          * @param disp
          */
-        void uniform_temperature(vector<double>& gfunction, vector<gt::boreholes::Borehole> boreholes,
-                vector<double>& time, double alpha, int nSegments=12, bool use_similarities=true ,bool disp=false);
-
         vector<double> uniform_borehole_wall_temperature(vector<gt::boreholes::Borehole> &boreField,
                                                          vector<double> &time, double alpha, int nSegments=12,
                                                          bool use_similarities=true, bool display=false);
