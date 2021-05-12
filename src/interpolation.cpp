@@ -4,7 +4,6 @@
 
 #include <cpgfunction/interpolation.h>
 #include <csignal>
-#include <cpgfunction/SegmentResponse.h>
 
 using namespace std;
 
