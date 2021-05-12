@@ -43,25 +43,6 @@ namespace gt {
             return bores;
         }  // boreField();
 
-    // ------ Create Fields --------
-    std::vector<Borehole> rectangle_field(int N_1, int N_2, double B_1, double B_2, double H, double D, double r_b) {
-        int nbh = N_1 * N_2;
-        std::vector<Borehole> borefield(nbh);
-
-        double pos_x;
-        double pos_y;
-        int point_nb = 0;
-        for( int j = 0; j < N_2; j++ ) {
-            for (int i = 0; i < N_1; i++) {
-                pos_x = double(i) * B_1;
-                pos_y = double(j) * B_2;
-                borefield[point_nb] = Borehole(H, D, r_b, pos_x, pos_y);
-                point_nb++;
-            } // end i
-        } // end j
-        return borefield;
-    } // rectangular field function
-
     } // namespace boreholes
 
 } // namespace gt
