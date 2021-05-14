@@ -4,6 +4,10 @@
 
 ## New features
 
+* [Issue 28](https://github.com/j-c-cook/cpgfunction/issues/28) -
+  The third party library LinearAlgebra (`jcc:la`) is included and made use of for `LU`
+  factorization in `gfunction.cpp`
+
 * [Issue 12](https://github.com/j-c-cook/cpgfunction/issues/12) -
   A boolean toggle option is added for multi-threading for computing the 
   uniform borehole wall temperature (UBHWT) g-function
