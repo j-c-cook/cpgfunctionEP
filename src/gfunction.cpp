@@ -11,6 +11,10 @@
 #include <boost/asio.hpp>
 
 #include <LinearAlgebra/gesv.h>
+#include <LinearAlgebra/axpy.h>
+#include <LinearAlgebra/scal.h>
+#include <LinearAlgebra/gemv.h>
+#include <LinearAlgebra/dot.h>
 
 using namespace std;  // lots of vectors, only namespace to be used
 
@@ -484,39 +488,55 @@ namespace gt { namespace gfunction {
         // Number of time steps
         int nt = p + 1;
 
-        auto _borehole_wall_temp = [&q_reconstructed, &Tb_0, &time, &SegRes, &boreSegments, &h_ij]
-                (const int i, const int nSources, const int nt){
-            for (int j =0; j<nSources; j++) {
-                for (int k=0; k<nt; k++) {
-                    double h1;
-                    double h2;
-                    if (k==0) {
-                        SegRes.get_h_value(h1, i, j, k);
-                        Tb_0[i] += h1 * q_reconstructed[j][nt-k-1] ;
-//                        hash_table_lookup(h1, h_map, time, boreSegments, i, j, k, hash_mode);
-                        Tb_0[i] += h1 * q_reconstructed[j][nt-k-1] ;
-//                        Tb_0[i] += h_ij[i][j][k+1] * q_reconstructed[j][nt-k-1] ;
-                    } else if (k>0) {
-                        SegRes.get_h_value(h1, i, j, k);
-                        SegRes.get_h_value(h2, i, j, k-1);
-//                        hash_table_lookup(h1, h_map, time, boreSegments, i, j, k, hash_mode);
-//                        hash_table_lookup(h2, h_map, time, boreSegments, i, j, k-1, hash_mode);
-                        Tb_0[i] += (h1-h2) * q_reconstructed[j][nt-k-1] ;
-//                        Tb_0[i] += (h_ij[i][j][k+1]- h_ij[i][j][k]) * q_reconstructed[j][nt-k-1] ;
-                    }
+        int nq_squared = nSources * nSources;
+        std::vector<double> H1(nSources*nSources, 0);
+        std::vector<double> H2(nSources*nSources, 0);
+        std::vector<double> y(nSources);
 
-                }
+        for (int k = 0; k < nt; k++) {
+            int idx;
+            double _h1;
+            double _h2;
+            for (int i = 0; i < nSources; i++) {
+                for (int j = 0; j < nSources; j++) {
+                    idx = (i * nSources) + j;
+                    if (k==0) {
+                        SegRes.get_h_value(_h1, i, j, k);
+                        H1[idx] = _h1;
+                    } else {
+                        SegRes.get_h_value(_h1, i, j, k);
+                        SegRes.get_h_value(_h2, i, j, k-1);
+                        H1[idx] = _h1;
+                        H2[idx] = _h2;
+                    }  // if (k==0)
+                }  // next j
+            }  // next i
+            // H2 = -1 * H1 + H2
+            double a = -1;
+            int inc = 1;
+            jcc::la::axpy(nq_squared, a, H1, inc, H2, inc);
+            // H2 = -1 * H2
+            jcc::la::scal(nq_squared, a, H2, inc);
+
+            std::vector<double> q(nSources, 0);
+            for (int l = 0; l < nSources; l++) {
+                q[l] = q_reconstructed[l][nt-k-1];
             }
-        };
-        for (int i=0; i<nSources; i++) {
-            if (multithread) {
-                boost::asio::post(pool, [&_borehole_wall_temp, i, nSources, nt]
-                { _borehole_wall_temp(i, nSources, nt); });
-            } else {
-                _borehole_wall_temp(i, nSources, nt);
-            }  // if (multithread);
-        }  // next i
-        pool.join();
+
+            // Tb_0
+            char trans = 'T';
+            double alpha = 1.;
+            double beta = 0;
+            jcc::la::gemv(trans, nSources, nSources, alpha, H2, nSources, q, inc, beta, y, inc);
+            // ...
+            for (int l=0; l<y.size(); l++){
+                Tb_0[l] += y[l];
+            }
+
+            // H1 -> H2
+        }  // next k
+
+//        pool.join();
     }  // _temporal_superposition
 
 } } // namespace gt::gfunction
