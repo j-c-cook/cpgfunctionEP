@@ -10,8 +10,7 @@
 #include <thread>
 #include <boost/asio.hpp>
 
-
-extern "C" void dgesv_( int *n, int *nrhs, double  *a, int *lda, int *ipiv, double *b, int *lbd, int *info  );
+#include <LinearAlgebra/gesv.h>
 
 using namespace std;  // lots of vectors, only namespace to be used
 
@@ -322,7 +321,7 @@ namespace gt { namespace gfunction {
 
             // ----- LU decomposition -----
             start = std::chrono::steady_clock::now();
-            dgesv_( &n, &nrhs, &*A_.begin(), &lda, &*_ipiv.begin(), &*b_.begin(), &ldb, &info );
+            jcc::la::gesv(n, nrhs, A_, lda, _ipiv, b_, ldb, info);
 
             for (int i=0; i<SIZE; i++) {
                 x[i] = b_[i];
