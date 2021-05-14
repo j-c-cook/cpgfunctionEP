@@ -2,7 +2,7 @@
 // Created by jackcook on 5/14/21.
 //
 
-extern "C" double ddot_(int *n, double *a, int *incx, double *b, int * incy);
+#include <LinearAlgebra/dot.h>
 
 #include <iostream>
 #include <vector>
@@ -16,7 +16,7 @@ int main() {
     int incy = 1;
     double result;
 
-    result = ddot_(&n, &*x.begin(), &incx, &*y.begin(), &incy);
+    result = jcc::la::dot(n, x, y, incx, incy);
 
     std::cout.precision(32);
     std::cout << result << std::endl;

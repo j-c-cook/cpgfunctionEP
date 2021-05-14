@@ -10,8 +10,8 @@ using namespace std;
 #ifndef LINEARALGEBRA_GEMV_H
 #define LINEARALGEBRA_GEMV_H
 
-namespace la {
-    namespace _gemv {
+namespace jcc {
+    namespace la {
 
         extern "C" void dgemv_(char *Trans, int *m, int *n, double *alpha, double *A, int * lda,
                                double *x, int * incx, double *beta, double *y, int *incy);
@@ -19,7 +19,7 @@ namespace la {
         void gemv(char &trans, int &m, int &n, double &alpha, vector<double> &A, int &lda, vector<double> &x,
                   int &incx, double &beta, vector<double> &y, int &incy);
 
-    }  // namespace _gemv
-}  // namespace la
+    }  // namespace la
+}  // namespace jcc
 
 #endif //LINEARALGEBRA_GEMV_H

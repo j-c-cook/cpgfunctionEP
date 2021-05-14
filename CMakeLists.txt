@@ -7,7 +7,8 @@ include_directories(include)
 add_library(LinearAlgebra SHARED
         src/gesv.cpp
         src/dot.cpp
-        src/gemv.cpp)
+        src/gemv.cpp
+        src/axpy.cpp)
 
 # Depends on LAPACK and BLAS
 find_package(LAPACK)
@@ -26,10 +27,12 @@ endif()
 add_executable(test1 test/gesv.cpp)
 add_executable(test2 test/dot.cpp)
 add_executable(test3 test/gemv.cpp)
+add_executable(test4 test/axpy.cpp)
 
 target_link_libraries(test1 LinearAlgebra)
 target_link_libraries(test2 LinearAlgebra)
 target_link_libraries(test3 LinearAlgebra)
+target_link_libraries(test4 LinearAlgebra)
 
 # Turn on testing
 enable_testing()
@@ -38,3 +41,4 @@ enable_testing()
 add_test(NAME RunTest1 COMMAND ${CMAKE_BINARY_DIR}/test1)
 add_test(NAME RunTest2 COMMAND ${CMAKE_BINARY_DIR}/test2)
 add_test(NAME RunTest3 COMMAND ${CMAKE_BINARY_DIR}/test3)
+add_test(NAME RunTest4 COMMAND ${CMAKE_BINARY_DIR}/test4)

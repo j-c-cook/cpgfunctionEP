@@ -2,9 +2,6 @@
 // Created by jackcook on 5/14/21.
 //
 
-//extern "C" void dgemv_(char *Trans, int *m, int *n, double *alpha, double *A, int * lda,
-//                       double *x, int * incx, double *beta, double *y, int *incy);
-
 #include <LinearAlgebra/gemv.h>
 #include <iostream>
 #include <vector>
@@ -29,7 +26,7 @@ int main() {
     std::vector<double> y(n, 0);  // y is a vector of size n full of zeros
     int incy = 1;
 
-    la::_gemv::gemv(trans, m, n, alpha, A, lda, x, incx, beta, y, incy);
+    jcc::la::gemv(trans, m, n, alpha, A, lda, x, incx, beta, y, incy);
 
     for (int i = 0; i < y.size(); i++) {
         std::cout << y[i] << std::endl;
