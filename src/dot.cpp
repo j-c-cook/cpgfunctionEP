@@ -10,7 +10,7 @@
 namespace jcc {
     namespace la {
 
-        double dot(int &n, std::vector<double> &x, std::vector<double> &y, int incx=1, int incy=1) {
+        double dot(int &n, std::vector<double> &x, int &incx, std::vector<double> &y, int &incy) {
             double result = ddot_(&n, &*x.begin(), &incx, &*y.begin(), &incy);
             return result;
         }

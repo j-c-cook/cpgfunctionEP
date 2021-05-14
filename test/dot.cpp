@@ -16,7 +16,7 @@ int main() {
     int incy = 1;
     double result;
 
-    result = jcc::la::dot(n, x, y, incx, incy);
+    result = jcc::la::dot(n, x, incx, y, incy);
 
     std::cout.precision(32);
     std::cout << result << std::endl;

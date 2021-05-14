@@ -12,7 +12,7 @@ namespace jcc {
     namespace la {
 
         extern "C" double ddot_(int *n, double *x, int *incx, double *y, int * incy);
-        double dot(int &n, std::vector<double> &x, std::vector<double> &y, int incx, int incy);
+        double dot(int &n, std::vector<double> &x, int &incx, std::vector<double> &y, int &incy);
 
     }  // namespace la
 }  // namespace jcc
