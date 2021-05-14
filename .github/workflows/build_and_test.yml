@@ -15,6 +15,11 @@ jobs:
         with:
           python-version: 3.7
 
+      - name: Init Submodules
+        working-directory: ./
+        shell: bash
+        run: git submodule init && git submodule update
+
       - name: Install Apt Dependencies
         run: sudo apt-get install libboost-dev libblas-dev liblapack-dev
 
