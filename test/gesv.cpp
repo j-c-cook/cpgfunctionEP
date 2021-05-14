@@ -2,7 +2,7 @@
 // Created by jackcook on 5/14/21.
 //
 
-#include <LinearAlgebra/_gesv.h>
+#include <LinearAlgebra/gesv.h>
 
 extern void print_matrix( std::string desc, int m, int n, double* a, int lda );
 

@@ -2,7 +2,7 @@
 // Created by jackcook on 5/14/21.
 //
 
-#include <LinearAlgebra/_gesv.h>
+#include <LinearAlgebra/gesv.h>
 
 namespace la {
     namespace _gesv {
