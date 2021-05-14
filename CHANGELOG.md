@@ -4,6 +4,8 @@
 
 ### New features
 
+- [Issue 6](https://github.com/j-c-cook/LinearAlgebra/issues/6) - Add scalar ability `x = a*x` 
+
 - [Issue 5](https://github.com/j-c-cook/LinearAlgebra/issues/5) - Adds LAPACK's copy function for 
   `std::vector`'s
 

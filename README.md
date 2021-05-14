@@ -8,3 +8,4 @@ Linear algebra in C++ using BLAS and LAPACK libraries
 - [gemv](test/gemv.cpp) - Performs matrix multiplication of a matrix by a vector `y = alpha*A*x + beta*y`
 - [axpy](test/axpy.cpp) - Vector product `y = a*x + y`
 - [copy](test/copy.cpp) - Copy vector `x` into vector `y`
+- [scal](test/scal.cpp) - Scale vector `x` by `a`, `x = a * x`
