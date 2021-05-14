@@ -4,8 +4,10 @@ project(LinearAlgebra)
 include_directories(include)
 
 # Create a DLL with an API
-add_library(LinearAlgebra SHARED src/gesv.cpp
-        src/dot.cpp)
+add_library(LinearAlgebra SHARED
+        src/gesv.cpp
+        src/dot.cpp
+        src/gemv.cpp)
 
 # Depends on LAPACK and BLAS
 find_package(LAPACK)
@@ -23,9 +25,11 @@ endif()
 # Create a test binary that depends on the DLL
 add_executable(test1 test/gesv.cpp)
 add_executable(test2 test/dot.cpp)
+add_executable(test3 test/gemv.cpp)
 
 target_link_libraries(test1 LinearAlgebra)
 target_link_libraries(test2 LinearAlgebra)
+target_link_libraries(test3 LinearAlgebra)
 
 # Turn on testing
 enable_testing()
@@ -33,3 +37,4 @@ enable_testing()
 # Test the binary itself
 add_test(NAME RunTest1 COMMAND ${CMAKE_BINARY_DIR}/test1)
 add_test(NAME RunTest2 COMMAND ${CMAKE_BINARY_DIR}/test2)
+add_test(NAME RunTest3 COMMAND ${CMAKE_BINARY_DIR}/test3)
