@@ -4,6 +4,9 @@
 
 ### New features
 
+- [Issue 7](https://github.com/j-c-cook/LinearAlgebra/issues/7) - Matrix vector multiplication
+  using upper triangular symmetric matrix (`spmv`) 
+
 - [Issue 6](https://github.com/j-c-cook/LinearAlgebra/issues/6) - Add scalar ability `x = a*x` 
 
 - [Issue 5](https://github.com/j-c-cook/LinearAlgebra/issues/5) - Adds LAPACK's copy function for 

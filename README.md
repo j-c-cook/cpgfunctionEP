@@ -9,3 +9,4 @@ Linear algebra in C++ using BLAS and LAPACK libraries
 - [axpy](test/axpy.cpp) - Vector product `y = a*x + y`
 - [copy](test/copy.cpp) - Copy vector `x` into vector `y`
 - [scal](test/scal.cpp) - Scale vector `x` by `a`, `x = a * x`
+- [spmv](test/spmv.cpp) - Matrix vector mutiplication when `A` is a packed symmetric matrix, `y = alpha*A*x + beta*y` 
