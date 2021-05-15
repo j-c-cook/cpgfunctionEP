@@ -15,6 +15,7 @@
 #include <LinearAlgebra/scal.h>
 #include <LinearAlgebra/gemv.h>
 #include <LinearAlgebra/copy.h>
+#include <LinearAlgebra/spmv.h>
 
 #include <omp.h>
 
@@ -488,58 +489,53 @@ namespace gt { namespace gfunction {
         // Number of time steps
         int nt = p + 1;
 
-        int nq_squared = nSources * nSources;
-        std::vector<double> H1(nSources*nSources, 0);
-        std::vector<double> H2(nSources*nSources, 0);
+        int gauss_sum = nSources * (nSources + 1) / 2;
+        std::vector<double> H1(gauss_sum, 0);
+        std::vector<double> H2(gauss_sum, 0);
         std::vector<double> y(nSources);
 
-        auto _fill_segment_matrices = [&H1, &H2, &nSources, &SegRes](const int i, const int k){
-            int idx;
-            double _h1;
-            double _h2;
-            for (int j = 0; j < nSources; j++) {
-                idx = (i * nSources) + j;
-                if (k==0) {
-                    SegRes.get_h_value(_h1, i, j, k);
-                    H1[idx] = _h1;
-                } else {
-                    SegRes.get_h_value(_h1, i, j, k);
-                    SegRes.get_h_value(_h2, i, j, k-1);
-                    H1[idx] = _h1;
-                    H2[idx] = _h2;
-                }  // if (k==0)
-            }  // next j
-        };
+        std::vector<double> q(nSources, 0);
 
         for (int k = 0; k < nt; k++) {
             // Launch the pool with n threads.
-            boost::asio::thread_pool pool(processor_count);
-            for (int i = 0; i < nSources; i++) {
-                boost::asio::post(pool, [&_fill_segment_matrices, i, k]{_fill_segment_matrices(i, k);});
+//            boost::asio::thread_pool pool(processor_count);
+            for (int i = 0; i < gauss_sum; i++) {
+                if (k==0){
+                    H1[i] = SegRes.h_ij[i][k];
+                } else {
+                    H1[i] = SegRes.h_ij[i][k];
+                    H2[i] = SegRes.h_ij[i][k-1];
+                }
+
             }  // next i
-            pool.join();
+//            pool.join();
 
             // H2 = -1 * H1 + H2
             double a = -1;
             int inc = 1;
-            jcc::la::axpy(nq_squared, a, H1, inc, H2, inc);
+            jcc::la::axpy(gauss_sum, a, H1, inc, H2, inc);
             // H2 = -1 * H2
-            jcc::la::scal(nq_squared, a, H2, inc);
+            jcc::la::scal(gauss_sum, a, H2, inc);
 
-            std::vector<double> q(nSources, 0);
             for (int l = 0; l < nSources; l++) {
                 q[l] = q_reconstructed[l][nt-k-1];
             }
+
+            char uplo = 'l';
 
             // Tb_0
             char trans = 'T';
             double alpha = 1.;
             double beta = 0;
-            jcc::la::gemv(trans, nSources, nSources, alpha, H2, nSources, q, inc, beta, y, inc);
+//            jcc::la::gemv(trans, nSources, nSources, alpha, H2, nSources, q, inc, beta, y, inc);
+
+            jcc::la::spmv(uplo, nSources, alpha, H2, q, inc, beta, y, inc);
+
             // ...
-            for (int l=0; l<y.size(); l++){
-                Tb_0[l] += y[l];
-            }
+            jcc::la::axpy(nSources, alpha, y, inc, Tb_0, inc);
+//            for (int l=0; l<y.size(); l++){
+//                Tb_0[l] += y[l];
+//            }
 
             // H1 -> H2  (DOESNT work)
 //            jcc::la::copy(nSources, H1, inc, H2, inc);

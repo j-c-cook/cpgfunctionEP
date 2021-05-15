@@ -25,7 +25,8 @@ add_library(cpgfunction SHARED src/boreholes.cpp
         third_party/LinearAlgebra/src/gesv.cpp
         third_party/LinearAlgebra/src/gemv.cpp
         third_party/LinearAlgebra/src/scal.cpp
-        third_party/LinearAlgebra/src/dot.cpp)
+        third_party/LinearAlgebra/src/dot.cpp
+        third_party/LinearAlgebra/src/spmv.cpp)
 
 # It depends on boost
 set(Boost_USE_STATIC_LIBS OFF)
