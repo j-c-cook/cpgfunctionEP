@@ -17,6 +17,9 @@
 #include <LinearAlgebra/copy.h>
 #include <LinearAlgebra/spmv.h>
 
+extern "C" void dcopy_(int *n, double *x, int *incx, double *y, int *incy);
+extern "C" void daxpy_(int *n, double *a, double *x, int *incx, double *y, int *incy);
+
 #include <omp.h>
 
 using namespace std;  // lots of vectors, only namespace to be used
@@ -216,6 +219,17 @@ namespace gt { namespace gfunction {
         // create interpolation object for accumulated heat extraction
         std::vector<std::vector<double>> q_reconstructed (nSources, std::vector<double> (nt));
 
+        // TODO: Correct the storage of the segment response matrix
+        int gauss_sum = nSources * (nSources + 1) / 2;
+        std::vector<double> H_ij(gauss_sum * nt, 0);  // 1D nSources x nt
+        int idx;
+        for (int i=0; i<nt; i++) {
+            for (int j=0; j<gauss_sum; j++) {
+                idx = (i * gauss_sum) + j;
+                H_ij[idx] = SegRes.h_ij[j][i];
+            }  // next j
+        }  // next i
+
         for (int p=0; p<nt; p++) {
             if (p==1) {
                 int a = 1;
@@ -303,7 +317,7 @@ namespace gt { namespace gfunction {
                                     SegRes,
                                     time,
                                     boreSegments,
-                                    h_ij, q_reconstructed, p, multithread);
+                                    H_ij, q_reconstructed, p, multithread);
             // fill b with -Tb
             b_[SIZE-1] = Hb_sum;
             for (int i=0; i<Tb_0.size(); i++) {
@@ -477,7 +491,7 @@ namespace gt { namespace gfunction {
     void _temporal_superposition(vector<double>& Tb_0,
                                  gt::heat_transfer::SegmentResponse &SegRes,
                                  vector<double> &time, vector<gt::boreholes::Borehole> &boreSegments,
-                                 vector<vector<vector<double> > >& h_ij,
+                                 vector<double> &h_ij,
                                  std::vector<std::vector<double>>& q_reconstructed, const int p,
                                  bool multithread)
             {
@@ -490,32 +504,48 @@ namespace gt { namespace gfunction {
         int nt = p + 1;
 
         int gauss_sum = nSources * (nSources + 1) / 2;
+        int gauss_sum_m1 = gauss_sum - 1;
         std::vector<double> H1(gauss_sum, 0);
         std::vector<double> H2(gauss_sum, 0);
         std::vector<double> y(nSources);
 
+        std::vector<double> dh_ij(gauss_sum, 0);
+        int begin_1;
+        int begin_2;
+
         std::vector<double> q(nSources, 0);
+        int inc = 1;
+
+        double alpha = 1;
+        double alpha_n = -1;
+
+        int total = h_ij.size();
 
         for (int k = 0; k < nt; k++) {
             // Launch the pool with n threads.
 //            boost::asio::thread_pool pool(processor_count);
-            for (int i = 0; i < gauss_sum; i++) {
-                if (k==0){
-                    H1[i] = SegRes.h_ij[i][k];
-                } else {
-                    H1[i] = SegRes.h_ij[i][k];
-                    H2[i] = SegRes.h_ij[i][k-1];
-                }
-
-            }  // next i
+            if (k==0){
+                // dh_ij = h(k)
+                begin_1 = k * gauss_sum;
+                dcopy_(&gauss_sum, &h_ij.at(begin_1), &inc, &*dh_ij.begin(), &inc);
+            } else {
+                begin_1 = k * gauss_sum;
+                begin_2 = (k-1) * gauss_sum;
+                // h_1 -> dh_ij
+                dcopy_(&gauss_sum, &h_ij.at(begin_1), &inc, &*dh_ij.begin(), &inc);
+                // dh_ij = -1 * h(k) + h(k-1)
+                daxpy_(&gauss_sum, &alpha_n, &h_ij.at(begin_2), &inc, &*dh_ij.begin(), &inc);
+                // dh_ij = -1 * dh_ij
+//                jcc::la::scal(gauss_sum, alpha_n, dh_ij, inc);
+            }
 //            pool.join();
 
             // H2 = -1 * H1 + H2
-            double a = -1;
-            int inc = 1;
-            jcc::la::axpy(gauss_sum, a, H1, inc, H2, inc);
+//            double a = -1;
+//            int inc = 1;
+//            jcc::la::axpy(gauss_sum, a, H1, inc, H2, inc);
             // H2 = -1 * H2
-            jcc::la::scal(gauss_sum, a, H2, inc);
+//            jcc::la::scal(gauss_sum, a, H2, inc);
 
             for (int l = 0; l < nSources; l++) {
                 q[l] = q_reconstructed[l][nt-k-1];
@@ -529,9 +559,10 @@ namespace gt { namespace gfunction {
             double beta = 0;
 //            jcc::la::gemv(trans, nSources, nSources, alpha, H2, nSources, q, inc, beta, y, inc);
 
-            jcc::la::spmv(uplo, nSources, alpha, H2, q, inc, beta, y, inc);
+            // y = 1 * dh_ij * q + 0 * y
+            jcc::la::spmv(uplo, nSources, alpha, dh_ij, q, inc, beta, y, inc);
 
-            // ...
+            // Tb_0 = 1 * y + Tb_0
             jcc::la::axpy(nSources, alpha, y, inc, Tb_0, inc);
 //            for (int l=0; l<y.size(); l++){
 //                Tb_0[l] += y[l];
