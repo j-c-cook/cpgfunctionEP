@@ -14,7 +14,9 @@
 #include <LinearAlgebra/axpy.h>
 #include <LinearAlgebra/scal.h>
 #include <LinearAlgebra/gemv.h>
-#include <LinearAlgebra/dot.h>
+#include <LinearAlgebra/copy.h>
+
+#include <omp.h>
 
 using namespace std;  // lots of vectors, only namespace to be used
 
@@ -479,8 +481,6 @@ namespace gt { namespace gfunction {
                                  bool multithread)
             {
         const auto processor_count = thread::hardware_concurrency();
-        // Launch the pool with n threads.
-        boost::asio::thread_pool pool(processor_count);
 
         std::fill(Tb_0.begin(), Tb_0.end(), 0);
         // Number of heat sources
@@ -493,24 +493,32 @@ namespace gt { namespace gfunction {
         std::vector<double> H2(nSources*nSources, 0);
         std::vector<double> y(nSources);
 
-        for (int k = 0; k < nt; k++) {
+        auto _fill_segment_matrices = [&H1, &H2, &nSources, &SegRes](const int i, const int k){
             int idx;
             double _h1;
             double _h2;
+            for (int j = 0; j < nSources; j++) {
+                idx = (i * nSources) + j;
+                if (k==0) {
+                    SegRes.get_h_value(_h1, i, j, k);
+                    H1[idx] = _h1;
+                } else {
+                    SegRes.get_h_value(_h1, i, j, k);
+                    SegRes.get_h_value(_h2, i, j, k-1);
+                    H1[idx] = _h1;
+                    H2[idx] = _h2;
+                }  // if (k==0)
+            }  // next j
+        };
+
+        for (int k = 0; k < nt; k++) {
+            // Launch the pool with n threads.
+            boost::asio::thread_pool pool(processor_count);
             for (int i = 0; i < nSources; i++) {
-                for (int j = 0; j < nSources; j++) {
-                    idx = (i * nSources) + j;
-                    if (k==0) {
-                        SegRes.get_h_value(_h1, i, j, k);
-                        H1[idx] = _h1;
-                    } else {
-                        SegRes.get_h_value(_h1, i, j, k);
-                        SegRes.get_h_value(_h2, i, j, k-1);
-                        H1[idx] = _h1;
-                        H2[idx] = _h2;
-                    }  // if (k==0)
-                }  // next j
+                boost::asio::post(pool, [&_fill_segment_matrices, i, k]{_fill_segment_matrices(i, k);});
             }  // next i
+            pool.join();
+
             // H2 = -1 * H1 + H2
             double a = -1;
             int inc = 1;
@@ -533,10 +541,10 @@ namespace gt { namespace gfunction {
                 Tb_0[l] += y[l];
             }
 
-            // H1 -> H2
+            // H1 -> H2  (DOESNT work)
+//            jcc::la::copy(nSources, H1, inc, H2, inc);
         }  // next k
 
-//        pool.join();
     }  // _temporal_superposition
 
 } } // namespace gt::gfunction
