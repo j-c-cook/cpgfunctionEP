@@ -309,19 +309,10 @@ namespace gt { namespace gfunction {
 
             // ----- load history reconstruction -------
             start = std::chrono::steady_clock::now();
-            // TODO: the last function making use of q_reconsructed[][] is here (issue 32)
-            load_history_reconstruction(q_reconstructed,time, _time, Q, dt, p);
+            load_history_reconstruction(q_r,time, _time, Q, dt, p);
             end = std::chrono::steady_clock::now();
             milli = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
             load_history_reconstruction_time += milli;
-
-            // TODO: make q_reconstructed 1D (issue 32)
-            for (int l=0; l<nt; l++) {
-                for (int k=0; k<nSources; k++) {
-                    idx = (l * nSources) + k;
-                    q_r[idx] = q_reconstructed[k][l];
-                }  // next k
-            }  // next l
 
             // ----- temporal superposition
             start = std::chrono::steady_clock::now();
@@ -433,7 +424,7 @@ namespace gt { namespace gfunction {
         } // end for
     } // void _borehole_segments
 
-    void load_history_reconstruction(std::vector<std::vector<double>>& q_reconstructed,
+    void load_history_reconstruction(std::vector<double>& q_reconstructed,
             vector<double>& time, vector<double>& _time, vector<vector<double> >& Q,
             vector<double>& dt, const int p) {
         // for s in range p+1
@@ -477,7 +468,7 @@ namespace gt { namespace gfunction {
             _Q_dot_dt(i);  // could be threaded here, if timings ever prove necessary
         } // next i
 
-        auto _interpolate = [&Q_dt, &q_reconstructed, &t, &t_reconstructed, &dt_reconstructed, &p](const int i) {
+        auto _interpolate = [&Q_dt, &q_reconstructed, &t, &t_reconstructed, &dt_reconstructed, &p, &nSources](const int i) {
             int n = t.size();
             std::vector<double> y(n);
             for (int j=0; j<n; j++) {
@@ -487,13 +478,14 @@ namespace gt { namespace gfunction {
             std::vector<double> yp(n2);
             jcc::interpolation::interp1d(t_reconstructed, yp, t, y);
 
-
+            int idx;
             for (int j=0; j<p; j++) {
                 double c = yp[j];
                 double d = yp[j+1];
                 double e = dt_reconstructed[j];
 //                q_reconstructed[i][j] = (s(t_reconstructed[j+1]) - s(t_reconstructed[j])) / dt_reconstructed[j];
-                q_reconstructed[i][j] = (d - c) / e;
+                idx = (j * nSources) + i;
+                q_reconstructed[idx] = (d - c) / e;
             }
         }; // _interpolate
         for (int i=0; i<nSources; i++) {
