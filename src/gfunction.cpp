@@ -19,6 +19,8 @@
 
 extern "C" void dcopy_(int *n, double *x, int *incx, double *y, int *incy);
 extern "C" void daxpy_(int *n, double *a, double *x, int *incx, double *y, int *incy);
+extern "C" void dspmv_(char *uplo, int *n, double *alpha, double *A,
+                       double *x, int *incx, double *beta, double *y, int *incy);
 
 #include <omp.h>
 
@@ -218,6 +220,7 @@ namespace gt { namespace gfunction {
         // Restructured load history
         // create interpolation object for accumulated heat extraction
         std::vector<std::vector<double>> q_reconstructed (nSources, std::vector<double> (nt));
+        std::vector<double> q_r(nSources * nt, 0);
 
         // TODO: Correct the storage of the segment response matrix
         int gauss_sum = nSources * (nSources + 1) / 2;
@@ -306,18 +309,28 @@ namespace gt { namespace gfunction {
 
             // ----- load history reconstruction -------
             start = std::chrono::steady_clock::now();
+            // TODO: the last function making use of q_reconsructed[][] is here (issue 32)
             load_history_reconstruction(q_reconstructed,time, _time, Q, dt, p);
             end = std::chrono::steady_clock::now();
             milli = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
             load_history_reconstruction_time += milli;
 
+            // TODO: make q_reconstructed 1D (issue 32)
+            for (int l=0; l<nt; l++) {
+                for (int k=0; k<nSources; k++) {
+                    idx = (l * nSources) + k;
+                    q_r[idx] = q_reconstructed[k][l];
+                }  // next k
+            }  // next l
+
             // ----- temporal superposition
             start = std::chrono::steady_clock::now();
             _temporal_superposition(Tb_0,
                                     SegRes,
-                                    time,
-                                    boreSegments,
-                                    H_ij, q_reconstructed, p, multithread);
+                                    H_ij,
+                                    q_r,
+                                    p,
+                                    nSources);
             // fill b with -Tb
             b_[SIZE-1] = Hb_sum;
             for (int i=0; i<Tb_0.size(); i++) {
@@ -488,42 +501,27 @@ namespace gt { namespace gfunction {
         }
     } // load_history_reconstruction
 
-    void _temporal_superposition(vector<double>& Tb_0,
-                                 gt::heat_transfer::SegmentResponse &SegRes,
-                                 vector<double> &time, vector<gt::boreholes::Borehole> &boreSegments,
-                                 vector<double> &h_ij,
-                                 std::vector<std::vector<double>>& q_reconstructed, const int p,
-                                 bool multithread)
+    void _temporal_superposition(vector<double>& Tb_0, gt::heat_transfer::SegmentResponse &SegRes,
+                                 vector<double> &h_ij, vector<double> &q_reconstructed,
+                                 const int p, int &nSources)
             {
-        const auto processor_count = thread::hardware_concurrency();
-
+        // This function performs equation (37) of Cimmino (2017)
         std::fill(Tb_0.begin(), Tb_0.end(), 0);
-        // Number of heat sources
-        int nSources = q_reconstructed.size();
         // Number of time steps
         int nt = p + 1;
 
-        int gauss_sum = nSources * (nSources + 1) / 2;
-        int gauss_sum_m1 = gauss_sum - 1;
-        std::vector<double> H1(gauss_sum, 0);
-        std::vector<double> H2(gauss_sum, 0);
-        std::vector<double> y(nSources);
-
+        int gauss_sum = nSources * (nSources + 1) / 2;  // Number of positions in packed symmetric matrix
+        // Storage of h_ij differences
         std::vector<double> dh_ij(gauss_sum, 0);
-        int begin_1;
+        int begin_1;  // integer declarations for where the linear algebra will begin
         int begin_2;
-
-        std::vector<double> q(nSources, 0);
-        int inc = 1;
+        int begin_q;  // time for q_reconstructed to begin
+        int inc = 1;  // the vectors are of increment 1, they can be completely unwrapped in BLAS
 
         double alpha = 1;
         double alpha_n = -1;
 
-        int total = h_ij.size();
-
         for (int k = 0; k < nt; k++) {
-            // Launch the pool with n threads.
-//            boost::asio::thread_pool pool(processor_count);
             if (k==0){
                 // dh_ij = h(k)
                 begin_1 = k * gauss_sum;
@@ -535,43 +533,14 @@ namespace gt { namespace gfunction {
                 dcopy_(&gauss_sum, &h_ij.at(begin_1), &inc, &*dh_ij.begin(), &inc);
                 // dh_ij = -1 * h(k) + h(k-1)
                 daxpy_(&gauss_sum, &alpha_n, &h_ij.at(begin_2), &inc, &*dh_ij.begin(), &inc);
-                // dh_ij = -1 * dh_ij
-//                jcc::la::scal(gauss_sum, alpha_n, dh_ij, inc);
             }
-//            pool.join();
-
-            // H2 = -1 * H1 + H2
-//            double a = -1;
-//            int inc = 1;
-//            jcc::la::axpy(gauss_sum, a, H1, inc, H2, inc);
-            // H2 = -1 * H2
-//            jcc::la::scal(gauss_sum, a, H2, inc);
-
-            for (int l = 0; l < nSources; l++) {
-                q[l] = q_reconstructed[l][nt-k-1];
-            }
-
+            // q_reconstructed(t_k - t_k')
+            begin_q = (nt - k - 1) * nSources;
+            // dh_ij is a lower triangular packed matrix
             char uplo = 'l';
-
-            // Tb_0
-            char trans = 'T';
-            double alpha = 1.;
-            double beta = 0;
-//            jcc::la::gemv(trans, nSources, nSources, alpha, H2, nSources, q, inc, beta, y, inc);
-
-            // y = 1 * dh_ij * q + 0 * y
-            jcc::la::spmv(uplo, nSources, alpha, dh_ij, q, inc, beta, y, inc);
-
-            // Tb_0 = 1 * y + Tb_0
-            jcc::la::axpy(nSources, alpha, y, inc, Tb_0, inc);
-//            for (int l=0; l<y.size(); l++){
-//                Tb_0[l] += y[l];
-//            }
-
-            // H1 -> H2  (DOESNT work)
-//            jcc::la::copy(nSources, H1, inc, H2, inc);
+            // Tb_0 = 1 * dh_ij * q(t_k-t_k') + 1 * Tb_0
+            dspmv_(&uplo, &nSources, &alpha, &*dh_ij.begin(), &q_reconstructed.at(begin_q), &inc,
+                   &alpha, &*Tb_0.begin(), &inc);
         }  // next k
-
-    }  // _temporal_superposition
-
+    }  // _temporal_superposition();
 } } // namespace gt::gfunction
