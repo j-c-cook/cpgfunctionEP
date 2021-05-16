@@ -2,7 +2,28 @@
 
 ## Current Version
 
+## Enhancements
+
+* [Issue 25](https://github.com/j-c-cook/cpgfunction/issues/25) - Removes all references to the 3D `h_ij`
+  segment response matrix. See [PR 30](https://github.com/j-c-cook/cpgfunction/pull/30).
+
+* [Issue 32](https://github.com/j-c-cook/cpgfunction/issues/32) - The multi-dimensional matrices, 
+  `q_reconstructed` and `h_ij`, are made one dimensional prior to passage into the temporal superposition
+  function so that `BLAS` routines can be heavily depended on and the loops completely unraveled.  
+  See [PR 30](https://github.com/j-c-cook/cpgfunction/pull/30).
+
+* [Issue 33](https://github.com/j-c-cook/cpgfunction/issues/33) - It is found that the 
+  packed segment resopnse matrix can be directly made us of in `BLAS spmv`, and that addition
+  greatly optimizes the temporal superposition function. For now the assumption is made that all
+  segments in the field are of equivalent length, which is true and fine, but at some point in the
+  future unequal segment lengths should be made possible again. 
+  See [PR 30](https://github.com/j-c-cook/cpgfunction/pull/30).
+
 ## New features
+
+* [Issue 28](https://github.com/j-c-cook/cpgfunction/issues/28) -
+  The third party library LinearAlgebra (`jcc:la`) is included and made use of for `LU`
+  factorization in `gfunction.cpp`
 
 * [Issue 12](https://github.com/j-c-cook/cpgfunction/issues/12) -
   A boolean toggle option is added for multi-threading for computing the 

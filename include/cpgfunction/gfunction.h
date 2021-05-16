@@ -39,13 +39,11 @@ namespace gt { namespace gfunction {
 
         void _borehole_segments(vector<gt::boreholes::Borehole>& boreSegments,
                                 vector<gt::boreholes::Borehole>& boreholes, int nSegments);
-        void load_history_reconstruction(vector<vector<double>>& q_reconstructed, vector<double>& time, vector<double>& _time,
-                vector<vector<double> >& Q, vector<double>& dt, const int p);
-        void _temporal_superposition(vector<double>& Tb_0,
-                                     gt::heat_transfer::SegmentResponse &SegRes,
-                                     vector<double> &time, vector<gt::boreholes::Borehole> &boreSegments,
-                                     vector<vector<vector<double> > >& h_ij,
-                std::vector<std::vector<double>>& q_reconstructed, int p, bool multithread);
+        void load_history_reconstruction(vector<double>& q_reconstructed, vector<double>& time,
+                                         vector<double>& _time, vector<vector<double> >& Q,
+                                         vector<double>& dt, const int p);
+        void _temporal_superposition(vector<double>& Tb_0, gt::heat_transfer::SegmentResponse &SegRes,
+                                     vector<double> &h_ij, vector<double> &q_reconstructed, int p, int &nSources);
         void _solve_eqn(vector<double>& x, vector<vector<double>>& A, vector<double>& b);
 
 } } // namespace gt::gfunction

@@ -11,6 +11,18 @@
 #include <boost/asio.hpp>
 
 #include <LinearAlgebra/gesv.h>
+#include <LinearAlgebra/axpy.h>
+#include <LinearAlgebra/scal.h>
+#include <LinearAlgebra/gemv.h>
+#include <LinearAlgebra/copy.h>
+#include <LinearAlgebra/spmv.h>
+
+extern "C" void dcopy_(int *n, double *x, int *incx, double *y, int *incy);
+extern "C" void daxpy_(int *n, double *a, double *x, int *incx, double *y, int *incy);
+extern "C" void dspmv_(char *uplo, int *n, double *alpha, double *A,
+                       double *x, int *incx, double *beta, double *y, int *incy);
+
+#include <omp.h>
 
 using namespace std;  // lots of vectors, only namespace to be used
 
@@ -208,6 +220,18 @@ namespace gt { namespace gfunction {
         // Restructured load history
         // create interpolation object for accumulated heat extraction
         std::vector<std::vector<double>> q_reconstructed (nSources, std::vector<double> (nt));
+        std::vector<double> q_r(nSources * nt, 0);
+
+        // TODO: Correct the storage of the segment response matrix
+        int gauss_sum = nSources * (nSources + 1) / 2;
+        std::vector<double> H_ij(gauss_sum * nt, 0);  // 1D nSources x nt
+        int idx;
+        for (int i=0; i<nt; i++) {
+            for (int j=0; j<gauss_sum; j++) {
+                idx = (i * gauss_sum) + j;
+                H_ij[idx] = SegRes.h_ij[j][i];
+            }  // next j
+        }  // next i
 
         for (int p=0; p<nt; p++) {
             if (p==1) {
@@ -285,7 +309,7 @@ namespace gt { namespace gfunction {
 
             // ----- load history reconstruction -------
             start = std::chrono::steady_clock::now();
-            load_history_reconstruction(q_reconstructed,time, _time, Q, dt, p);
+            load_history_reconstruction(q_r,time, _time, Q, dt, p);
             end = std::chrono::steady_clock::now();
             milli = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
             load_history_reconstruction_time += milli;
@@ -294,9 +318,10 @@ namespace gt { namespace gfunction {
             start = std::chrono::steady_clock::now();
             _temporal_superposition(Tb_0,
                                     SegRes,
-                                    time,
-                                    boreSegments,
-                                    h_ij, q_reconstructed, p, multithread);
+                                    H_ij,
+                                    q_r,
+                                    p,
+                                    nSources);
             // fill b with -Tb
             b_[SIZE-1] = Hb_sum;
             for (int i=0; i<Tb_0.size(); i++) {
@@ -399,7 +424,7 @@ namespace gt { namespace gfunction {
         } // end for
     } // void _borehole_segments
 
-    void load_history_reconstruction(std::vector<std::vector<double>>& q_reconstructed,
+    void load_history_reconstruction(std::vector<double>& q_reconstructed,
             vector<double>& time, vector<double>& _time, vector<vector<double> >& Q,
             vector<double>& dt, const int p) {
         // for s in range p+1
@@ -443,7 +468,7 @@ namespace gt { namespace gfunction {
             _Q_dot_dt(i);  // could be threaded here, if timings ever prove necessary
         } // next i
 
-        auto _interpolate = [&Q_dt, &q_reconstructed, &t, &t_reconstructed, &dt_reconstructed, &p](const int i) {
+        auto _interpolate = [&Q_dt, &q_reconstructed, &t, &t_reconstructed, &dt_reconstructed, &p, &nSources](const int i) {
             int n = t.size();
             std::vector<double> y(n);
             for (int j=0; j<n; j++) {
@@ -453,13 +478,14 @@ namespace gt { namespace gfunction {
             std::vector<double> yp(n2);
             jcc::interpolation::interp1d(t_reconstructed, yp, t, y);
 
-
+            int idx;
             for (int j=0; j<p; j++) {
                 double c = yp[j];
                 double d = yp[j+1];
                 double e = dt_reconstructed[j];
 //                q_reconstructed[i][j] = (s(t_reconstructed[j+1]) - s(t_reconstructed[j])) / dt_reconstructed[j];
-                q_reconstructed[i][j] = (d - c) / e;
+                idx = (j * nSources) + i;
+                q_reconstructed[idx] = (d - c) / e;
             }
         }; // _interpolate
         for (int i=0; i<nSources; i++) {
@@ -467,56 +493,46 @@ namespace gt { namespace gfunction {
         }
     } // load_history_reconstruction
 
-    void _temporal_superposition(vector<double>& Tb_0,
-                                 gt::heat_transfer::SegmentResponse &SegRes,
-                                 vector<double> &time, vector<gt::boreholes::Borehole> &boreSegments,
-                                 vector<vector<vector<double> > >& h_ij,
-                                 std::vector<std::vector<double>>& q_reconstructed, const int p,
-                                 bool multithread)
+    void _temporal_superposition(vector<double>& Tb_0, gt::heat_transfer::SegmentResponse &SegRes,
+                                 vector<double> &h_ij, vector<double> &q_reconstructed,
+                                 const int p, int &nSources)
             {
-        const auto processor_count = thread::hardware_concurrency();
-        // Launch the pool with n threads.
-        boost::asio::thread_pool pool(processor_count);
-
+        // This function performs equation (37) of Cimmino (2017)
         std::fill(Tb_0.begin(), Tb_0.end(), 0);
-        // Number of heat sources
-        int nSources = q_reconstructed.size();
         // Number of time steps
         int nt = p + 1;
 
-        auto _borehole_wall_temp = [&q_reconstructed, &Tb_0, &time, &SegRes, &boreSegments, &h_ij]
-                (const int i, const int nSources, const int nt){
-            for (int j =0; j<nSources; j++) {
-                for (int k=0; k<nt; k++) {
-                    double h1;
-                    double h2;
-                    if (k==0) {
-                        SegRes.get_h_value(h1, i, j, k);
-                        Tb_0[i] += h1 * q_reconstructed[j][nt-k-1] ;
-//                        hash_table_lookup(h1, h_map, time, boreSegments, i, j, k, hash_mode);
-                        Tb_0[i] += h1 * q_reconstructed[j][nt-k-1] ;
-//                        Tb_0[i] += h_ij[i][j][k+1] * q_reconstructed[j][nt-k-1] ;
-                    } else if (k>0) {
-                        SegRes.get_h_value(h1, i, j, k);
-                        SegRes.get_h_value(h2, i, j, k-1);
-//                        hash_table_lookup(h1, h_map, time, boreSegments, i, j, k, hash_mode);
-//                        hash_table_lookup(h2, h_map, time, boreSegments, i, j, k-1, hash_mode);
-                        Tb_0[i] += (h1-h2) * q_reconstructed[j][nt-k-1] ;
-//                        Tb_0[i] += (h_ij[i][j][k+1]- h_ij[i][j][k]) * q_reconstructed[j][nt-k-1] ;
-                    }
+        int gauss_sum = nSources * (nSources + 1) / 2;  // Number of positions in packed symmetric matrix
+        // Storage of h_ij differences
+        std::vector<double> dh_ij(gauss_sum, 0);
+        int begin_1;  // integer declarations for where the linear algebra will begin
+        int begin_2;
+        int begin_q;  // time for q_reconstructed to begin
+        int inc = 1;  // the vectors are of increment 1, they can be completely unwrapped in BLAS
 
-                }
-            }
-        };
-        for (int i=0; i<nSources; i++) {
-            if (multithread) {
-                boost::asio::post(pool, [&_borehole_wall_temp, i, nSources, nt]
-                { _borehole_wall_temp(i, nSources, nt); });
+        double alpha = 1;
+        double alpha_n = -1;
+
+        for (int k = 0; k < nt; k++) {
+            if (k==0){
+                // dh_ij = h(k)
+                begin_1 = k * gauss_sum;
+                dcopy_(&gauss_sum, &h_ij.at(begin_1), &inc, &*dh_ij.begin(), &inc);
             } else {
-                _borehole_wall_temp(i, nSources, nt);
-            }  // if (multithread);
-        }  // next i
-        pool.join();
-    }  // _temporal_superposition
-
+                begin_1 = k * gauss_sum;
+                begin_2 = (k-1) * gauss_sum;
+                // h_1 -> dh_ij
+                dcopy_(&gauss_sum, &h_ij.at(begin_1), &inc, &*dh_ij.begin(), &inc);
+                // dh_ij = -1 * h(k) + h(k-1)
+                daxpy_(&gauss_sum, &alpha_n, &h_ij.at(begin_2), &inc, &*dh_ij.begin(), &inc);
+            }
+            // q_reconstructed(t_k - t_k')
+            begin_q = (nt - k - 1) * nSources;
+            // dh_ij is a lower triangular packed matrix
+            char uplo = 'l';
+            // Tb_0 = 1 * dh_ij * q(t_k-t_k') + 1 * Tb_0
+            dspmv_(&uplo, &nSources, &alpha, &*dh_ij.begin(), &q_reconstructed.at(begin_q), &inc,
+                   &alpha, &*Tb_0.begin(), &inc);
+        }  // next k
+    }  // _temporal_superposition();
 } } // namespace gt::gfunction
