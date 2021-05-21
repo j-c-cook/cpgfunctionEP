@@ -2,7 +2,7 @@
 // Created by jackcook on 5/14/21.
 //
 
-#include <LinearAlgebra/copy.h>
+#include <LinearAlgebra/blas.h>
 
 #include <iostream>
 #include <vector>
@@ -16,7 +16,7 @@ int main() {
     int incx = 1;
     int incy = 1;
 
-    jcc::la::copy(n, x, incx, y, incy);
+    jcc::blas::copy(n, x, incx, y, incy);
 
     for (double v : y) {
         std::cout << v << std::endl;

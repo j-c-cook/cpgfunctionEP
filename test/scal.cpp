@@ -2,7 +2,7 @@
 // Created by jackcook on 5/14/21.
 //
 
-#include <LinearAlgebra/scal.h>
+#include <LinearAlgebra/blas.h>
 
 #include <iostream>
 #include <vector>
@@ -14,7 +14,7 @@ int main(){
     int n = x.size();
     int incx = 1;
 
-    jcc::la::scal(n, a, x, incx);
+    jcc::blas::scal(n, a, x, incx);
 
     for (double v : x) {
         std::cout << v << std::endl;

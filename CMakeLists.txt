@@ -5,13 +5,7 @@ include_directories(include)
 
 # Create a DLL with an API
 add_library(LinearAlgebra SHARED
-        src/gesv.cpp
-        src/dot.cpp
-        src/gemv.cpp
-        src/axpy.cpp
-        src/copy.cpp
-        src/scal.cpp
-        src/spmv.cpp)
+        src/blas.cpp src/lapack.cpp)
 
 # Depends on LAPACK and BLAS
 find_package(LAPACK)

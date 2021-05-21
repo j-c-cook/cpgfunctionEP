@@ -2,7 +2,7 @@
 // Created by jackcook on 5/14/21.
 //
 
-#include <LinearAlgebra/gemv.h>
+#include <LinearAlgebra/blas.h>
 #include <iostream>
 #include <vector>
 
@@ -26,7 +26,7 @@ int main() {
     std::vector<double> y(n, 0);  // y is a vector of size n full of zeros
     int incy = 1;
 
-    jcc::la::gemv(trans, m, n, alpha, A, lda, x, incx, beta, y, incy);
+    jcc::blas::gemv(trans, m, n, alpha, A, lda, x, incx, beta, y, incy);
 
     for (int i = 0; i < y.size(); i++) {
         std::cout << y[i] << std::endl;
