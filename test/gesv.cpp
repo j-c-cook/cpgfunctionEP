@@ -2,7 +2,10 @@
 // Created by jackcook on 5/14/21.
 //
 
-#include <LinearAlgebra/gesv.h>
+#include <LinearAlgebra/lapack.h>
+
+#include <iostream>
+#include <string>
 
 extern void print_matrix( std::string desc, int m, int n, double* a, int lda );
 
@@ -17,7 +20,7 @@ int main(){
     vector<double> a = {5, 2, 8, 9, 7, 2, 10, 3, 4};
     vector<double> b = {22, 13, 17};
 
-    jcc::la::gesv(n, nrhs, a, lda, i_piv, b, ldb, info);
+    jcc::lapack::gesv(n, nrhs, a, lda, i_piv, b, ldb, info);
 
     print_matrix("Solution: ", n, nrhs, &*b.begin(), ldb);
 

@@ -2,7 +2,7 @@
 // Created by jackcook on 5/14/21.
 //
 
-#include <LinearAlgebra/spmv.h>
+#include <LinearAlgebra/blas.h>
 
 #include <iostream>
 #include <vector>
@@ -23,7 +23,7 @@ int main(){
     std::vector<double> y(n);
     int incy = 1;
 
-    jcc::la::spmv(uplo, n, alpha, A, x, incx, beta, y, incy);
+    jcc::blas::spmv(uplo, n, alpha, A, x, incx, beta, y, incy);
 
     for (double v : y) {
         std::cout << v << std::endl;

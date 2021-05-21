@@ -2,7 +2,7 @@
 // Created by jackcook on 5/14/21.
 //
 
-#include <LinearAlgebra/dot.h>
+#include <LinearAlgebra/blas.h>
 
 #include <iostream>
 #include <vector>
@@ -16,7 +16,7 @@ int main() {
     int incy = 1;
     double result;
 
-    result = jcc::la::dot(n, x, incx, y, incy);
+    result = jcc::blas::dot(n, x, incx, y, incy);
 
     std::cout.precision(32);
     std::cout << result << std::endl;
