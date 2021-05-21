@@ -2,6 +2,14 @@
 
 ## Current version
 
+### Enhancements
+
+- [Issue 8](https://github.com/j-c-cook/LinearAlgebra/issues/8) - 
+  The BLAS and LAPACK functions are each put into their own namespace in side of 
+  their own modules.  
+
+## Version 1.0.0 (2021-05-21)
+
 ### New features
 
 - [Issue 7](https://github.com/j-c-cook/LinearAlgebra/issues/7) - Matrix vector multiplication
