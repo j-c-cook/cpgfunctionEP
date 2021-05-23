@@ -29,9 +29,11 @@ using namespace std;  // lots of vectors, only namespace to be used
 namespace gt { namespace gfunction {
     // The uniform borehole wall temperature (UBWHT) g-function calculation. Originally presented in
     // Cimmino and Bernier (2015) and a later paper on speed improvements by Cimmino (2018)
-    vector<double> uniform_borehole_wall_temperature(vector<gt::boreholes::Borehole> &boreField,
-                                                     vector<double> &time, double alpha, int nSegments,
-                                                     bool use_similarities, bool multithread, bool display){
+    vector<double> uniform_borehole_wall_temperature(
+            vector<gt::boreholes::Borehole> &boreField,
+            vector<double> &time, double alpha, int nSegments,
+            bool use_similarities, bool adaptive, int n_Threads,
+            bool multi_thread, bool display){
         vector<double> gFunction(time.size());
 
         if (display) {
@@ -112,11 +114,11 @@ namespace gt { namespace gfunction {
                 Hb[b] = boreSegments[b].H;
             } // next b
         }; // auto _segmentlengths
-        if (multithread) {
+        if (multi_thread) {
             boost::asio::post(pool, [nSources, &boreSegments, &Hb, &_segmentlengths]{ _segmentlengths(nSources); });
         } else {
             _segmentlengths(nSources);
-        }  // if (multithread);
+        }  // if (multi_thread);
 
         end = std::chrono::steady_clock::now();
         milli = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
@@ -142,11 +144,11 @@ namespace gt { namespace gfunction {
                 } // fi
             } // next i
         }; // auto _fill_time
-        if (multithread) {
+        if (multi_thread) {
             boost::asio::post(pool, [&_fill_time, &time, &_time]{ _fill_time() ;});
         } else {
             _fill_time();
-        }  // if (multithread);
+        }  // if (multi_thread);
 
         end = std::chrono::steady_clock::now();
         milli = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
@@ -295,11 +297,11 @@ namespace gt { namespace gfunction {
             boost::asio::thread_pool pool3(processor_count);
             // A needs filled each loop because the _gsl partial pivot decomposition modifies the matrix
             for (int i=0; i<SIZE; i++) {
-                if (multithread) {
+                if (multi_thread) {
                     boost::asio::post(pool3, [&_fillA, i, p, SIZE]{ _fillA(i, p, SIZE) ;});
                 } else {
                     _fillA(i, p, SIZE);
-                }  // if (multithread);
+                }  // if (multi_thread);
             }  // next i
             pool3.join();
 
