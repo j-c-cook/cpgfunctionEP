@@ -2,7 +2,7 @@
 
 ## Version 2.0.0 (2021-05-23)
 
-## Enhancements
+### Enhancements
 
 * [Issue 25](https://github.com/j-c-cook/cpgfunction/issues/25) - Removes all references to the 3D `h_ij`
   segment response matrix. See [PR 30](https://github.com/j-c-cook/cpgfunction/pull/30).
@@ -19,7 +19,7 @@
   future unequal segment lengths should be made possible again. 
   See [PR 30](https://github.com/j-c-cook/cpgfunction/pull/30).
 
-## New features
+### New features
 
 * [Issue 28](https://github.com/j-c-cook/cpgfunction/issues/28) -
   The third party library LinearAlgebra (`jcc:la`) is included and made use of for `LU`
@@ -29,7 +29,7 @@
   A boolean toggle option is added for multi-threading for computing the 
   uniform borehole wall temperature (UBHWT) g-function
 
-## API Changes
+### API Changes
 
 * [Issue 16](https://github.com/j-c-cook/cpgfunction/issues/16) - The `uniform borehole wall temperature` 
   g-function definition is defined for planned use in EnergyPlus with all arguments. Not all the arguments
