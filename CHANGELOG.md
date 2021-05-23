@@ -1,6 +1,6 @@
 # History of changes 
 
-## Current Version
+## Version 2.0.0 (2021-05-23)
 
 ## Enhancements
 
@@ -28,6 +28,12 @@
 * [Issue 12](https://github.com/j-c-cook/cpgfunction/issues/12) -
   A boolean toggle option is added for multi-threading for computing the 
   uniform borehole wall temperature (UBHWT) g-function
+
+## API Changes
+
+* [Issue 16](https://github.com/j-c-cook/cpgfunction/issues/16) - The `uniform borehole wall temperature` 
+  g-function definition is defined for planned use in EnergyPlus with all arguments. Not all the arguments
+  currently have a purpose, the adaptive discretization and number of thread arguments are place holders.
 
 ## Version 1.0.0 (2021-05-12)
 
