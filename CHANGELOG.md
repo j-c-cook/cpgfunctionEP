@@ -4,6 +4,11 @@
 
 ### Maintenance
 
+* [Issue 35](https://github.com/j-c-cook/cpgfunction/issues/35) - The C++ API
+  library for an interface to BLAS and LAPACK, 
+  [LinearAlgebra](https://github.com/j-c-cook/LinearAlgebra), is made into a 
+  `subtree` rather than `submodule`.
+
 * [Issue 50](https://github.com/j-c-cook/cpgfunction/issues/50) - Include boost
   files in `third_party/` rather than CMake finding the library in path. Boost
   is stripped to only the required libraries so that the size of the dependency
