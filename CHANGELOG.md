@@ -2,6 +2,13 @@
 
 ## Version 2.1.0 (2021-xx-xx)
 
+### Maintenance
+
+* [Issue 50](https://github.com/j-c-cook/cpgfunction/issues/50) - Include boost
+  files in `third_party/` rather than CMake finding the library in path. Boost
+  is stripped to only the required libraries so that the size of the dependency
+  is reduced.
+
 ### Enhancements
 
 ### New features
