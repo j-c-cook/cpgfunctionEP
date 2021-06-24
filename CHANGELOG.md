@@ -1,5 +1,11 @@
 # History of changes 
 
+## Version 2.1.0 (2021-xx-xx)
+
+### Enhancements
+
+### New features
+
 ## Version 2.0.0 (2021-05-23)
 
 ### Enhancements

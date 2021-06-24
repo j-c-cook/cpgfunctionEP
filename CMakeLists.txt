@@ -22,7 +22,7 @@ add_library(cpgfunction SHARED src/boreholes.cpp
         src/statistics.cpp)
 
 # It depends on boost (stripped)
-include_directories(third_party/boost-1.76.0)
+include_directories(third_party/boost-1.71.0)
 
 # It depends on threads
 find_package(Threads REQUIRED)
