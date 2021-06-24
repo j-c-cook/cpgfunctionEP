@@ -21,21 +21,8 @@ add_library(cpgfunction SHARED src/boreholes.cpp
         src/coordinates.cpp
         src/statistics.cpp)
 
-# It depends on boost
-set(Boost_USE_STATIC_LIBS OFF)
-set(Boost_USE_MULTITHREADED ON)
-set(Boost_USE_STATIC_RUNTIME OFF)
-# If the boost installation already on your computer is garbage or if you don't have one, uncomment this and
-# manually set the path to BOOST_ROOT (https://stackoverflow.com/a/58447515/11637415)
-# set(BOOST_ROOT /path/to/boost)
-find_package(Boost 1.71.0)  # needs a minimum of 1.74.0 for Gaussian Quadrature integration of FLS
-message(STATUS "Boost_FOUND=${Boost_FOUND}")
-if(Boost_FOUND)
-    include_directories(${Boost_INCLUDE_DIRS})
-else()
-    # ERROR
-endif()
-target_link_libraries(cpgfunction ${Boost_LIBRARIES})
+# It depends on boost (stripped)
+include_directories(third_party/boost-1.76.0)
 
 # It depends on threads
 find_package(Threads REQUIRED)
