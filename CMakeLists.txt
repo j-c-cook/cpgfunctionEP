@@ -8,6 +8,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 # Everything will need to access this
 include_directories(include)
 include_directories(third_party)
+include_directories(third_party/LinearAlgebra)
 include_directories(third_party/LinearAlgebra/include)
 
 # Create a DLL with an API
@@ -18,15 +19,7 @@ add_library(cpgfunction SHARED src/boreholes.cpp
         src/utilities.cpp
         third_party/nlohmann/json.hpp
         src/coordinates.cpp
-        src/statistics.cpp
-        third_party/LinearAlgebra/src/dot.cpp
-        third_party/LinearAlgebra/src/copy.cpp
-        third_party/LinearAlgebra/src/axpy.cpp
-        third_party/LinearAlgebra/src/gesv.cpp
-        third_party/LinearAlgebra/src/gemv.cpp
-        third_party/LinearAlgebra/src/scal.cpp
-        third_party/LinearAlgebra/src/dot.cpp
-        third_party/LinearAlgebra/src/spmv.cpp)
+        src/statistics.cpp)
 
 # It depends on boost
 set(Boost_USE_STATIC_LIBS OFF)

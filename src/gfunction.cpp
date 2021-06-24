@@ -10,17 +10,8 @@
 #include <thread>
 #include <boost/asio.hpp>
 
-#include <LinearAlgebra/gesv.h>
-#include <LinearAlgebra/axpy.h>
-#include <LinearAlgebra/scal.h>
-#include <LinearAlgebra/gemv.h>
-#include <LinearAlgebra/copy.h>
-#include <LinearAlgebra/spmv.h>
-
-extern "C" void dcopy_(int *n, double *x, int *incx, double *y, int *incy);
-extern "C" void daxpy_(int *n, double *a, double *x, int *incx, double *y, int *incy);
-extern "C" void dspmv_(char *uplo, int *n, double *alpha, double *A,
-                       double *x, int *incx, double *beta, double *y, int *incy);
+#include <LinearAlgebra/blas.h>
+#include <LinearAlgebra/lapack.h>
 
 #include <omp.h>
 
@@ -348,7 +339,8 @@ namespace gt { namespace gfunction {
 
             // ----- LU decomposition -----
             start = std::chrono::steady_clock::now();
-            jcc::la::gesv(n, nrhs, A_, lda, _ipiv, b_, ldb, info);
+            jcc::lapack::dgesv_(&n, &nrhs, &*A_.begin(), &lda, &*_ipiv.begin(),
+                                &*b_.begin(), &ldb, &info);
 
             for (int i=0; i<SIZE; i++) {
                 x[i] = b_[i];
@@ -519,22 +511,26 @@ namespace gt { namespace gfunction {
             if (k==0){
                 // dh_ij = h(k)
                 begin_1 = k * gauss_sum;
-                dcopy_(&gauss_sum, &h_ij.at(begin_1), &inc, &*dh_ij.begin(), &inc);
+                jcc::blas::dcopy_(&gauss_sum, &h_ij.at(begin_1), &inc,
+                                  &*dh_ij.begin(), &inc);
             } else {
                 begin_1 = k * gauss_sum;
                 begin_2 = (k-1) * gauss_sum;
                 // h_1 -> dh_ij
-                dcopy_(&gauss_sum, &h_ij.at(begin_1), &inc, &*dh_ij.begin(), &inc);
+                jcc::blas::dcopy_(&gauss_sum, &h_ij.at(begin_1), &inc,
+                                  &*dh_ij.begin(), &inc);
                 // dh_ij = -1 * h(k) + h(k-1)
-                daxpy_(&gauss_sum, &alpha_n, &h_ij.at(begin_2), &inc, &*dh_ij.begin(), &inc);
+                jcc::blas::daxpy_(&gauss_sum, &alpha_n, &h_ij.at(begin_2),
+                                  &inc, &*dh_ij.begin(), &inc);
             }
             // q_reconstructed(t_k - t_k')
             begin_q = (nt - k - 1) * nSources;
             // dh_ij is a lower triangular packed matrix
             char uplo = 'l';
             // Tb_0 = 1 * dh_ij * q(t_k-t_k') + 1 * Tb_0
-            dspmv_(&uplo, &nSources, &alpha, &*dh_ij.begin(), &q_reconstructed.at(begin_q), &inc,
-                   &alpha, &*Tb_0.begin(), &inc);
+            jcc::blas::dspmv_(&uplo, &nSources, &alpha, &*dh_ij.begin(),
+                              &q_reconstructed.at(begin_q), &inc, &alpha,
+                              &*Tb_0.begin(), &inc);
         }  // next k
     }  // _temporal_superposition();
 } } // namespace gt::gfunction

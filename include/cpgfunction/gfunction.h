@@ -48,7 +48,7 @@ namespace gfunction {
                                  vector<double> &h_ij, vector<double> &q_reconstructed, int p, int &nSources);
     void _solve_eqn(vector<double>& x, vector<vector<double>>& A, vector<double>& b);
 
+}  // namespace gfunction
 }  // namespace gt
-} // namespace gfunction
 
 #endif //CPPGFUNCTION_GFUNCTION_H
