@@ -13,24 +13,25 @@
 #include <LinearAlgebra/blas.h>
 #include <LinearAlgebra/lapack.h>
 
-#include <omp.h>
-
 using namespace std;  // lots of vectors, only namespace to be used
 
 namespace gt { namespace gfunction {
-    // The uniform borehole wall temperature (UBWHT) g-function calculation. Originally presented in
-    // Cimmino and Bernier (2015) and a later paper on speed improvements by Cimmino (2018)
+    // The uniform borehole wall temperature (UBWHT) g-function calculation.
+    // Originally presented in Cimmino and Bernier (2014) and a later paper on
+    // speed improvements by Cimmino (2018)
     vector<double> uniform_borehole_wall_temperature(
-            vector<gt::boreholes::Borehole> &boreField,
-            vector<double> &time, double alpha, int nSegments,
-            bool use_similarities, bool adaptive, int n_Threads,
-            bool multi_thread, bool display){
+            vector<gt::boreholes::Borehole> &boreField, vector<double> &time,
+            double alpha, int nSegments, bool use_similarities, bool adaptive,
+            int n_Threads, bool multi_thread, bool display){
         vector<double> gFunction(time.size());
 
         if (display) {
-            std::cout << "------------------------------------------------------------" << std::endl;
-            std::cout << "Calculating g-function for uniform borehole wall temperature" << std::endl;
-            std::cout << "------------------------------------------------------------" << std::endl;
+            std::cout << "---------------------------------------------------"
+                         "---------" << std::endl;
+            std::cout << "Calculating g-function for uniform borehole wall "
+                         "temperature" << std::endl;
+            std::cout << "---------------------------------------------------"
+                         "---------" << std::endl;
         }
         auto startall = std::chrono::steady_clock::now();
         // Open up processes here

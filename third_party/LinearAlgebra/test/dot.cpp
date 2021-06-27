@@ -2,7 +2,9 @@
 // Created by jackcook on 5/14/21.
 //
 
-#include <LinearAlgebra/blas.h>
+//#include <LinearAlgebra/blas.h>
+
+#include <LinearAlgebra/dot.h>
 
 #include <iostream>
 #include <vector>
@@ -16,7 +18,11 @@ int main() {
     int incy = 1;
     double result;
 
-    result = jcc::blas::dot(n, x, incx, y, incy);
+//    result = jcc::blas::dot(n, x, incx, y, incy);
+
+    int start_loc = 0;
+    int n_threads = 4;
+    result = jcc::blas::dot(n, x, y, start_loc, n_threads);
 
     std::cout.precision(32);
     std::cout << result << std::endl;
