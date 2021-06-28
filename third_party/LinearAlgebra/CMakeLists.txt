@@ -29,7 +29,7 @@ IF(USE_OpenMP)
     ENDIF()
 ENDIF()
 
-# Create a test binary that depends on the DLL
+## Create a test binary that depends on the DLL
 #add_executable(test1 test/gesv.cpp)
 #add_executable(test2 test/dot.cpp)
 #add_executable(test3 test/gemv.cpp)
@@ -47,7 +47,7 @@ ENDIF()
 #target_link_libraries(test7 LinearAlgebra)
 #
 ## Turn on testing
-##enable_testing()
+#enable_testing()
 #
 ## Test the binary itself
 #add_test(NAME RunTest1 COMMAND ${CMAKE_BINARY_DIR}/test1)

@@ -21,7 +21,8 @@ add_library(cpgfunction SHARED src/boreholes.cpp
         third_party/nlohmann/json.hpp
         src/coordinates.cpp
         src/statistics.cpp
-        third_party/LinearAlgebra/src/axpy.cpp)
+        third_party/LinearAlgebra/src/axpy.cpp
+        third_party/LinearAlgebra/src/spmv.cpp)
 
 # It depends on boost (stripped)
 include_directories(third_party/boost-1.71.0)
@@ -58,6 +59,7 @@ add_executable(test2 test/interpolation.cpp)
 add_executable(test4 test/borefield_definition.cpp)
 add_executable(test5 test/time_definition.cpp)
 add_executable(test6 test/compute_UBHWT_gFunction.cpp)
+add_executable(test7 test/packed.cpp)
 
 target_link_libraries(test1 cpgfunction)
 target_link_libraries(test2 cpgfunction)
@@ -65,6 +67,7 @@ target_link_libraries(test2 cpgfunction)
 target_link_libraries(test4 cpgfunction)
 target_link_libraries(test5 cpgfunction)
 target_link_libraries(test6 cpgfunction)
+target_link_libraries(test7 cpgfunction)
 
 # target_compile_definitions(cpgfunction PUBLIC TEST_RESOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 # Copy validation files to build directory so tests can open
@@ -86,3 +89,4 @@ add_test(NAME RunTest4 COMMAND "${CMAKE_BINARY_DIR}/test4")
 add_test(NAME RunTest5 COMMAND "${CMAKE_BINARY_DIR}/test5")
 # Pass variable path into test 6 for json files
 add_test(NAME RunTest6 COMMAND ${CMAKE_BINARY_DIR}/test6)
+add_test(NAME RunTest7 COMMAND ${CMAKE_BINARY_DIR}/test7)

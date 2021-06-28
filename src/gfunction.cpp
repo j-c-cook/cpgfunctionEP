@@ -10,6 +10,7 @@
 #include <thread>
 #include <boost/asio.hpp>
 #include <algorithm>  // for copy
+#include <LinearAlgebra/spmv.h>
 
 #include <LinearAlgebra/blas.h>
 #include <LinearAlgebra/lapack.h>
@@ -530,6 +531,8 @@ namespace gt { namespace gfunction {
                 // h_1 -> dh_ij
                 std::copy(begin_it_1, end_it_1, dh_ij.begin());
                 // dh_ij = -1 * h(k) + h(k-1)
+//                jcc::blas::daxpy_(&gauss_sum, &alpha_n, &h_ij.at(begin_2),
+//                                  &inc, &*dh_ij.begin(), &inc);
                 jcc::blas::axpy(gauss_sum, alpha_n, h_ij, dh_ij, begin_2,
                                 n_threads);
             }
@@ -541,6 +544,8 @@ namespace gt { namespace gfunction {
             jcc::blas::dspmv_(&uplo, &nSources, &alpha, &*dh_ij.begin(),
                               &q_reconstructed.at(begin_q), &inc, &alpha,
                               &*Tb_0.begin(), &inc);
+//            jcc::blas::spmv(nSources, alpha, dh_ij, q_reconstructed, alpha,
+//                            Tb_0, begin_q, n_threads);
         }  // next k
     }  // _temporal_superposition();
 } } // namespace gt::gfunction
