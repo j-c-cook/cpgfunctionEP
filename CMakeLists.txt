@@ -10,6 +10,7 @@ include_directories(include)
 include_directories(third_party)
 include_directories(third_party/LinearAlgebra)
 include_directories(third_party/LinearAlgebra/include)
+add_subdirectory(third_party/LinearAlgebra)
 
 # Create a DLL with an API
 add_library(cpgfunction SHARED src/boreholes.cpp
@@ -19,7 +20,8 @@ add_library(cpgfunction SHARED src/boreholes.cpp
         src/utilities.cpp
         third_party/nlohmann/json.hpp
         src/coordinates.cpp
-        src/statistics.cpp)
+        src/statistics.cpp
+        third_party/LinearAlgebra/src/axpy.cpp)
 
 # It depends on boost (stripped)
 include_directories(third_party/boost-1.71.0)

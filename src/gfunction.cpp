@@ -13,6 +13,7 @@
 
 #include <LinearAlgebra/blas.h>
 #include <LinearAlgebra/lapack.h>
+#include <LinearAlgebra/axpy.h>
 
 using namespace std;  // lots of vectors, only namespace to be used
 
@@ -498,6 +499,9 @@ namespace gt { namespace gfunction {
         // Number of time steps
         int nt = p + 1;
 
+        const auto processor_count = thread::hardware_concurrency();
+        int n_threads = int(processor_count);
+
         int gauss_sum = nSources * (nSources + 1) / 2;  // Number of positions in packed symmetric matrix
         // Storage of h_ij differences
         std::vector<double> dh_ij(gauss_sum, 0);
@@ -526,8 +530,8 @@ namespace gt { namespace gfunction {
                 // h_1 -> dh_ij
                 std::copy(begin_it_1, end_it_1, dh_ij.begin());
                 // dh_ij = -1 * h(k) + h(k-1)
-                jcc::blas::daxpy_(&gauss_sum, &alpha_n, &h_ij.at(begin_2),
-                                  &inc, &*dh_ij.begin(), &inc);
+                jcc::blas::axpy(gauss_sum, alpha_n, h_ij, dh_ij, begin_2,
+                                n_threads);
             }
             // q_reconstructed(t_k - t_k')
             begin_q = (nt - k - 1) * nSources;
