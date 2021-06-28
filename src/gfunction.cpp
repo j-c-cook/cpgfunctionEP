@@ -539,11 +539,11 @@ namespace gt { namespace gfunction {
             // dh_ij is a lower triangular packed matrix
             char uplo = 'l';
             // Tb_0 = 1 * dh_ij * q(t_k-t_k') + 1 * Tb_0
-            jcc::blas::dspmv_(&uplo, &nSources, &alpha, &*dh_ij.begin(),
-                              &q_reconstructed.at(begin_q), &inc, &alpha,
-                              &*Tb_0.begin(), &inc);
-//            jcc::blas::spmv(nSources, alpha, dh_ij, q_reconstructed, alpha,
-//                            Tb_0, begin_q, n_threads);
+//            jcc::blas::dspmv_(&uplo, &nSources, &alpha, &*dh_ij.begin(),
+//                              &q_reconstructed.at(begin_q), &inc, &alpha,
+//                              &*Tb_0.begin(), &inc);
+            jcc::blas::spmv(nSources, alpha, dh_ij, q_reconstructed, alpha,
+                            Tb_0, begin_q, n_threads);
         }  // next k
     }  // _temporal_superposition();
 } } // namespace gt::gfunction
