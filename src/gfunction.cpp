@@ -9,6 +9,7 @@
 #include <cpgfunction/interpolation.h>
 #include <thread>
 #include <boost/asio.hpp>
+#include <algorithm>  // for copy
 
 #include <LinearAlgebra/blas.h>
 #include <LinearAlgebra/lapack.h>
@@ -508,18 +509,22 @@ namespace gt { namespace gfunction {
         double alpha = 1;
         double alpha_n = -1;
 
+        std::vector<double>::iterator begin_it_1;
+        std::vector<double>::iterator end_it_1;
+//        std::vector<double>::iterator begin_it_2;
+//        std::vector<double>::iterator end_it_2;
+
         for (int k = 0; k < nt; k++) {
+            begin_1 = k * gauss_sum;
+            begin_it_1 = h_ij.begin() + begin_1;
+            end_it_1 = h_ij.begin() + begin_1 + gauss_sum;
             if (k==0){
                 // dh_ij = h(k)
-                begin_1 = k * gauss_sum;
-                jcc::blas::dcopy_(&gauss_sum, &h_ij.at(begin_1), &inc,
-                                  &*dh_ij.begin(), &inc);
+                std::copy(begin_it_1, end_it_1, dh_ij.begin());
             } else {
-                begin_1 = k * gauss_sum;
                 begin_2 = (k-1) * gauss_sum;
                 // h_1 -> dh_ij
-                jcc::blas::dcopy_(&gauss_sum, &h_ij.at(begin_1), &inc,
-                                  &*dh_ij.begin(), &inc);
+                std::copy(begin_it_1, end_it_1, dh_ij.begin());
                 // dh_ij = -1 * h(k) + h(k-1)
                 jcc::blas::daxpy_(&gauss_sum, &alpha_n, &h_ij.at(begin_2),
                                   &inc, &*dh_ij.begin(), &inc);

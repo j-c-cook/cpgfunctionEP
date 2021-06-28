@@ -2,7 +2,8 @@
 // Created by jackcook on 5/14/21.
 //
 
-#include <LinearAlgebra/blas.h>
+//#include <LinearAlgebra/blas.h>
+#include <LinearAlgebra/axpy.h>
 
 #include <iostream>
 #include <vector>
@@ -20,7 +21,12 @@ int main(){
 
     int incy = 1;  // increment is 1
 
-    jcc::blas::axpy(n, a, x, incx, y, incy);
+//    jcc::blas::axpy(n, a, x, incx, y, incy);
+
+    int start = 0;
+    int n_threads = 4;
+    jcc::blas::axpy(n, a, x, y, start, n_threads);
+
 
     for (int i = 0; i < y.size(); i++){
         std::cout << y[i] << std::endl;
