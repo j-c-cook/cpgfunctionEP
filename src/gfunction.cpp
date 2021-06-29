@@ -9,12 +9,10 @@
 #include <cpgfunction/interpolation.h>
 #include <thread>
 #include <boost/asio.hpp>
-#include <algorithm>  // for copy
-#include <LinearAlgebra/spmv.h>
+#include <blas/blas.h>
 
-#include <LinearAlgebra/blas.h>
-#include <LinearAlgebra/lapack.h>
-#include <LinearAlgebra/axpy.h>
+extern "C" void dgesv_( int *n, int *nrhs, double  *a, int *lda, int *ipiv,
+                        double *b, int *lbd, int *info );
 
 using namespace std;  // lots of vectors, only namespace to be used
 
@@ -343,8 +341,8 @@ namespace gt { namespace gfunction {
 
             // ----- LU decomposition -----
             start = std::chrono::steady_clock::now();
-            jcc::lapack::dgesv_(&n, &nrhs, &*A_.begin(), &lda, &*_ipiv.begin(),
-                                &*b_.begin(), &ldb, &info);
+            dgesv_(&n, &nrhs, &*A_.begin(), &lda, &*_ipiv.begin(),
+                   &*b_.begin(), &ldb, &info);
 
             for (int i=0; i<SIZE; i++) {
                 x[i] = b_[i];

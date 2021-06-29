@@ -1,6 +1,6 @@
-# History of changes 
+# History of changes (cpgfunctionEP)
 
-## Version 2.1.0 (2021-xx-xx)
+## Version 0.1.0 (2021-xx-xx)
 
 ### Maintenance
 
@@ -14,9 +14,8 @@
   is stripped to only the required libraries so that the size of the dependency
   is reduced.
 
-### Enhancements
 
-### New features
+# History of changes (cpgfunction)
 
 ## Version 2.0.0 (2021-05-23)
 

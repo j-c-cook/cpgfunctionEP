@@ -15,3 +15,7 @@ The changes should fall under one of the following categories:
 - Depracated - for soon-to-be removed features
 - Removed - for removed features
 - Fixes - for any bug fixes
+
+## Versioning
+
+This library makes use of [Semantic Versioning](https://semver.org/).
