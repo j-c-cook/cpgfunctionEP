@@ -7,22 +7,22 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 # Everything will need to access this
 include_directories(include)
-include_directories(third_party)
-include_directories(third_party/eigen-3.3.9)
+# Third party includes
+include_directories(third_party/boost-1.71.0)  # It depends on boost (stripped)
+include_directories(third_party/nlohmann-3.9.1)
+include_directories(third_party/eigen-3.3.9)  # Eigen for LU decomposition
 
 # Create a DLL with an API
-add_library(cpgfunction SHARED src/boreholes.cpp
+add_library(cpgfunction SHARED
+        src/boreholes.cpp
         src/gfunction.cpp
         src/heat_transfer.cpp
         src/interpolation.cpp
         src/utilities.cpp
-        third_party/nlohmann/json.hpp
         src/coordinates.cpp
         src/statistics.cpp
         src/blas.cpp)
 
-# It depends on boost (stripped)
-include_directories(third_party/boost-1.71.0)
 
 # It depends on threads
 find_package(Threads REQUIRED)
