@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.6)
-project(CpGFunction)
+project(CpGFunctionEP)
 
 set(CMAKE_CXX_STANDARD 11)
 # Compiler requests -std=c++11 be set for compiler option
@@ -8,6 +8,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 # Everything will need to access this
 include_directories(include)
 include_directories(third_party)
+include_directories(third_party/eigen-3.3.9)
 
 # Create a DLL with an API
 add_library(cpgfunction SHARED src/boreholes.cpp
