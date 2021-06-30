@@ -19,6 +19,9 @@ jobs:
         python -m pip install --upgrade pip
         pip install aqtinstall
 
+    - name: Create Build Directory
+      run: cmake -E make_directory ./build/
+
     - name: Configure CMake
       working-directory: ./build
       shell: bash
