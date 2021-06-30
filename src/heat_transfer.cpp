@@ -7,6 +7,7 @@
 #include <thread>
 #include <boost/asio.hpp>
 #include <cpgfunction/boreholes.h>
+#include <cmath>
 
 using namespace boost::math::quadrature;
 
