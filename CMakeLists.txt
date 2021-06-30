@@ -11,6 +11,8 @@ include_directories(third_party/boost-1.71.0)  # It depends on boost (stripped)
 include_directories(third_party/nlohmann-3.9.1)
 include_directories(third_party/eigen-3.3.9)  # Eigen for LU decomposition
 
+add_compile_definitions(_USE_MATH_DEFINES)
+
 # Create a DLL with an API
 add_library(cpgfunction SHARED
         src/boreholes.cpp
