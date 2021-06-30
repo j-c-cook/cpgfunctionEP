@@ -50,7 +50,7 @@ jobs:
     - name: Build Package
       working-directory: ./build
       shell: bash
-      run: cmake --build . --target package -j 2 --config $BUILD_TYPE
+      run: cmake --build . -j 2
 
     - name: Run Tests
       working-directory: ./build
