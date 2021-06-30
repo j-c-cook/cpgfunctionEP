@@ -17,7 +17,6 @@ namespace gt {
     double Distance_Formula(double x1, double y1, double x2, double y2);
 
     namespace boreholes {
-        using namespace std;
         struct Borehole {
             // Destructor
             virtual ~Borehole() {
@@ -37,7 +36,7 @@ namespace gt {
             }
 
             double distance(Borehole target);
-            std::tuple<double, double> position();
+            tuple<double, double> position();
         };
 
         vector<Borehole>boreField(
