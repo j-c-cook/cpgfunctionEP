@@ -164,7 +164,7 @@ namespace gt {
             int a = 1;
         } // Similarity::_similarities_group_by_distance
 
-        void Similarity::_similarities_one_distance(SimilaritiesType & SimT, vector<tuple<int, int>> &pairs,
+        void Similarity::_similarities_one_distance(SimilaritiesType & SimT, vector<tuple<int, int> > &pairs,
                                                     vector<gt::boreholes::Borehole> &boreSegments, const string& kind,
                                                     double tol) {
             // Condition for equivalence of the real part of the FLS solution
