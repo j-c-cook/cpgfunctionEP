@@ -28,18 +28,6 @@ add_library(cpgfunction SHARED
 find_package(Threads REQUIRED)
 target_link_libraries(cpgfunction ${CMAKE_THREAD_LIBS_INIT})
 
-find_package(LAPACK)
-target_link_libraries(cpgfunction ${LAPACK_LIBRARIES})
-
-# OpenBLAS is specified because the default (Netlib BLAS) is much slower for LU decomposition (dgesv_)
-set(BLA_VENDOR OpenBLAS)
-find_package(BLAS)
-if (BLAS_FOUND)
-    target_link_libraries(cpgfunction ${BLAS_LIBRARIES})
-else()
-    # ERROR
-endif()
-
 OPTION (USE_OpenMP "Use OpenMP" ON)
 IF(USE_OpenMP)
     FIND_PACKAGE(OpenMP)
@@ -66,7 +54,6 @@ target_link_libraries(test5 cpgfunction)
 target_link_libraries(test6 cpgfunction)
 target_link_libraries(test7 cpgfunction)
 
-# target_compile_definitions(cpgfunction PUBLIC TEST_RESOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 # Copy validation files to build directory so tests can open
 file(GLOB JsonValidation test/validation/*.json)
 file(GLOB CustomLayout test/custom_configurations/*.json)

@@ -1,4 +1,4 @@
-# cpgfunction
+# cpgfunctionEP
 An open source low level (C++) implementation of [Massimo Cimmino][1]'s
 g-function methodology. The g-function calculation has to do with the distribution
 of heat in a ground heat exchanger (GHE). The g-function, after computed,
