@@ -2,17 +2,17 @@
 // Created by jackcook on 7/11/20.
 //
 
-#ifndef CPPGFUNCTION_HEAT_TRANSFER_H
-#define CPPGFUNCTION_HEAT_TRANSFER_H
-
 #include <iostream>
 #include <vector>
 #include <cpgfunction/boreholes.h>
 #include <boost/math/quadrature/gauss_kronrod.hpp>
 #include <boost/asio.hpp>
+#include <cmath>
 
 using namespace std;
 
+#ifndef CPPGFUNCTION_HEAT_TRANSFER_H
+#define CPPGFUNCTION_HEAT_TRANSFER_H
 
 namespace gt { namespace heat_transfer {
 

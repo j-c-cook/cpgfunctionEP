@@ -2,13 +2,13 @@
 // Created by jackcook on 5/6/21.
 //
 
-#ifndef CPGFUNCTION_COORDINATES_H
-#define CPGFUNCTION_COORDINATES_H
-
 #include <utility>
 #include <vector>
 #include <tuple>
 #include <iostream>
+
+#ifndef CPGFUNCTION_COORDINATES_H
+#define CPGFUNCTION_COORDINATES_H
 
 namespace gt {
     namespace coordinates {

@@ -2,15 +2,15 @@
 // Created by jackcook on 7/11/20.
 //
 
-#ifndef CPPGFUNCTION_BOREHOLES_H
-#define CPPGFUNCTION_BOREHOLES_H
-
 #include <iostream>
 #include <math.h>
 #include <tuple>
 #include <vector>
 
 using namespace std;
+
+#ifndef CPPGFUNCTION_BOREHOLES_H
+#define CPPGFUNCTION_BOREHOLES_H
 
 namespace gt {
 

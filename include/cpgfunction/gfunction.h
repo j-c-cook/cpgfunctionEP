@@ -4,15 +4,15 @@
 // Created by jackcook on 7/11/20.
 //
 
-#ifndef CPPGFUNCTION_GFUNCTION_H
-#define CPPGFUNCTION_GFUNCTION_H
-
 #include <iostream>
 #include <vector>
 #include <cpgfunction/boreholes.h>
 #include <cpgfunction/heat_transfer.h>
 
 using namespace std;
+
+#ifndef CPPGFUNCTION_GFUNCTION_H
+#define CPPGFUNCTION_GFUNCTION_H
 
 /** The functions will be listed here in the order which they appear in the associated cpp file **/
 
