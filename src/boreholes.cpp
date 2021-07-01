@@ -34,7 +34,7 @@ namespace gt {
             double x;
             double y;
 
-            for (int i = 0; i < coordinates.size(); i++) {
+            for (std::size_t i = 0; i < coordinates.size(); i++) {
                 x = std::get<0>(coordinates[i]);
                 y = std::get<1>(coordinates[i]);
                 bores[i] = Borehole(H, D, r_b, x, y);
@@ -61,7 +61,7 @@ namespace gt {
             // if real and image parts of the FLS are split, evaluate real and image similarities seperately:
             if (splitRealAndImage) {
                 ImageSimT.resize(Pairs.size());
-                for (int i=0; i<Pairs.size(); i++) {
+                for (std::size_t i=0; i<Pairs.size(); i++) {
                     // TODO: thread both of these
                     _similarities_one_distance(RealSimT[i],Pairs[i], boreSegments, "real");
                     _similarities_one_distance(ImageSimT[i],Pairs[i], boreSegments, "image");
@@ -239,7 +239,7 @@ namespace gt {
             double D2;
 
             // Cycle through all pairs of boreholes for the given distance
-            for (int i=1; i<pairs.size(); i++) {
+            for (std::size_t i=1; i<pairs.size(); i++) {
                 ibor = get<0>(pairs[i]);
                 jbor = get<1>(pairs[i]);
                 if (ibor > jbor) {

@@ -70,7 +70,7 @@ namespace gt { namespace heat_transfer {
             cout << "\tDetected " << processor_count << " as the number of available threads" << endl;
         }
 
-        gt:boreholes::SimilaritiesType SimReal; // positive
+        gt::boreholes::SimilaritiesType SimReal; // positive
         gt::boreholes::SimilaritiesType SimImage; // negative
 
         int COUNT=0;
@@ -129,10 +129,10 @@ namespace gt { namespace heat_transfer {
                     } else if (SegRes.storage_mode==1) {
                         // will loop through every (i, j), will combine real+image
                         int index;
-                        for (int k=0; k<SimReal.Sim[s].size(); k++) {
+                        for (std::size_t k=0; k<SimReal.Sim[s].size(); k++) {
                             i = get<0>(SimReal.Sim[s][k]);
                             j = get<1>(SimReal.Sim[s][k]);
-                            for (int t=0; t<time.size(); t++){
+                            for (std::size_t t=0; t<time.size(); t++){
                                 // must consider real and image source separate when combining
                                 if (i <= j) {
                                     // we want to store n2, n1
@@ -151,8 +151,8 @@ namespace gt { namespace heat_transfer {
             };
             auto end = std::chrono::steady_clock::now();
             if (disp) {
-                double milli = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-                double seconds = milli / 1000;
+                auto milli = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+                double seconds = double(milli) / 1000;
                 std::cout << "Elapsed time in seconds : "
                           << seconds
                           << " sec" << std::endl;
@@ -181,8 +181,8 @@ namespace gt { namespace heat_transfer {
             pool.join();
             auto end2 = std::chrono::steady_clock::now();
             if (disp) {
-                double milli = std::chrono::duration_cast<std::chrono::milliseconds>(end2 - end).count();
-                double seconds = milli / 1000;
+                auto milli = std::chrono::duration_cast<std::chrono::milliseconds>(end2 - end).count();
+                double seconds = double(milli) / 1000;
                 std::cout << "Elapsed time in seconds : "
                           << seconds
                           << " sec" << std::endl;
@@ -198,7 +198,7 @@ namespace gt { namespace heat_transfer {
             auto _fill_line = [&h_ij, &time, &boreSegments](const int i, const int j, const double alpha,
                     bool sameSegment, bool otherSegment) {
                 auto _dot_product = [&h_ij, &time](const int i, const int j, const double constant) {
-                    for (int k=0; k < time.size(); k++) {
+                    for (std::size_t k=0; k < time.size(); k++) {
                         h_ij[j][i][k+1] = constant * h_ij[i][j][k+1];
                     } // end for
                 };
@@ -207,21 +207,25 @@ namespace gt { namespace heat_transfer {
                 gt::boreholes::Borehole b1;
                 gt::boreholes::Borehole b2;
                 b2 = boreSegments[i];
-                for (int k = 0; k < time.size(); k++) {
+                for (std::size_t k = 0; k < time.size(); k++) {
                     double t = time[k];
-                    if (sameSegment && not otherSegment){
-                        b1 = boreSegments[i];
-                        h = finite_line_source(t, alpha, b2, b2);
-                    } else if (otherSegment && not sameSegment) {
+                    if (!otherSegment){
+                        if (sameSegment) {
+                            b1 = boreSegments[i];
+                            h = finite_line_source(t, alpha, b2, b2);
+                        }
+                    } else if (otherSegment && !sameSegment) {
                         b1 = boreSegments[j];
                         h = finite_line_source(t, alpha, b1, b2);
                     } else {
                         throw std::invalid_argument( "sameSegment and otherSegment cannot both be true" );
                     } // end if
                     h_ij[i][j][k+1] = h;
-                    if (otherSegment && not sameSegment) {
-                        constant = double(b2.H / b1.H);
-                        _dot_product(i, j, constant);
+                    if (!sameSegment) {
+                        if (otherSegment) {
+                            constant = double(b2.H / b1.H);
+                            _dot_product(i, j, constant);
+                        }
                     } // end if
                 }; // end for
             }; // auto _fill_line
@@ -249,8 +253,8 @@ namespace gt { namespace heat_transfer {
             pool.join();
             auto end = std::chrono::steady_clock::now();
             if (disp) {
-                double milli = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
-                double seconds = milli / 1000;
+                auto milli = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+                double seconds = double(milli) / 1000;
                 std::cout << "Elapsed time in seconds : "
                           << seconds
                           << " sec" << std::endl;
