@@ -4,6 +4,9 @@ project(cpgfunctionEP)
 set(CMAKE_CXX_STANDARD 17)
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++17")
+else()
+    set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
+    add_compile_definitions(_USE_MATH_DEFINES)
 endif()
 
 # Everything will need to access this
@@ -15,8 +18,6 @@ include_directories(third_party/eigen-3.3.9)  # Eigen for LU decomposition
 #include_directories(third_party)  # Gauss-Kronrod Integration
 #include_directories(src third_party/cquadpack/src)
 include_directories(third_party/qdt-master)
-
-add_compile_definitions(_USE_MATH_DEFINES)
 
 # Create a DLL with an API
 add_library(cpgfunctionEP SHARED
