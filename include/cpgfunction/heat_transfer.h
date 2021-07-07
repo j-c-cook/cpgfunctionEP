@@ -5,7 +5,6 @@
 #include <iostream>
 #include <vector>
 #include <cpgfunction/boreholes.h>
-#include <boost/math/quadrature/gauss_kronrod.hpp>
 #include <boost/asio.hpp>
 #include <cmath>
 

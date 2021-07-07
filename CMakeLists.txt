@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.6)
-project(CpGFunctionEP)
+project(cpgfunctionEP)
 
 set(CMAKE_CXX_STANDARD 17)
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
@@ -12,11 +12,14 @@ include_directories(include)
 include_directories(third_party/boost-1.71.0)  # It depends on boost (stripped)
 include_directories(third_party/nlohmann-3.9.1)
 include_directories(third_party/eigen-3.3.9)  # Eigen for LU decomposition
+#include_directories(third_party)  # Gauss-Kronrod Integration
+#include_directories(src third_party/cquadpack/src)
+include_directories(third_party/qdt-master)
 
 add_compile_definitions(_USE_MATH_DEFINES)
 
 # Create a DLL with an API
-add_library(cpgfunction SHARED
+add_library(cpgfunctionEP SHARED
         src/boreholes.cpp
         src/gfunction.cpp
         src/heat_transfer.cpp
@@ -26,10 +29,14 @@ add_library(cpgfunction SHARED
         src/statistics.cpp
         src/blas.cpp)
 
+#add_subdirectory(third_party/cquadpack)
+#target_link_libraries(cpgfunctionEP third_party/cquadpack/cquadpack)
+#target_link_libraries(cpgfunctionEP cquadpack)
+#include_directories(${PROJECT_BINARY_DIR}/third_party/cquadpack)
 
 # It depends on threads
 find_package(Threads REQUIRED)
-target_link_libraries(cpgfunction ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(cpgfunctionEP ${CMAKE_THREAD_LIBS_INIT})
 
 OPTION (USE_OpenMP "Use OpenMP" ON)
 IF(USE_OpenMP)
@@ -49,13 +56,13 @@ add_executable(test5 test/time_definition.cpp)
 add_executable(test6 test/compute_UBHWT_gFunction.cpp)
 add_executable(test7 test/packed.cpp)
 
-target_link_libraries(test1 cpgfunction)
-target_link_libraries(test2 cpgfunction)
-# target_link_libraries(test3 cpgfunction)
-target_link_libraries(test4 cpgfunction)
-target_link_libraries(test5 cpgfunction)
-target_link_libraries(test6 cpgfunction)
-target_link_libraries(test7 cpgfunction)
+target_link_libraries(test1 cpgfunctionEP)
+target_link_libraries(test2 cpgfunctionEP)
+# target_link_libraries(test3 cpgfunctionEP)
+target_link_libraries(test4 cpgfunctionEP)
+target_link_libraries(test5 cpgfunctionEP)
+target_link_libraries(test6 cpgfunctionEP)
+target_link_libraries(test7 cpgfunctionEP)
 
 # Copy validation files to build directory so tests can open
 file(GLOB JsonValidation test/validation/*.json)

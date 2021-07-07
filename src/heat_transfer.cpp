@@ -8,12 +8,16 @@
 #include <boost/asio.hpp>
 #include <cpgfunction/boreholes.h>
 #include <cmath>
+#include <qdt.h>
 
-using namespace boost::math::quadrature;
+namespace gt::heat_transfer {
 
-namespace gt { namespace heat_transfer {
-    double finite_line_source(const double time_, const double alpha, gt::boreholes::Borehole &b1,
-                              gt::boreholes::Borehole &b2, bool reaSource, bool imgSource) {
+    using namespace gt;
+    using namespace std;
+
+    double finite_line_source(const double time_, const double alpha,
+                              boreholes::Borehole &b1, boreholes::Borehole &b2,
+                              bool reaSource, bool imgSource) {
 
         auto _Ils = [&b1, &b2, reaSource, imgSource](const double s) {
             auto _erfint = [](const double x) {
@@ -43,18 +47,19 @@ namespace gt { namespace heat_transfer {
         // lower bound of integration
         double a = double(1.) / sqrt(double(4.) * alpha * time_);
         // Evaluate the integral using Gauss-Kronrod
-        double error;
-        double Q = gauss_kronrod<double, 15>::integrate(_Ils, a, std::numeric_limits<double>::infinity(),
-                                                        5, 1e-9, &error);
-        return Q;
+        double result;
+        auto method = qdt::adaptive(qdt::gauss_kronrod());
+        result = method.integrate(_Ils, a, qdt::INF);
+
+        return result;
 
     } // void finite_line_source
 
-    void
-    thermal_response_factors(SegmentResponse &SegRes, std::vector< std::vector< std::vector<double> > >& h_ij,
-                             std::vector<gt::boreholes::Borehole> &boreSegments,
-                             std::vector<double> &time,
-                             const double alpha, bool use_similaries, bool disp) {
+    void thermal_response_factors(SegmentResponse &SegRes,
+                             vector<vector<vector<double> > >& h_ij,
+                             vector<boreholes::Borehole> &boreSegments,
+                             vector<double> &time, const double alpha,
+                             bool use_similaries, bool disp) {
         // total number of line sources
         int nSources = boreSegments.size();
         // number of time values
@@ -341,5 +346,4 @@ namespace gt { namespace heat_transfer {
         index = i * (2*nSources - i - 1) / 2 + j;
     }  // SegmentResponse::get_index_value();
 
-
-} } // namespace gt::heat_transfer
+} // namespace gt::heat_transfer
