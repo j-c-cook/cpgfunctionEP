@@ -52,7 +52,6 @@ namespace gt::heat_transfer {
         result = method.integrate(_Ils, a, qdt::INF);
 
         return result;
-
     } // void finite_line_source
 
     void thermal_response_factors(SegmentResponse &SegRes,
@@ -72,19 +71,12 @@ namespace gt::heat_transfer {
         // Launch the pool with n threads.
         boost::asio::thread_pool pool(processor_count);
         if (disp) {
-            cout << "\tDetected " << processor_count << " as the number of available threads" << endl;
+            cout << "\tDetected " << processor_count
+            << " as the number of available threads" << endl;
         }
 
         gt::boreholes::SimilaritiesType SimReal; // positive
         gt::boreholes::SimilaritiesType SimImage; // negative
-
-        int COUNT=0;
-//        auto check_key = [&h_map](Key &sim_key) {
-//            // Key is not present
-//            if (h_map.find(sim_key) == h_map.end())
-//                return false;
-//            return true;
-//        }; // check_key
 
         auto sum_to_n = [](const int n) {
             return n * (n + 1) / 2;
@@ -100,16 +92,19 @@ namespace gt::heat_transfer {
             double disTol = 0.1;
             double tol = 1.0e-6;
             gt::boreholes::Similarity sim;
-            sim.similarities(SimReal, SimImage, boreSegments, splitRealAndImage, disTol, tol);
+            sim.similarities(SimReal, SimImage, boreSegments,
+                             splitRealAndImage, disTol, tol);
 
-            //---
+            // ---
             // Adaptive hashing scheme if statement
             // Determine the Segment Response storing mode here
             int Ntot = sum_to_n(nSources);
 
             // lambda function for calculating h at each time step
-            auto _calculate_h = [&boreSegments, &splitRealAndImage, &time, &alpha, &nt, &h_ij, &SegRes, &Ntot](boreholes::SimilaritiesType &SimReal,
-                    int s, bool reaSource, bool imgSource) {
+            auto _calculate_h =
+                    [&boreSegments, &splitRealAndImage, &time, &alpha, &nt,
+                     &SegRes](boreholes::SimilaritiesType &SimReal, int s,
+                             bool reaSource, bool imgSource) {
                 // begin function
                 int n1;
                 int n2;
@@ -156,12 +151,13 @@ namespace gt::heat_transfer {
             };
             auto end = std::chrono::steady_clock::now();
             if (disp) {
-                auto milli = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+                auto milli = chrono::duration_cast<chrono::milliseconds>(end - start).count();
                 double seconds = double(milli) / 1000;
                 std::cout << "Elapsed time in seconds : "
                           << seconds
                           << " sec" << std::endl;
-                std::cout << "Calculating segment to segment response factors ..." << std::endl;
+                std::cout << "Calculating segment to segment response "
+                             "factors ..." << std::endl;
             } // end if
 
             // inputs
@@ -266,61 +262,7 @@ namespace gt::heat_transfer {
             }
             // Iterate over the thread vector
         } // fi similarity
-
-//        for (int i = 0; i < nSources; i++) {
-//            for (int j=0; j<nSources; j++) {
-//                for (int k=0; k<nt; k++) {
-//                    std::cout << h_ij[i][j][k+1] << "\t";
-//                }
-//                std::cout << std::endl;
-//            }
-//            int a = 1;
-//        }
-//        gt::boreholes::Borehole b1;
-//        gt::boreholes::Borehole b2;
-//        int Ntot = sum_to_n(nSources);
-//        for (int i = 0; i < nSources; i++) {
-//            for (int j=0; j<nSources; j++) {
-//                for (int k=0; k<nt; k++) {
-//                    double v;
-//                    double h;
-//                    double hij;
-//                    double ratio;
-//                    if (i <= j) {
-//                        int index = SegRes.get_index_value(i, j);
-//                        h = SegRes.h_ij[index][k];
-//                    } else {
-//                        int index = SegRes.get_index_value(j, i);
-//                        b1 = boreSegments[i];
-//                        b2 = boreSegments[j];
-//                        h = b2.H/b1.H * SegRes.h_ij[index][k];
-//                    }
-////                    hij = h_ij[i][j][k+1];
-//                    SegRes.get_h_value(v, i, j, k);
-//                    h_ij[i][j][k+1] = h;
-//                    if (h - v > 1.0e-6) {
-//                        ratio = h / hij;
-//                        int a = 1;
-//                    }
-//                }
-//            }
-//        }
-        int a =1;
     } // void thermal_response_factors
-
-//    void SegmentResponse::ReSizeContainers(const int n, const int nt) {
-//        switch(storage_mode) {
-//            case 0 :
-//                cout << "Case 0 not written yet" << endl;
-//                break;
-//            case 1 :
-//                h_ij.resize(n, vector<vector<double>>(n, vector<double>(nt, 0)));
-//                break;
-//            default:
-//                throw invalid_argument("The case selected is not currently implemented.");
-//        }
-//
-//    }
 
     void SegmentResponse::get_h_value(double &h, const int i, const int j, const int k) {
         int index;
