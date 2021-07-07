@@ -53,6 +53,6 @@ jobs:
       run: cmake --build . -j 2
 
     - name: Run Tests
-      working-directory: ./build
+      working-directory: ./build/Debug
       shell: bash
-      run: ctest 
+      run: ctest
