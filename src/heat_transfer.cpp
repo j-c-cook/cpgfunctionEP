@@ -5,7 +5,6 @@
 #include <cpgfunction/heat_transfer.h>
 #include <stdexcept>
 #include <thread>
-#include <boost/asio.hpp>
 #include <cpgfunction/boreholes.h>
 #include <cmath>
 #include <qdt.h>
@@ -66,8 +65,6 @@ namespace gt::heat_transfer {
         // Create a vector of threads
         //may return 0 when not able to detect
         const auto processor_count = thread::hardware_concurrency();
-        // Launch the pool with n threads.
-        boost::asio::thread_pool pool(processor_count);
         if (disp) {
             cout << "\tDetected " << processor_count
             << " as the number of available threads" << endl;
@@ -178,7 +175,7 @@ namespace gt::heat_transfer {
                     _calculate_h(SimImage, s, reaSource, imgSource);
                 }
             }
-            pool.join();
+
             auto end2 = std::chrono::steady_clock::now();
             if (disp) {
                 auto milli = std::chrono::duration_cast<std::chrono::milliseconds>(end2 - end).count();
@@ -249,8 +246,6 @@ namespace gt::heat_transfer {
 //                } // end for
 //            } // fi (end if)
 
-            /** Wait for all the threads in vector to join **/
-            pool.join();
             auto end = std::chrono::steady_clock::now();
             if (disp) {
                 auto milli = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();

@@ -12,9 +12,11 @@
 #include <tuple>
 #include <cpgfunction/statistics.h>
 #include <stdexcept>
+#include <chrono>
 
 
-void export_gFunction(std::string output_path, std::vector<double> logtime, std::vector<double> gFunction) {
+void export_gFunction(std::string output_path, std::vector<double> logtime,
+                      std::vector<double> gFunction) {
     std::ofstream o(output_path);
 
     nlohmann::json j;
@@ -96,7 +98,8 @@ int main(){
         vector<double> gFunction =
                 gt::gfunction::uniform_borehole_wall_temperature(boreField,
                                                                  time, alpha,
-                                                                 12, true,
+                                                                 12,
+                                                                 true,
                                                                  true);
         auto end = std::chrono::steady_clock::now();
         auto milli = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();

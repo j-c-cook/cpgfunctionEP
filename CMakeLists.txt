@@ -9,7 +9,7 @@ endif()
 # Everything will need to access this
 include_directories(include)
 # Third party includes
-include_directories(third_party/boost-1.71.0)  # It depends on boost (stripped)
+#include_directories(third_party/boost-1.71.0)  # It depends on boost (stripped)
 include_directories(third_party/nlohmann-3.9.1)
 include_directories(third_party/eigen-3.3.9)  # Eigen for LU decomposition
 #include_directories(third_party)  # Gauss-Kronrod Integration

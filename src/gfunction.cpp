@@ -8,7 +8,6 @@
 #include <chrono>
 #include <cpgfunction/interpolation.h>
 #include <thread>
-#include <boost/asio.hpp>
 #include <blas/blas.h>
 #include <Eigen/Dense>
 
@@ -64,16 +63,8 @@ namespace gt { namespace gfunction {
         gt::heat_transfer::SegmentResponse SegRes(nSources, nSum, nt);
 
         // Split boreholes into segments
-//        vector<gt::boreholes::Borehole> boreSegments(nSources);
-//        _borehole_segments(boreSegments, boreField, nSegments);
-
-        // TODO: make SegRes hold all Segment Response specific stuff
         _borehole_segments(SegRes.boreSegments, boreField, nSegments);
 
-        // Initialize segment-to-segment response factors (https://slaystudy.com/initialize-3d-vector-in-c/)
-        // NOTE: (nt + 1), the first row will be full of zeros for later interpolation
-        vector< vector< vector<double> > > h_ij(1 ,
-                                                vector< vector<double> > (1, vector<double> (1, 0.0)) );
         // Calculate segment to segment thermal response factors
         auto start = std::chrono::steady_clock::now();
         gt::heat_transfer::thermal_response_factors(SegRes,
@@ -106,22 +97,14 @@ namespace gt { namespace gfunction {
         double LU_decomposition_time = 0;
 
         auto start2 = std::chrono::steady_clock::now();
-        boost::asio::thread_pool pool(processor_count);
 
         // ------ Segment lengths -------
         start = std::chrono::steady_clock::now();
         std::vector<float> Hb(nSources);
-        auto _segmentlengths = [&SegRes, &Hb](const int nSources) {
-            for (int b=0; b<nSources; b++) {
-                Hb[b] = SegRes.boreSegments[b].H;
-            } // next b
-        }; // auto _segmentlengths
-        if (multi_thread) {
-            boost::asio::post(pool, [nSources, &_segmentlengths]
-                { _segmentlengths(nSources); });
-        } else {
-            _segmentlengths(nSources);
-        }  // if (multi_thread);
+        # pragma omp parallel for num_threads(processor_count)
+        for (int b=0; b<nSources; b++) {
+            Hb[b] = SegRes.boreSegments[b].H;
+        } // next b
 
         end = std::chrono::steady_clock::now();
         milli = chrono::duration_cast<chrono::milliseconds>
@@ -135,31 +118,41 @@ namespace gt { namespace gfunction {
         std::vector<double> _time(time.size()+1);
         std::vector<double> dt(_time_untouched.size());
 
-        auto _fill_time = [&_time, &time, &dt, &_time_untouched]() {
-            for (int i=0; i<_time.size(); i++) {
-                if (i==0) {
-                    _time[0] = 0;
-                    _time_untouched[0] = 0;
-                    dt[i] = time[i];
-                } else {
-                    _time[i] = time[i-1];
-                    _time_untouched[i] = time[i-1];
-                    dt[i] = time[i] - time[i-1];
-                } // fi
-            } // next i
-        }; // auto _fill_time
-        if (multi_thread) {
-            boost::asio::post(pool, [&_fill_time]{ _fill_time() ;});
-        } else {
-            _fill_time();
-        }  // if (multi_thread);
+//        auto _fill_time = [&_time, &time, &dt, &_time_untouched]() {
+//            for (int i=0; i<_time.size(); i++) {
+//                if (i==0) {
+//                    _time[0] = 0;
+//                    _time_untouched[0] = 0;
+//                    dt[i] = time[i];
+//                } else {
+//                    _time[i] = time[i-1];
+//                    _time_untouched[i] = time[i-1];
+//                    dt[i] = time[i] - time[i-1];
+//                } // fi
+//            } // next i
+//        }; // auto _fill_time
+//        if (multi_thread) {
+//            boost::asio::post(pool, [&_fill_time]{ _fill_time() ;});
+//        } else {
+//            _fill_time();
+//        }  // if (multi_thread);
+        # pragma omp parallel for num_threads(processor_count)
+        for (int i=0; i<_time.size(); i++) {
+            if (i==0) {
+                _time[0] = 0;
+                _time_untouched[0] = 0;
+                dt[i] = time[i];
+            } else {
+                _time[i] = time[i-1];
+                _time_untouched[i] = time[i-1];
+                dt[i] = time[i] - time[i-1];
+            } // fi
+        } // next i
 
         end = std::chrono::steady_clock::now();
         milli = chrono::duration_cast<chrono::milliseconds>
                 (end - start).count();
         time_vector_time += milli;
-
-        pool.join(); // starting up a new idea after this, pool will close here
 
         // ---------- segment h values -------------
         /** Starting up pool2 here **/
@@ -262,19 +255,13 @@ namespace gt { namespace gfunction {
                     } // fi
                 } // next k
             };
-            boost::asio::thread_pool pool3(processor_count);
             // A needs filled each loop because the _gsl partial pivot
             // decomposition modifies the matrix
             // TODO: Look into reducing the number of times A is built given that Eigen is now being used
+            # pragma omp parallel for num_threads(processor_count)
             for (int i=0; i<SIZE; i++) {
-                if (multi_thread) {
-                    boost::asio::post(pool3, [&_fillA, i, p, SIZE]
-                        { _fillA(i, p, SIZE) ;});
-                } else {
-                    _fillA(i, p, SIZE);
-                }  // if (multi_thread);
+                _fillA(i, p, SIZE);
             }  // next i
-            pool3.join();
             end = std::chrono::steady_clock::now();  // _fill_A
             milli = chrono::duration_cast<chrono::milliseconds>
                     (end - start).count();
@@ -404,8 +391,8 @@ namespace gt { namespace gfunction {
     } // void _borehole_segments
 
     void load_history_reconstruction(std::vector<double>& q_reconstructed,
-            vector<double>& time, vector<double>& _time, vector<vector<double> >& Q,
-            vector<double>& dt, const int p) {
+            vector<double>& time, vector<double>& _time,
+            vector<vector<double> >& Q, vector<double>& dt, const int p) {
         // for s in range p+1
         int nSources = Q.size();
 
