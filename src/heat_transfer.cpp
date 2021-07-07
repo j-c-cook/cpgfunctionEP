@@ -10,10 +10,10 @@
 #include <cmath>
 #include <qdt.h>
 
-namespace gt::heat_transfer {
+using namespace gt;
+using namespace std;
 
-    using namespace gt;
-    using namespace std;
+namespace gt::heat_transfer {
 
     double finite_line_source(const double time_, const double alpha,
                               boreholes::Borehole &b1, boreholes::Borehole &b2,
@@ -55,12 +55,10 @@ namespace gt::heat_transfer {
     } // void finite_line_source
 
     void thermal_response_factors(SegmentResponse &SegRes,
-                             vector<vector<vector<double> > >& h_ij,
-                             vector<boreholes::Borehole> &boreSegments,
-                             vector<double> &time, const double alpha,
-                             bool use_similaries, bool disp) {
+                                  vector<double> &time, const double alpha,
+                                  bool use_similaries, bool disp) {
         // total number of line sources
-        int nSources = boreSegments.size();
+        int nSources = SegRes.boreSegments.size();
         // number of time values
         int nt = time.size();
 
@@ -81,7 +79,6 @@ namespace gt::heat_transfer {
         auto sum_to_n = [](const int n) {
             return n * (n + 1) / 2;
         };
-
         if (use_similaries) {
             auto start = std::chrono::steady_clock::now();
             // Calculations with similarities
@@ -92,7 +89,7 @@ namespace gt::heat_transfer {
             double disTol = 0.1;
             double tol = 1.0e-6;
             gt::boreholes::Similarity sim;
-            sim.similarities(SimReal, SimImage, boreSegments,
+            sim.similarities(SimReal, SimImage, SegRes.boreSegments,
                              splitRealAndImage, disTol, tol);
 
             // ---
@@ -101,10 +98,10 @@ namespace gt::heat_transfer {
             int Ntot = sum_to_n(nSources);
 
             // lambda function for calculating h at each time step
-            auto _calculate_h =
-                    [&boreSegments, &splitRealAndImage, &time, &alpha, &nt,
-                     &SegRes](boreholes::SimilaritiesType &SimReal, int s,
-                             bool reaSource, bool imgSource) {
+            auto _calculate_h = [&SegRes, &splitRealAndImage, &time, &alpha,
+                                 &nt](boreholes::SimilaritiesType &SimReal,
+                                         int s, bool reaSource,
+                                         bool imgSource) {
                 // begin function
                 int n1;
                 int n2;
@@ -113,49 +110,53 @@ namespace gt::heat_transfer {
                 // begin thread
                 n1 = get<0>(SimReal.Sim[s][0]);
                 n2 = get<1>(SimReal.Sim[s][0]);
-                b1 = boreSegments[n1];
-                b2 = boreSegments[n2];
+                b1 = SegRes.boreSegments[n1];
+                b2 = SegRes.boreSegments[n2];
                 vector<double> hPos(nt);
                 if (splitRealAndImage) {
                     for (int k=0; k<nt; k++) {
-                        hPos[k] = finite_line_source(time[k], alpha, b1, b2, reaSource, imgSource);
+                        hPos[k] = finite_line_source(time[k], alpha, b1,
+                                                     b2, reaSource, imgSource);
                     }  // next k
                     int i;
                     int j;
-                    if (SegRes.storage_mode==0) {
-                        // not looping through every (i, j), real and image stored separately
-                        // TODO: make the option to store entire matrix
-                        throw std::invalid_argument("This storage mode does not currently exist.");
-                    } else if (SegRes.storage_mode==1) {
+                    if (SegRes.storage_mode==1) {
                         // will loop through every (i, j), will combine real+image
                         int index;
                         for (std::size_t k=0; k<SimReal.Sim[s].size(); k++) {
                             i = get<0>(SimReal.Sim[s][k]);
                             j = get<1>(SimReal.Sim[s][k]);
                             for (std::size_t t=0; t<time.size(); t++){
-                                // must consider real and image source separate when combining
+                                // must consider real and image source separate
+                                // when combining
                                 if (i <= j) {
                                     // we want to store n2, n1
                                     SegRes.get_index_value(index, i, j);
-                                    SegRes.h_ij[index][t] += b2.H / b1.H * hPos[t]; // non-critical race condition
+                                    // non-critical race condition
+                                    SegRes.h_ij[index][t] += b2.H / b1.H * hPos[t];
                                 } else {
                                     SegRes.get_index_value(index, j, i);
-                                    SegRes.h_ij[index][t] += hPos[t]; // non-critical race condition
+                                    // non-critical race condition
+                                    SegRes.h_ij[index][t] += hPos[t];
                                 }  // else ()
                             }  // next t
                         }  // next k
                     }  // else if(SegRes.storage_mode==1)
                 } else {
-                    throw std::invalid_argument( "Not yet written yet.");
+                    throw std::invalid_argument( "Currently, the only "
+                                                 "Segment Response storage"
+                                                 "mode available is 1. This"
+                                                 "corresponds to a packed "
+                                                 "matrix.");
                 }
             };
             auto end = std::chrono::steady_clock::now();
             if (disp) {
-                auto milli = chrono::duration_cast<chrono::milliseconds>(end - start).count();
+                auto milli = chrono::duration_cast<
+                        chrono::milliseconds>(end - start).count();
                 double seconds = double(milli) / 1000;
-                std::cout << "Elapsed time in seconds : "
-                          << seconds
-                          << " sec" << std::endl;
+                std::cout << "Elapsed time in seconds : " << seconds
+                << " sec" << std::endl;
                 std::cout << "Calculating segment to segment response "
                              "factors ..." << std::endl;
             } // end if
@@ -163,20 +164,18 @@ namespace gt::heat_transfer {
             // inputs
             bool reaSource;
             bool imgSource;
+            # pragma omp parallel for num_threads(processor_count)
             for (int s=0; s<SimReal.nSim; s++) {
                 reaSource = true;
                 imgSource = false;
-                boost::asio::post(pool, [&_calculate_h, &SimReal, s, reaSource, imgSource]
-                { _calculate_h(SimReal, s, reaSource, imgSource); });
-//                _calculate_h(SimReal, s, reaSource, imgSource, hash_mode);
+                _calculate_h(SimReal, s, reaSource, imgSource);
             } // next s
             if (splitRealAndImage) {
                 reaSource = false;
                 imgSource = true;
+                # pragma omp parallel for num_threads(processor_count)
                 for (int s=0; s<SimImage.nSim; s++) {
-                    boost::asio::post(pool, [&_calculate_h, &SimImage, s, reaSource, imgSource]
-                    { _calculate_h(SimImage, s, reaSource, imgSource); });
-//                    _calculate_h(SimImage, s, reaSource, imgSource, hash_mode);
+                    _calculate_h(SimImage, s, reaSource, imgSource);
                 }
             }
             pool.join();
@@ -196,59 +195,59 @@ namespace gt::heat_transfer {
             bool sameSegment;
             bool otherSegment;
 
-            auto _fill_line = [&h_ij, &time, &boreSegments](const int i, const int j, const double alpha,
-                    bool sameSegment, bool otherSegment) {
-                auto _dot_product = [&h_ij, &time](const int i, const int j, const double constant) {
-                    for (std::size_t k=0; k < time.size(); k++) {
-                        h_ij[j][i][k+1] = constant * h_ij[i][j][k+1];
-                    } // end for
-                };
-                double h;
-                double constant;
-                gt::boreholes::Borehole b1;
-                gt::boreholes::Borehole b2;
-                b2 = boreSegments[i];
-                for (std::size_t k = 0; k < time.size(); k++) {
-                    double t = time[k];
-                    if (!otherSegment){
-                        if (sameSegment) {
-                            b1 = boreSegments[i];
-                            h = finite_line_source(t, alpha, b2, b2);
-                        }
-                    } else if (otherSegment && !sameSegment) {
-                        b1 = boreSegments[j];
-                        h = finite_line_source(t, alpha, b1, b2);
-                    } else {
-                        throw std::invalid_argument( "sameSegment and otherSegment cannot both be true" );
-                    } // end if
-                    h_ij[i][j][k+1] = h;
-                    if (!sameSegment) {
-                        if (otherSegment) {
-                            constant = double(b2.H / b1.H);
-                            _dot_product(i, j, constant);
-                        }
-                    } // end if
-                }; // end for
-            }; // auto _fill_line
+//            auto _fill_line = [&h_ij, &time, &boreSegments](const int i, const int j, const double alpha,
+//                    bool sameSegment, bool otherSegment) {
+//                auto _dot_product = [&h_ij, &time](const int i, const int j, const double constant) {
+//                    for (std::size_t k=0; k < time.size(); k++) {
+//                        h_ij[j][i][k+1] = constant * h_ij[i][j][k+1];
+//                    } // end for
+//                };
+//                double h;
+//                double constant;
+//                gt::boreholes::Borehole b1;
+//                gt::boreholes::Borehole b2;
+//                b2 = boreSegments[i];
+//                for (std::size_t k = 0; k < time.size(); k++) {
+//                    double t = time[k];
+//                    if (!otherSegment){
+//                        if (sameSegment) {
+//                            b1 = boreSegments[i];
+//                            h = finite_line_source(t, alpha, b2, b2);
+//                        }
+//                    } else if (otherSegment && !sameSegment) {
+//                        b1 = boreSegments[j];
+//                        h = finite_line_source(t, alpha, b1, b2);
+//                    } else {
+//                        throw std::invalid_argument( "sameSegment and otherSegment cannot both be true" );
+//                    } // end if
+//                    h_ij[i][j][k+1] = h;
+//                    if (!sameSegment) {
+//                        if (otherSegment) {
+//                            constant = double(b2.H / b1.H);
+//                            _dot_product(i, j, constant);
+//                        }
+//                    } // end if
+//                }; // end for
+//            }; // auto _fill_line
 
-            for (int i = 0; i < nSources; i++) {
-                // Segment to same-segment thermal response factor
-                // FLS solution for combined real and image sources
-                sameSegment = true;
-                otherSegment = false;
-                boost::asio::post(pool, [i, alpha, sameSegment, otherSegment, &_fill_line]
-                { _fill_line(i, i, alpha, true, false); });
-//                _fill_line(i, i, alpha, sameSegment, otherSegment); // could call with no threading during debugging
-
-                // Segment to other segment thermal response factor
-                for (int j = i + 1; j<nSources; j++) {
-                    sameSegment = false;
-                    otherSegment = true;
-                    boost::asio::post(pool, [i, j, alpha, sameSegment, otherSegment, &_fill_line]
-                    { _fill_line(i, j, alpha, sameSegment, otherSegment); });
-//                    _fill_line(i, j, alpha, sameSegment, otherSegment);  // could call with no threading during debugging
-                } // end for
-            } // fi (end if)
+//            for (int i = 0; i < nSources; i++) {
+//                // Segment to same-segment thermal response factor
+//                // FLS solution for combined real and image sources
+//                sameSegment = true;
+//                otherSegment = false;
+//                boost::asio::post(pool, [i, alpha, sameSegment, otherSegment, &_fill_line]
+//                { _fill_line(i, i, alpha, true, false); });
+////                _fill_line(i, i, alpha, sameSegment, otherSegment); // could call with no threading during debugging
+//
+//                // Segment to other segment thermal response factor
+//                for (int j = i + 1; j<nSources; j++) {
+//                    sameSegment = false;
+//                    otherSegment = true;
+//                    boost::asio::post(pool, [i, j, alpha, sameSegment, otherSegment, &_fill_line]
+//                    { _fill_line(i, j, alpha, sameSegment, otherSegment); });
+////                    _fill_line(i, j, alpha, sameSegment, otherSegment);  // could call with no threading during debugging
+//                } // end for
+//            } // fi (end if)
 
             /** Wait for all the threads in vector to join **/
             pool.join();

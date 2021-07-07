@@ -45,8 +45,6 @@ namespace gt::heat_transfer {
                               boreholes::Borehole& b1, boreholes::Borehole& b2,
                               bool reaSource=true, bool imgSource=true);
     void thermal_response_factors(SegmentResponse &SegRes,
-                                  vector<vector<vector<double> > >& h_ij,
-                                  vector<boreholes::Borehole>& boreSegments,
                                   vector<double>& time, double alpha,
                                   bool use_similaries, bool disp=false);
 

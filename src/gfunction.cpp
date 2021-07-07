@@ -38,8 +38,15 @@ namespace gt { namespace gfunction {
         // Create a vector of threads
         //may return 0 when not able to detect
         const auto processor_count = thread::hardware_concurrency();
-//        // Launch the pool with n threads.
-//        cout << "\tDetected " << processor_count << " as the number of available threads" << endl;
+        // TODO: make n_threads optional
+        n_Threads = int(processor_count);
+
+        if (display) {
+            // Launch the pool with n threads.
+            cout << "\tDetected " << processor_count <<
+                 " as the number of available threads" << endl;
+            cout << "\tMaking use of " << n_Threads << " threads." << endl;
+        }
 
         // Number of boreholes
         int nbh = boreField.size();
@@ -57,8 +64,8 @@ namespace gt { namespace gfunction {
         gt::heat_transfer::SegmentResponse SegRes(nSources, nSum, nt);
 
         // Split boreholes into segments
-        vector<gt::boreholes::Borehole> boreSegments(nSources);
-        _borehole_segments(boreSegments, boreField, nSegments);
+//        vector<gt::boreholes::Borehole> boreSegments(nSources);
+//        _borehole_segments(boreSegments, boreField, nSegments);
 
         // TODO: make SegRes hold all Segment Response specific stuff
         _borehole_segments(SegRes.boreSegments, boreField, nSegments);
@@ -70,11 +77,10 @@ namespace gt { namespace gfunction {
         // Calculate segment to segment thermal response factors
         auto start = std::chrono::steady_clock::now();
         gt::heat_transfer::thermal_response_factors(SegRes,
-                                                    h_ij,
-                                                    boreSegments,
                                                     time,
                                                     alpha,
-                                                    use_similarities, display);
+                                                    use_similarities,
+                                                    display);
         auto end = std::chrono::steady_clock::now();
 
         if (display) {
@@ -105,9 +111,9 @@ namespace gt { namespace gfunction {
         // ------ Segment lengths -------
         start = std::chrono::steady_clock::now();
         std::vector<float> Hb(nSources);
-        auto _segmentlengths = [&boreSegments, &Hb](const int nSources) {
+        auto _segmentlengths = [&SegRes, &Hb](const int nSources) {
             for (int b=0; b<nSources; b++) {
-                Hb[b] = boreSegments[b].H;
+                Hb[b] = SegRes.boreSegments[b].H;
             } // next b
         }; // auto _segmentlengths
         if (multi_thread) {

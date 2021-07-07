@@ -93,9 +93,11 @@ int main(){
         std::cout << "Compute g-function for borefield of shape: " + shape << std::endl;
         auto start = std::chrono::steady_clock::now();
         // Compute uniform borehole wall temperature g-function
-        vector<double> gFunction = gt::gfunction::uniform_borehole_wall_temperature(boreField, time, alpha,
-                                                                                    12, true,
-                                                                                    true);
+        vector<double> gFunction =
+                gt::gfunction::uniform_borehole_wall_temperature(boreField,
+                                                                 time, alpha,
+                                                                 12, true,
+                                                                 true);
         auto end = std::chrono::steady_clock::now();
         auto milli = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
         double seconds = double(milli) / 1000;
