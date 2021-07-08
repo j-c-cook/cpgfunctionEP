@@ -13,6 +13,15 @@
   files in `third_party/` rather than CMake finding the library in path. Boost
   is stripped to only the required libraries so that the size of the dependency
   is reduced.
+  
+### Fixes
+  
+* [Issue 10](https://github.com/j-c-cook/cpgfunctionEP/issues/10) - Vector over flow error associated with number of 
+  time steps being less than 6 is fixed. 
+  Commit [558c63c](https://github.com/j-c-cook/cpgfunctionEP/commit/558c63c9b5c4041282fdb473327463b8fe183fbd)
+  fixes a vector overflow error that occured when the number of time steps described were less than 6 (`nt<6`). Commit
+  [94e222b](https://github.com/j-c-cook/cpgfunctionEP/commit/94e222bb0cf670f1a4f3058bd1b7b6c7f8bf8233) now allows the 
+  function time_geometric to have less than 6 time steps. 
 
 
 # History of changes (cpgfunction)
