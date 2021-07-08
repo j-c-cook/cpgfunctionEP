@@ -116,7 +116,7 @@ namespace gt { namespace gfunction {
         // create new time vector that starts at 0
         std::vector<double> _time_untouched(time.size()+1);
         std::vector<double> _time(time.size()+1);
-        std::vector<double> dt(_time_untouched.size());
+        std::vector<double> dt(time.size()+1);
 
 //        auto _fill_time = [&_time, &time, &dt, &_time_untouched]() {
 //            for (int i=0; i<_time.size(); i++) {
@@ -145,7 +145,11 @@ namespace gt { namespace gfunction {
             } else {
                 _time[i] = time[i-1];
                 _time_untouched[i] = time[i-1];
-                dt[i] = time[i] - time[i-1];
+                if (i < time.size()) {
+                    dt[i] = time[i] - time[i-1];
+                } else if (i == time.size()) {
+                    dt[i] = time[i-1] - time[i-2];
+                }
             } // fi
         } // next i
 
