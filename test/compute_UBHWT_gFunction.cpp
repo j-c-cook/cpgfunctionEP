@@ -12,9 +12,11 @@
 #include <tuple>
 #include <cpgfunction/statistics.h>
 #include <stdexcept>
+#include <chrono>
 
 
-void export_gFunction(std::string output_path, std::vector<double> logtime, std::vector<double> gFunction) {
+void export_gFunction(std::string output_path, std::vector<double> logtime,
+                      std::vector<double> gFunction) {
     std::ofstream o(output_path);
 
     nlohmann::json j;
@@ -93,9 +95,12 @@ int main(){
         std::cout << "Compute g-function for borefield of shape: " + shape << std::endl;
         auto start = std::chrono::steady_clock::now();
         // Compute uniform borehole wall temperature g-function
-        vector<double> gFunction = gt::gfunction::uniform_borehole_wall_temperature(boreField, time, alpha,
-                                                                                    12, true,
-                                                                                    true);
+        vector<double> gFunction =
+                gt::gfunction::uniform_borehole_wall_temperature(boreField,
+                                                                 time, alpha,
+                                                                 12,
+                                                                 true,
+                                                                 true);
         auto end = std::chrono::steady_clock::now();
         auto milli = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
         double seconds = double(milli) / 1000;
@@ -115,7 +120,7 @@ int main(){
             double rmse = gt::statistics::root_mean_square_error(gFunctionReference, gFunction);
             rmse *= 100;
 
-            if (rmse > 1.0E-12) {
+            if (rmse > 1.0E-3) {
                 throw std::invalid_argument("The root mean square error is more than 0.");
             }
 

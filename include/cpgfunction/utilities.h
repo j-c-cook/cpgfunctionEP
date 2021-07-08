@@ -2,12 +2,12 @@
 // Created by jackcook on 7/11/20.
 //
 
-#ifndef CPPGFUNCTION_UTILITIES_H
-#define CPPGFUNCTION_UTILITIES_H
-
 #include <iostream>
 #include <vector>
 #include <cmath>
+
+#ifndef CPPGFUNCTION_UTILITIES_H
+#define CPPGFUNCTION_UTILITIES_H
 
 namespace gt {
     namespace utilities {

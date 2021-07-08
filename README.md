@@ -1,4 +1,4 @@
-# cpgfunction
+# cpgfunctionEP
 An open source low level (C++) implementation of [Massimo Cimmino][1]'s
 g-function methodology. The g-function calculation has to do with the distribution
 of heat in a ground heat exchanger (GHE). The g-function, after computed,
@@ -70,6 +70,15 @@ Test project /home/edwin/Projects/cpgfunction/cmake-build-debug
 This ran what used to just be the main.cpp built file.
 
 # Acknowledgments
+The initial funding of this research project was provided by Dr. Jeffrey D. 
+Spitler of Oklahoma State University. Further development of the library was
+funded by the National Renewable Energy Laboratory (NREL), which is owned by
+the U.S. Department of Energy (DOE). The NREL contract requests delivery of 
+cpgfunction for use in EnergyPlus as a third party tool to calculate fast and 
+accurate g-functions. Initial integration into EnergyPlus makes use of the 
+UBHWT boundary condition with the adaptive discretization scheme to approximate 
+UIFT g-functions.
+
 The original g-function theory appeared in a Per Eskilon's PhD thesis,
 his advisor who helped develop that theory was Prof. Johan Claesson of Lund
 University in Sweden. Massimo Cimmino, Assistant Professor at Polytechnique

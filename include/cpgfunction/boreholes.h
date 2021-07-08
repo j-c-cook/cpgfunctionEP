@@ -2,20 +2,21 @@
 // Created by jackcook on 7/11/20.
 //
 
-#ifndef CPPGFUNCTION_BOREHOLES_H
-#define CPPGFUNCTION_BOREHOLES_H
-
 #include <iostream>
 #include <math.h>
 #include <tuple>
 #include <vector>
+
+using namespace std;
+
+#ifndef CPPGFUNCTION_BOREHOLES_H
+#define CPPGFUNCTION_BOREHOLES_H
 
 namespace gt {
 
     double Distance_Formula(double x1, double y1, double x2, double y2);
 
     namespace boreholes {
-        using namespace std;
         struct Borehole {
             // Destructor
             virtual ~Borehole() {
@@ -27,23 +28,28 @@ namespace gt {
             double x;    // position (meters) of the center of the borehole along the x-axis
             double y;    // position (meters) of the center of the borehole along the y-axis
 
-            Borehole(double H=0.0, double D=0.0, double r_b=0.0, double x=0.0, double y=0.0) : H(H), D(D), r_b(r_b), x(x), y(y) {
+            Borehole(double H=0.0,
+                     double D=0.0,
+                     double r_b=0.0,
+                     double x=0.0,
+                     double y=0.0) : H(H), D(D), r_b(r_b), x(x), y(y) {
             }
 
             double distance(Borehole target);
-            std::tuple<double, double> position();
+            tuple<double, double> position();
         };
 
-        std::vector<Borehole> boreField(const std::vector<std::tuple<double, double>> &coordinates, const double &r_b,
-                                        const double &H, const double &D);
+        vector<Borehole>boreField(
+                const vector<tuple<double, double> > &coordinates,
+                const double &r_b, const double &H, const double &D);
 
         struct SimilaritiesType {
             ~SimilaritiesType() {} // destructor
 
             int nSim = 0;
             vector< vector <tuple<int, int> > > Sim;
-            vector<tuple<double, double>> HSim;
-            vector<tuple<double, double>> DSim;
+            vector<tuple<double, double> > HSim;
+            vector<tuple<double, double> > DSim;
             vector<double> disSim;
 
             SimilaritiesType() {} // constructor
@@ -57,14 +63,14 @@ namespace gt {
             vector<int> nSimPos;  // number of positive similarities
             vector<vector<tuple<int, int> > > simPos;  // number of sim positions
             vector<double> disSimPos;  // the distances between each position
-            vector<tuple<int, int>> HSimPos;  // the heights of each borehole
-            vector<tuple<int, int>> DSimPos;  // the burial depth of each borehole
+            vector<tuple<int, int> > HSimPos;  // the heights of each borehole
+            vector<tuple<int, int> > DSimPos;  // the burial depth of each borehole
             // negative similarities
             vector<int> nSimNeg;
             vector<vector<tuple<int, int> > > simNeg;
             vector<double> disSimNeg;
-            vector<tuple<int, int>> HSimNeg;
-            vector<tuple<int, int>> DSimNeg;
+            vector<tuple<int, int> > HSimNeg;
+            vector<tuple<int, int> > DSimNeg;
 
             Similarity() {} // constructor
 

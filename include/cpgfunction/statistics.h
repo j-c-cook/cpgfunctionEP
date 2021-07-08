@@ -2,12 +2,12 @@
 // Created by jackcook on 5/10/21.
 //
 
-#ifndef CPGFUNCTION_STATISTICS_H
-#define CPGFUNCTION_STATISTICS_H
-
 #include <iostream>
 #include <vector>
 #include <cmath>
+
+#ifndef CPGFUNCTION_STATISTICS_H
+#define CPGFUNCTION_STATISTICS_H
 
 namespace gt {
     namespace statistics {

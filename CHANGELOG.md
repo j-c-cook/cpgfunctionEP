@@ -1,4 +1,45 @@
-# History of changes 
+# History of changes (cpgfunctionEP)
+
+## Version 0.1.0 (2021-07-08)
+
+### Maintenance
+  
+* [Issue 9](https://github.com/j-c-cook/cpgfunctionEP/issues/9) - The project builds on Linux, MacOS and Windows upon
+  commit [558c63c](https://github.com/j-c-cook/cpgfunctionEP/pull/1/commits/558c63c9b5c4041282fdb473327463b8fe183fbd).
+  
+* [Issue 6](https://github.com/j-c-cook/cpgfunctionEP/issues/6) - Dependencies are placed into the `third_party/`
+  folder. The dependencies source code is pasted in, rather than using `git subtree` or `git submodule`.
+  
+* [Issue 5](https://github.com/j-c-cook/cpgfunctionEP/issues/5) - Blas and lapack have been removed, thus deprecating
+  libraries dependency on Fortran. The following lists what the Fortran function calls were replaced with by commit:
+  - Commit [a20d3ea](https://github.com/j-c-cook/cpgfunctionEP/pull/1/commits/a20d3eacec67d5994b65d6716774c50404e26428) - 
+  Replaces the blas copy function with the native C++ algorithm standard copy function (`std::copy`)
+  - Commits [ec35baf](https://github.com/j-c-cook/cpgfunctionEP/pull/1/commits/ec35baf21025bb61a105ac9edd06e1e348676702) 
+  and [70ab158](https://github.com/j-c-cook/cpgfunctionEP/pull/1/commits/70ab1585d0efe5dd53dca90f3cf5685585030ef9) - 
+  Replaces the `blas::axpy` Fortran code with a C++ version. 
+  - Commit [383bf08](https://github.com/j-c-cook/cpgfunctionEP/pull/1/commits/383bf08f31d020af2cabe63d0d8b86eb4bbb8191) -
+  Replaces the symmetric packed matrix Fortran call with C++ code. 
+  - Commit [231e35e](https://github.com/j-c-cook/cpgfunctionEP/pull/1/commits/231e35ea416fe0943514cc82dc79238f3f2b79dd) - The 
+  LU decomposition of lapack is replaced by an Eigen function call.
+  
+* [Issue 3](https://github.com/j-c-cook/cpgfunctionEP/issues/3) - Boost is removed by replacing the thread pools with 
+  `OpenMP` calls, and the Gauss-Kronrod integration is replaced with a header only file by the name of 
+  [qdt](https://github.com/j-c-cook/cpgfunctionEP/tree/MilestoneV0.1/third_party/qdt-master). Qdt is a library 
+  written by Adolfo Munoz who released the code alongside a paper by the name of "Higher Order Ray Marching". 
+  The Kronrod integral of Munoz appears much faster than boost's. 
+  
+  
+### Fixes
+  
+* [Issue 10](https://github.com/j-c-cook/cpgfunctionEP/issues/10) - Vector over flow error associated with number of 
+  time steps being less than 6 is fixed. 
+  Commit [558c63c](https://github.com/j-c-cook/cpgfunctionEP/commit/558c63c9b5c4041282fdb473327463b8fe183fbd)
+  fixes a vector overflow error that occured when the number of time steps described were less than 6 (`nt<6`). Commit
+  [94e222b](https://github.com/j-c-cook/cpgfunctionEP/commit/94e222bb0cf670f1a4f3058bd1b7b6c7f8bf8233) now allows the 
+  function time_geometric to have less than 6 time steps. 
+
+
+# History of changes (cpgfunction)
 
 ## Version 2.0.0 (2021-05-23)
 

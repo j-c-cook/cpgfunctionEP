@@ -4,15 +4,15 @@
 // Created by jackcook on 7/11/20.
 //
 
-#ifndef CPPGFUNCTION_GFUNCTION_H
-#define CPPGFUNCTION_GFUNCTION_H
-
 #include <iostream>
 #include <vector>
 #include <cpgfunction/boreholes.h>
 #include <cpgfunction/heat_transfer.h>
 
 using namespace std;
+
+#ifndef CPPGFUNCTION_GFUNCTION_H
+#define CPPGFUNCTION_GFUNCTION_H
 
 /** The functions will be listed here in the order which they appear in the associated cpp file **/
 
@@ -48,7 +48,7 @@ namespace gfunction {
                                  vector<double> &h_ij, vector<double> &q_reconstructed, int p, int &nSources);
     void _solve_eqn(vector<double>& x, vector<vector<double>>& A, vector<double>& b);
 
+}  // namespace gfunction
 }  // namespace gt
-} // namespace gfunction
 
 #endif //CPPGFUNCTION_GFUNCTION_H

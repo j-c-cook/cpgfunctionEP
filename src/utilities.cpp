@@ -7,9 +7,6 @@
 namespace gt {
     namespace utilities {
         std::vector<double> time_geometric(double dt, double tmax, int Nt) {
-            if (Nt < 6) {
-                Nt = 6;
-            }
             std::vector<double> time(Nt);  // create a time vector of size Nt
 
             double value;

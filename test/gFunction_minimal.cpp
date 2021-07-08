@@ -22,12 +22,12 @@ int main() {
     double alpha = 1.0e-6;      // Ground thermal diffusivity (m2/s)
 
     // Number of segments per borehole
-    int nSegments = 25;
+    int nSegments = 2;
 
     // Geometrically expanding time vector.
     float dt = 100*3600.;                  // Time step
     double tmax = 3000. * 8760. * 3600.;    // Maximum time
-    int Nt = 30;                         // Number of time steps
+    int Nt = 6;                         // Number of time steps
     double ts = pow(H, 2)/(9.*alpha);            // Bore field characteristic time
 
     std::vector<double> time = gt::utilities::time_geometric(dt, tmax, Nt);
