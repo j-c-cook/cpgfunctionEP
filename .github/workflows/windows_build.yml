@@ -41,12 +41,11 @@ jobs:
     - name: Configure CMake
       working-directory: ./build
       shell: bash
-      run: |
-        set -x
-        cmake -G "Visual Studio 16 2019" -A ${{ matrix.vs-generator }} \
-              -DLINK_WITH_PYTHON=ON -DBUILD_FORTRAN=ON -DBUILD_PACKAGE:BOOL=ON \
-              -DDOCUMENTATION_BUILD="BuildWithAll" -DTEX_INTERACTION="batchmode" \
-              ../
+      run: cmake -G "Visual Studio 16 2019" -A ${{ matrix.vs-generator }} \
+          -DLINK_WITH_PYTHON=ON -DBUILD_FORTRAN=ON -DBUILD_PACKAGE:BOOL=ON \
+          -DDOCUMENTATION_BUILD="BuildWithAll" -DTEX_INTERACTION="batchmode" \
+          ../
+      
     - name: Build Package
       working-directory: ./build
       shell: bash
