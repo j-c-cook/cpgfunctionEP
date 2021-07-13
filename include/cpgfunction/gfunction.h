@@ -8,6 +8,7 @@
 #include <vector>
 #include <cpgfunction/boreholes.h>
 #include <cpgfunction/heat_transfer.h>
+#include <thread>
 
 using namespace std;
 
@@ -36,8 +37,9 @@ namespace gfunction {
     vector<double> uniform_borehole_wall_temperature(
             vector<gt::boreholes::Borehole> &boreField,
             vector<double> &time, double alpha, int nSegments=12,
-            bool use_similarities=true, bool adaptive=true, int n_Threads=1,
-            bool multi_thread=true, bool display=false);
+            bool use_similarities=true, bool adaptive=true,
+            int n_Threads=int(thread::hardware_concurrency()),
+            bool display=false);
 
     void _borehole_segments(vector<gt::boreholes::Borehole>& boreSegments,
                             vector<gt::boreholes::Borehole>& boreholes, int nSegments);

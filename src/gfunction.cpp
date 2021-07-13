@@ -21,7 +21,7 @@ namespace gt { namespace gfunction {
     vector<double> uniform_borehole_wall_temperature(
             vector<gt::boreholes::Borehole> &boreField, vector<double> &time,
             double alpha, int nSegments, bool use_similarities, bool adaptive,
-            int n_Threads, bool multi_thread, bool display){
+            int n_Threads, bool display){
         vector<double> gFunction(time.size());
 
         if (display) {
@@ -33,17 +33,8 @@ namespace gt { namespace gfunction {
                          "---------" << std::endl;
         }
         auto startall = std::chrono::steady_clock::now();
-        // Open up processes here
-        // Create a vector of threads
-        //may return 0 when not able to detect
-        const auto processor_count = thread::hardware_concurrency();
-        // TODO: make n_threads optional
-        n_Threads = int(processor_count);
 
         if (display) {
-            // Launch the pool with n threads.
-            cout << "\tDetected " << processor_count <<
-                 " as the number of available threads" << endl;
             cout << "\tMaking use of " << n_Threads << " threads." << endl;
         }
 
