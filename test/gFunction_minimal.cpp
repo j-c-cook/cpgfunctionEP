@@ -49,7 +49,13 @@ int main() {
     // Create borehole field
     std::vector<gt::boreholes::Borehole> boreField = gt::boreholes::boreField(coordinates, r_b, H, D);
 
-    std::vector<double> gFunction = gt::gfunction::uniform_borehole_wall_temperature(boreField, time, alpha, nSegments,true, true);
+    std::vector<double> gFunction =
+            gt::gfunction::uniform_borehole_wall_temperature(boreField,
+                                                             time,
+                                                             alpha,
+                                                             nSegments,
+                                                             true,
+                                                             true);
 
     for (double i : gFunction) {
         std::cout << i << std::endl;
