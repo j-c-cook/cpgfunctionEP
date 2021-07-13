@@ -41,15 +41,15 @@ IF(USE_OpenMP)
 ENDIF()
 
 # Create a test binary that depends on the DLL
-add_executable(test1 test/gFunction_minimal.cpp)
+add_executable(gFunction_minimal test/gFunction_minimal.cpp)
 add_executable(test2 test/interpolation.cpp)
 # add_executable(test3 test/configurations.cpp)
 add_executable(test4 test/borefield_definition.cpp)
 add_executable(test5 test/time_definition.cpp)
-add_executable(test6 test/compute_UBHWT_gFunction.cpp)
+add_executable(test6 test/gFunction_tests.cpp)
 add_executable(test7 test/packed.cpp)
 
-target_link_libraries(test1 cpgfunctionEP)
+target_link_libraries(gFunction_minimal cpgfunctionEP)
 target_link_libraries(test2 cpgfunctionEP)
 # target_link_libraries(test3 cpgfunctionEP)
 target_link_libraries(test4 cpgfunctionEP)
@@ -69,7 +69,7 @@ message(STATUS "The binary directory: ${CMAKE_BINARY_DIR}")
 enable_testing()
 
 # Test the test binary itself
-add_test(NAME RunTest1 COMMAND "${CMAKE_BINARY_DIR}/test1")
+add_test(NAME RunTest1 COMMAND "${CMAKE_BINARY_DIR}/gFunction_minimal")
 add_test(NAME RunTest2 COMMAND "${CMAKE_BINARY_DIR}/test2")
 # add_test(NAME RunTest3 COMMAND "${CMAKE_BINARY_DIR}/test3")
 add_test(NAME RunTest4 COMMAND "${CMAKE_BINARY_DIR}/test4")
