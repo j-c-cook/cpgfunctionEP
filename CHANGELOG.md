@@ -1,4 +1,24 @@
-# History of changes (cpgfunctionEP)
+# History of changes - cpgfunctionEP
+
+## Current version
+
+### Enhancements
+
+* [Issue 14](https://github.com/j-c-cook/cpgfunctionEP/issues/14) - The size of 
+  the borehole fields being run in the regression tests are reduced so that less 
+  time is spent running tests (that occur at each push). 
+  
+* [Issue 13](https://github.com/j-c-cook/cpgfunctionEP/issues/13) - The tests 
+  are only configured and ran if the main project being worked on is 
+  cpgfunctionEP. This is done because EnergyPlus will use this as a third party
+  subdirectory, and will not want to run the tests located in this library. 
+  
+### Changes
+
+* [Issue 8](https://github.com/j-c-cook/cpgfunctionEP/issues/8) - The uniform 
+  borehole wall temperature g-function calculation has an API change. The 
+  boolean argument for multi-threading is taken away. The number of threads is 
+  still an argument, and the default is all available threads on the processor. 
 
 ## Version 0.1.0 (2021-07-08)
 
@@ -39,7 +59,7 @@
   function time_geometric to have less than 6 time steps. 
 
 
-# History of changes (cpgfunction)
+# History of changes - cpgfunction
 
 ## Version 2.0.0 (2021-05-23)
 

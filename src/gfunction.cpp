@@ -21,7 +21,7 @@ namespace gt { namespace gfunction {
     vector<double> uniform_borehole_wall_temperature(
             vector<gt::boreholes::Borehole> &boreField, vector<double> &time,
             double alpha, int nSegments, bool use_similarities, bool adaptive,
-            int n_Threads, bool multi_thread, bool display){
+            int n_Threads, bool display){
         vector<double> gFunction(time.size());
 
         if (display) {
@@ -33,17 +33,8 @@ namespace gt { namespace gfunction {
                          "---------" << std::endl;
         }
         auto startall = std::chrono::steady_clock::now();
-        // Open up processes here
-        // Create a vector of threads
-        //may return 0 when not able to detect
-        const auto processor_count = thread::hardware_concurrency();
-        // TODO: make n_threads optional
-        n_Threads = int(processor_count);
 
         if (display) {
-            // Launch the pool with n threads.
-            cout << "\tDetected " << processor_count <<
-                 " as the number of available threads" << endl;
             cout << "\tMaking use of " << n_Threads << " threads." << endl;
         }
 
@@ -101,7 +92,7 @@ namespace gt { namespace gfunction {
         // ------ Segment lengths -------
         start = std::chrono::steady_clock::now();
         std::vector<float> Hb(nSources);
-        # pragma omp parallel for num_threads(processor_count)
+        # pragma omp parallel for num_threads(n_Threads)
         for (int b=0; b<nSources; b++) {
             Hb[b] = SegRes.boreSegments[b].H;
         } // next b
@@ -136,7 +127,7 @@ namespace gt { namespace gfunction {
 //        } else {
 //            _fill_time();
 //        }  // if (multi_thread);
-        # pragma omp parallel for num_threads(processor_count)
+        # pragma omp parallel for num_threads(n_Threads)
         for (int i=0; i<_time.size(); i++) {
             if (i==0) {
                 _time[0] = 0;
@@ -162,7 +153,6 @@ namespace gt { namespace gfunction {
         /** Starting up pool2 here **/
         // Launch the pool with n threads.
         auto tic = std::chrono::steady_clock::now();
-//        boost::asio::thread_pool pool2(processor_count);
         auto toc = std::chrono::steady_clock::now();
         if (display) {
             double milli = chrono::duration_cast<chrono::milliseconds>
@@ -262,7 +252,7 @@ namespace gt { namespace gfunction {
             // A needs filled each loop because the _gsl partial pivot
             // decomposition modifies the matrix
             // TODO: Look into reducing the number of times A is built given that Eigen is now being used
-            # pragma omp parallel for num_threads(processor_count)
+            # pragma omp parallel for num_threads(n_Threads)
             for (int i=0; i<SIZE; i++) {
                 _fillA(i, p, SIZE);
             }  // next i
@@ -464,8 +454,10 @@ namespace gt { namespace gfunction {
         }
     } // load_history_reconstruction
 
-    void _temporal_superposition(vector<double>& Tb_0, gt::heat_transfer::SegmentResponse &SegRes,
-                                 vector<double> &h_ij, vector<double> &q_reconstructed,
+    void _temporal_superposition(vector<double>& Tb_0,
+                                 gt::heat_transfer::SegmentResponse &SegRes,
+                                 vector<double> &h_ij,
+                                 vector<double> &q_reconstructed,
                                  const int p, int &nSources)
             {
         // This function performs equation (37) of Cimmino (2017)
@@ -482,15 +474,12 @@ namespace gt { namespace gfunction {
         int begin_1;  // integer declarations for where the linear algebra will begin
         int begin_2;
         int begin_q;  // time for q_reconstructed to begin
-        int inc = 1;  // the vectors are of increment 1, they can be completely unwrapped in BLAS
 
         double alpha = 1;
         double alpha_n = -1;
 
         std::vector<double>::iterator begin_it_1;
         std::vector<double>::iterator end_it_1;
-//        std::vector<double>::iterator begin_it_2;
-//        std::vector<double>::iterator end_it_2;
 
         for (int k = 0; k < nt; k++) {
             begin_1 = k * gauss_sum;
@@ -510,11 +499,7 @@ namespace gt { namespace gfunction {
             // q_reconstructed(t_k - t_k')
             begin_q = (nt - k - 1) * nSources;
             // dh_ij is a lower triangular packed matrix
-            char uplo = 'l';
             // Tb_0 = 1 * dh_ij * q(t_k-t_k') + 1 * Tb_0
-//            jcc::blas::dspmv_(&uplo, &nSources, &alpha, &*dh_ij.begin(),
-//                              &q_reconstructed.at(begin_q), &inc, &alpha,
-//                              &*Tb_0.begin(), &inc);
             jcc::blas::spmv(nSources, alpha, dh_ij, q_reconstructed, alpha,
                             Tb_0, begin_q, n_threads);
         }  // next k
