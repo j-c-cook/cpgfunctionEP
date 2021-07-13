@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   windows_build:
-    runs-on: self-hosted
+    runs-on: windows-2019
     continue-on-error: ${{ matrix.allow_failure }}
     strategy:
       # fail-fast: Default is true, switch to false to allow one platform to fail and still run others
