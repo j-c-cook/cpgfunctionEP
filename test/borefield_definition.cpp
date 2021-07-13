@@ -26,7 +26,8 @@ int main(){
     double r_b = 0.075;  // borehole radius (in meters)
 
     // -- boreField --
-    std::vector<gt::boreholes::Borehole> boreField = gt::boreholes::boreField(coordinates, r_b, H, D);
+    std::vector<gt::boreholes::Borehole> boreField =
+            gt::boreholes::boreField(coordinates, r_b, H, D);
 
     return 0;
 }
