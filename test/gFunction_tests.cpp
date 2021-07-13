@@ -54,8 +54,8 @@ int main(){
 
     // -- Definitions --
     // Coordinate geometry
-    int Nx = 10;
-    int Ny = 10;
+    int Nx = 8;
+    int Ny = 7;
     double Bx = 6.;
     double By = 4.5;
 
@@ -74,8 +74,12 @@ int main(){
     std::vector<double> logtime = gt::utilities::Eskilson_original_points();
 
     // -- Configurations --
-    std::vector<std::string> shapes{"Rectangle", "OpenRectangle", "U", "L", "custom"};
-    std::string custom_path = "Poisson_Disk_120_30_101.json";
+    std::vector<std::string> shapes{"Rectangle",
+                                    "OpenRectangle",
+                                    "U",
+                                    "L",
+                                    "custom"};
+    std::string custom_path = "poisson_disc_80_20.0_51.json";
 
     for (int i = 0; i < shapes.size(); i++) {
         // Field shape
