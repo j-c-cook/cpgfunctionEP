@@ -37,9 +37,9 @@ int main() {
     // Borehole fields
     // ---------------------------------------------------------
 
-    // Field of 6x8 (n=48) boreholes
-    int n1 = 6;
-    int n2 = 8;
+    // Field of 3x4 (n=12) boreholes
+    int n1 = 3;
+    int n2 = 4;
     // Coordinates
     std::vector<std::tuple<double, double>> coordinates =
             gt::coordinates::rectangle(n1, n2, B, B);
