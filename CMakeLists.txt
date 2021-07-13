@@ -12,11 +12,8 @@ endif()
 # Everything will need to access this
 include_directories(include)
 # Third party includes
-#include_directories(third_party/boost-1.71.0)  # It depends on boost (stripped)
 include_directories(third_party/nlohmann-3.9.1)
 include_directories(third_party/eigen-3.3.9)  # Eigen for LU decomposition
-#include_directories(third_party)  # Gauss-Kronrod Integration
-#include_directories(src third_party/cquadpack/src)
 include_directories(third_party/qdt-master)
 
 # Create a DLL with an API
@@ -29,11 +26,6 @@ add_library(cpgfunctionEP SHARED
         src/coordinates.cpp
         src/statistics.cpp
         src/blas.cpp)
-
-#add_subdirectory(third_party/cquadpack)
-#target_link_libraries(cpgfunctionEP third_party/cquadpack/cquadpack)
-#target_link_libraries(cpgfunctionEP cquadpack)
-#include_directories(${PROJECT_BINARY_DIR}/third_party/cquadpack)
 
 # It depends on threads
 find_package(Threads REQUIRED)
