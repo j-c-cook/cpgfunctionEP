@@ -14,6 +14,12 @@
 #include <stdexcept>
 #include <chrono>
 
+void export_gFunction(std::string output_path, std::vector<double> logtime,
+                      std::vector<double> gFunction);
+std::vector<std::tuple<double, double>> import_gFunction(std::string input_path);
+std::vector<std::tuple<double, double>> configuration(const std::string& shape,
+                                            const std::string& input_path);
+vector<tuple<double, double>> import_coordinates_from_file(const string& input_path);
 
 void export_gFunction(std::string output_path, std::vector<double> logtime,
                       std::vector<double> gFunction) {
@@ -46,6 +52,47 @@ std::vector<std::tuple<double, double>> import_gFunction(std::string input_path)
 
     return gFunction;
 }
+
+vector<tuple<double, double>> configuration(const string& shape,
+                                            const string& input_path){
+    // define acceptable inputs
+    std::vector<std::string> acceptable_arguments{"custom"};
+    // check if the input string is acceptable
+    bool acceptable = (std::find(acceptable_arguments.begin(),
+                                 acceptable_arguments.end(), shape) !=
+                       acceptable_arguments.end());
+
+    if (!acceptable) {
+        throw invalid_argument("The shape described (" +
+                               shape + ") is not an available input for "
+                                       "gt::coordinates::configuration().");
+    }
+
+    vector<tuple<double, double>> custom = import_coordinates_from_file(input_path);
+
+    return custom;
+}  // configuration();
+
+
+vector<tuple<double, double>> import_coordinates_from_file(
+        const string& input_path){
+    vector<tuple<double, double>> custom;  // custom-shape from .json file
+
+    // nlohmann json input
+    std::ifstream in(input_path);
+    nlohmann::json js;
+    in >> js;
+
+    std::vector<double> x = js["x"];
+    std::vector<double> y = js["y"];
+
+    custom.reserve(x.size());
+    for (int i = 0; i < x.size(); i++){
+        custom.emplace_back(x[i], y[i]);
+    }
+
+    return custom;
+}  // import_coordinates_from_file();
 
 
 int main(){
@@ -91,7 +138,7 @@ int main(){
             // Get x,y coordinates
             coordinates = gt::coordinates::configuration(shape, Nx, Ny, Bx, By);
         } else {
-            coordinates = gt::coordinates::configuration(shape, custom_path);
+            coordinates = configuration(shape, custom_path);
         }
 
         // Define borehole field
