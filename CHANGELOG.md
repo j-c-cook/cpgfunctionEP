@@ -2,6 +2,12 @@
 
 ## Current version
 
+### Fixes
+
+* [Issue 12](https://github.com/j-c-cook/cpgfunctionEP/issues/12) - The use 
+  similarities false option now computes and fills the packed segment response
+  matrix. 
+
 ### Enhancements
 
 * [Issue 14](https://github.com/j-c-cook/cpgfunctionEP/issues/14) - The size of 

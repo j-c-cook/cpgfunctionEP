@@ -95,8 +95,10 @@ int main(){
         }
 
         // Define borehole field
-        std::vector<gt::boreholes::Borehole> boreField = gt::boreholes::boreField(coordinates, r_b, H, D);
-        std::cout << "Compute g-function for borefield of shape: " + shape << std::endl;
+        std::vector<gt::boreholes::Borehole> boreField =
+                gt::boreholes::boreField(coordinates, r_b, H, D);
+        std::cout << "Compute g-function for borefield of shape: " + shape
+        << std::endl;
         auto start = std::chrono::steady_clock::now();
         // Compute uniform borehole wall temperature g-function
         vector<double> gFunction =
@@ -135,8 +137,6 @@ int main(){
             std::cout.precision(5);
         }
     }
-
-    // A test for a custom configuration
 
     return 0;
 }
