@@ -2,6 +2,14 @@
 
 ## Current version
 
+### Removes
+
+* [Issue 19](https://github.com/j-c-cook/cpgfunctionEP/issues/19) - The 
+  references to nlohmann json are removed from inside of the library. The 
+  EnergyPlus team does not want the dependency, and there will never be a 
+  reason for EnergyPlus to use the coordinate input/output functions. The 
+  tests are still dependent on nlohmann when built. 
+
 ### Fixes
 
 * [Issue 12](https://github.com/j-c-cook/cpgfunctionEP/issues/12) - The use 
