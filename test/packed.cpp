@@ -17,8 +17,8 @@ int main(){
     gt::heat_transfer::SegmentResponse SegRes(nSources, nSum, nt);
 
     int index;
-    for (int i=0; i<5; i++) {
-        for (int j=i; j<5; j++) {
+    for (int i=0; i<nSources; i++) {
+        for (int j=i; j<nSources; j++) {
             SegRes.get_index_value(index, i, j);
             std::cout << i << "\t" << j << "\t" << index << std::endl;
         }
