@@ -192,59 +192,44 @@ namespace gt::heat_transfer {
             bool sameSegment;
             bool otherSegment;
 
-//            auto _fill_line = [&h_ij, &time, &boreSegments](const int i, const int j, const double alpha,
-//                    bool sameSegment, bool otherSegment) {
-//                auto _dot_product = [&h_ij, &time](const int i, const int j, const double constant) {
-//                    for (std::size_t k=0; k < time.size(); k++) {
-//                        h_ij[j][i][k+1] = constant * h_ij[i][j][k+1];
-//                    } // end for
-//                };
-//                double h;
-//                double constant;
-//                gt::boreholes::Borehole b1;
-//                gt::boreholes::Borehole b2;
-//                b2 = boreSegments[i];
-//                for (std::size_t k = 0; k < time.size(); k++) {
-//                    double t = time[k];
-//                    if (!otherSegment){
-//                        if (sameSegment) {
-//                            b1 = boreSegments[i];
-//                            h = finite_line_source(t, alpha, b2, b2);
-//                        }
-//                    } else if (otherSegment && !sameSegment) {
-//                        b1 = boreSegments[j];
-//                        h = finite_line_source(t, alpha, b1, b2);
-//                    } else {
-//                        throw std::invalid_argument( "sameSegment and otherSegment cannot both be true" );
-//                    } // end if
-//                    h_ij[i][j][k+1] = h;
-//                    if (!sameSegment) {
-//                        if (otherSegment) {
-//                            constant = double(b2.H / b1.H);
-//                            _dot_product(i, j, constant);
-//                        }
-//                    } // end if
-//                }; // end for
-//            }; // auto _fill_line
-
-//            for (int i = 0; i < nSources; i++) {
-//                // Segment to same-segment thermal response factor
-//                // FLS solution for combined real and image sources
-//                sameSegment = true;
-//                otherSegment = false;
-//                boost::asio::post(pool, [i, alpha, sameSegment, otherSegment, &_fill_line]
-//                { _fill_line(i, i, alpha, true, false); });
-////                _fill_line(i, i, alpha, sameSegment, otherSegment); // could call with no threading during debugging
-//
-//                // Segment to other segment thermal response factor
-//                for (int j = i + 1; j<nSources; j++) {
-//                    sameSegment = false;
-//                    otherSegment = true;
-//                    boost::asio::post(pool, [i, j, alpha, sameSegment, otherSegment, &_fill_line]
-//                    { _fill_line(i, j, alpha, sameSegment, otherSegment); });
-////                    _fill_line(i, j, alpha, sameSegment, otherSegment);  // could call with no threading during debugging
-//                } // end for
-//            } // fi (end if)
+            auto _fill_line = [&SegRes, &time](const int i, const int j,
+                    const double alpha, bool sameSegment, bool otherSegment) {
+                double h;
+                int index;
+                gt::boreholes::Borehole b1;
+                gt::boreholes::Borehole b2;
+                b2 = SegRes.boreSegments[i];
+                for (std::size_t k = 0; k < time.size(); k++) {
+                    double t = time[k];
+                    if (!otherSegment){
+                        if (sameSegment) {
+                            b1 = SegRes.boreSegments[i];
+                            h = finite_line_source(t, alpha, b2, b2);
+                        }
+                    } else if (otherSegment && !sameSegment) {
+                        b1 = SegRes.boreSegments[j];
+                        h = finite_line_source(t, alpha, b1, b2);
+                    } else {
+                        throw std::invalid_argument( "sameSegment and otherSegment cannot both be true" );
+                    } // end if
+                    SegRes.get_index_value(index, i, j);
+                    SegRes.h_ij[index][k] = h;
+                }; // end for
+            }; // auto _fill_line
+            #pragma omp parallel for num_threads(processor_count)
+            for (int i = 0; i < nSources; i++) {
+                // Segment to same-segment thermal response factor
+                // FLS solution for combined real and image sources
+                sameSegment = true;
+                otherSegment = false;
+                _fill_line(i, i, alpha, sameSegment, otherSegment);
+                // Segment to other segment thermal response factor
+                for (int j = i + 1; j<nSources; j++) {
+                    sameSegment = false;
+                    otherSegment = true;
+                    _fill_line(i, j, alpha, sameSegment, otherSegment);
+                } // end for
+            } // fi (end if)
 
             auto end = std::chrono::steady_clock::now();
             if (disp) {
