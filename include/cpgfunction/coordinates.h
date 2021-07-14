@@ -28,7 +28,7 @@ namespace gt::coordinates {
 
     vector<tuple<double, double>> import_coordinates_from_file(const string& input_path);
     void export_coordinates_to_file(const vector<tuple<double, double>> &coordinates,
-                            const string& output_path);
+                                    const string& output_path);
 
 }
 
