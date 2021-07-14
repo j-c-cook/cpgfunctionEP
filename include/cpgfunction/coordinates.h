@@ -16,8 +16,8 @@ namespace gt::coordinates {
 
     vector<tuple<double, double>> configuration(const string& shape, int Nx,
                                                 int Ny, double Bx, double By);
-    vector<tuple<double, double>> configuration(const string& shape,
-                                                const string& input_path);
+//    vector<tuple<double, double>> configuration(const string& shape,
+//                                                const string& input_path);
 
     vector<tuple<double, double>> rectangle(int Nx, int Ny, double Bx,
                                             double By);
