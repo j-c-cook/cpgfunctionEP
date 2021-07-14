@@ -3,7 +3,7 @@
 //
 
 #include <iostream>
-#include <math.h>
+#include <cmath>
 #include <tuple>
 #include <vector>
 
