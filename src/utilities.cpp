@@ -123,9 +123,9 @@ namespace gt::utilities {
                 + ") is not an available input for "
                   "gt::utilities::time_vector().");
         }
-
+        // declare a variable for time in seconds
         double time_in_seconds;
-
+        // convert the time to seconds if it is not already in seconds
         if (units == "sec") {
             time_in_seconds = duration;
         } else if (units == "hour") {
@@ -135,9 +135,10 @@ namespace gt::utilities {
         } else if (units == "year") {
             time_in_seconds = year_to_sec(duration);
         }
-
+        // get Eskilson's 27 points in seconds
         vector<double> time = time_Eskilson(H, alpha);
-
+        // loop through points until the time in vector is greater than
+        // the duration
         int i = 0;
         bool enough = false;
         while (i < time.size() && !enough) {
@@ -146,9 +147,14 @@ namespace gt::utilities {
                 enough = true;
             }
         }  // wend
+        // resize the vector if need be
         if (enough) {
             time.resize(i+1);
         }
+        // Note: the maximum value described by Eskilson's highest value of
+        // ln(t/ts) = 3.003 is the maximum time available from this function.
+        // Any request for a longer simulation than that will just simulate to
+        // ln(t/ts) = 3.003. 
         return time;
     }  // time_vector();
 
