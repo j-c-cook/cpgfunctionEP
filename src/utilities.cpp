@@ -95,6 +95,7 @@ namespace gt::utilities {
         for (int i=1; i<np+1; i++) {
             logtime[i-1] = 0.0005*pow(i, 3) - 0.0303 * pow(i, 2) + 0.8491*i - 9.4028;
         }
+        return logtime;
     } // cook_spitler_time
 
     void convert_time(vector<double> &logtime, vector<double> &time,
@@ -154,7 +155,7 @@ namespace gt::utilities {
         // Note: the maximum value described by Eskilson's highest value of
         // ln(t/ts) = 3.003 is the maximum time available from this function.
         // Any request for a longer simulation than that will just simulate to
-        // ln(t/ts) = 3.003. 
+        // ln(t/ts) = 3.003.
         return time;
     }  // time_vector();
 
