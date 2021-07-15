@@ -40,9 +40,9 @@ The changes should fall under one of the following categories:
 - New features - for new features
 - Enhancements - for improvements made to code performance and functionality
 - Maintenance - for tidying code
-- Changed - for changes in functionality of the code
-- Depracated - for soon-to-be removed features
-- Removed - for removed features
+- Changes - for changes in functionality of the code
+- Deprecates - for soon-to-be removed features
+- Removes - for removed features
 - Fixes - for any bug fixes
 
 ## Versioning
