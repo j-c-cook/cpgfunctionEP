@@ -17,8 +17,8 @@ namespace gt::segments {
 
         int nSources;
         int nSum;
-        vector < vector < double > > h_ij;
         vector<gt::boreholes::Borehole> boreSegments;
+        vector < vector < double > > h_ij;
 
         SegmentResponse(int nSources,
                         int nSum,
