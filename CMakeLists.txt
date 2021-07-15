@@ -24,6 +24,7 @@ add_library(cpgfunctionEP SHARED
         src/utilities.cpp
         src/coordinates.cpp
         src/statistics.cpp
+        src/segments.cpp
         src/blas.cpp)
 
 # It depends on threads
