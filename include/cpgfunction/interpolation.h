@@ -4,7 +4,7 @@
 
 #include <iostream>
 #include <vector>
-#include <cpgfunction/heat_transfer.h>
+#include <cpgfunction/segments.h>
 
 using namespace std;
 

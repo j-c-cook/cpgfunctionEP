@@ -7,7 +7,7 @@
 
 using namespace std;
 
-namespace jcc { namespace interpolation {
+namespace jcc::interpolation {
 
     double linterp(double xp, double x0, double y0, double x1, double y1) {
         double yp;
@@ -55,7 +55,7 @@ namespace jcc { namespace interpolation {
     } // interp1d
 
     void interp1d(double &xp, double &yp, vector<double> &time,
-                  gt::heat_transfer::SegmentResponse &SegRes, int &i, int &j, int &k) {
+                  gt::segments::SegmentResponse &SegRes, int &i, int &j, int &k) {
         // if the x point is out of bounds, then tell the user that extrapolation is not possible
         if (xp < 0 || xp > time[time.size()-1]) {
             throw invalid_argument("Need to add extrapolation");
@@ -86,6 +86,6 @@ namespace jcc { namespace interpolation {
         }  // next k
     }  // interp1d();
 
-} } // jcc::interpolation
+} // jcc::interpolation
 
 
