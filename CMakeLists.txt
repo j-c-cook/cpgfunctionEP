@@ -54,6 +54,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     add_executable(time_definition test/time_definition.cpp)
     add_executable(gFunction_tests test/gFunction_tests.cpp)
     add_executable(packed test/packed.cpp)
+    add_executable(gFunction_adaptive test/gFunction_adaptive.cpp)
 
     target_link_libraries(gFunction_minimal cpgfunctionEP)
     target_link_libraries(interpolation cpgfunctionEP)
@@ -62,6 +63,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     target_link_libraries(time_definition cpgfunctionEP)
     target_link_libraries(gFunction_tests cpgfunctionEP)
     target_link_libraries(packed cpgfunctionEP)
+    target_link_libraries(gFunction_adaptive cpgfunctionEP)
 
     # Copy validation files to build directory so tests can open
     file(GLOB JsonValidation test/validation/*.json)
@@ -80,4 +82,5 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     # Pass variable path into test 6 for json files
     add_test(NAME RunTest6 COMMAND ${CMAKE_BINARY_DIR}/gFunction_tests)
     add_test(NAME RunTest7 COMMAND ${CMAKE_BINARY_DIR}/packed)
+    add_test(NAME RunTest8 COMMAND ${CMAKE_BINARY_DIR}/gFunction_adaptive)
 endif()
