@@ -6,13 +6,13 @@ To contribute code please first start an issue if one if not already started.
 Then:
 - Branch from the most current `master` branch:
 ```
-git checkout -b issuexx_ShortDescription  # checkout a branch locally from master
-git push -u origin issuexx_ShortDescription  # push to your remote that you have a new branch
-git branch --set-upstream-to=origin/issuexx_ShortDescription issuexx_ShortDescription
+git checkout -b <branch_name>  # checkout a branch locally from master
+git push -u origin <branch_name>  # push to your remote that you have a new branch
+git branch --set-upstream-to=<remote_name>/<branch_name> <branch_name>
 ```
 - Commit your changes and push them up
 ```
-git add <filename>
+git add <file_name>
 git commit -m "Type 50 character message here"
 git push origin issuexx_ShortDescription
 ```
@@ -20,7 +20,14 @@ git push origin issuexx_ShortDescription
   
 - Document the changelog for your issue
 
-The branch will then be merged into master once it has been reviewed. 
+The branch will then be merged into master once it has been reviewed. After the
+branch is merged (which will subsequently close the pull request and related
+issue(s)): 
+- Delete your remote and local branches (proceed with caution) 
+```
+git push -d <remote_name> <branch_name>
+git branch -d <branch_name>
+```
 
 ## Changelog
 
