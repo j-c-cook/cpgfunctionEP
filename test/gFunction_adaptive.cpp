@@ -6,6 +6,7 @@
 #include <vector>
 #include <cpgfunction/coordinates.h>
 #include <cpgfunction/boreholes.h>
+#include <cpgfunction/utilities.h>
 
 int main(){
     // ---------------------------------------------------------
@@ -13,10 +14,10 @@ int main(){
     // ---------------------------------------------------------
 
     // Borehole dimensions
-    float D = 4.0;             // Borehole buried depth (m)
-    float H = 100.;            // Borehole length (m)
-    float r_b = 0.075;         // Borehole radius (m)
-    float B = 7.5;             // Borehole spacing (m)
+    double D = 4.0;             // Borehole buried depth (m)
+    double H = 100.;            // Borehole length (m)
+    double r_b = 0.075;         // Borehole radius (m)
+    double B = 7.5;             // Borehole spacing (m)
 
     // Thermal properties
     double alpha = 1.0e-6;      // Ground thermal diffusivity (m2/s)
@@ -31,8 +32,9 @@ int main(){
 
     // Total time duration (in sec, hour, month or year)
     std::string time_units = "year";
-    double duration = 20;
-    // TODO: Add in function for this
+    double duration = 20.;
+    std::vector<double> time = gt::utilities::time_vector(
+            H, alpha, duration, time_units);
 
     // Coordinates
     std::vector<std::tuple<double, double>> coordinates =
