@@ -1,0 +1,8 @@
+//
+// Created by jackcook on 7/15/21.
+//
+
+#ifndef CPGFUNCTIONEP_SEGMENTS_H
+#define CPGFUNCTIONEP_SEGMENTS_H
+
+#endif //CPGFUNCTIONEP_SEGMENTS_H
