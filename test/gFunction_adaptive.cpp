@@ -33,7 +33,7 @@ int main(){
     // Total time duration (in sec, hour, month or year)
     std::string time_units = "year";
     double duration = 20.;
-    std::vector<double> time = gt::utilities::time_vector(
+    std::vector<double> time = gt::utilities::time_vector_constant_expansion(
             H, alpha, duration, time_units);
 
     // Coordinates
