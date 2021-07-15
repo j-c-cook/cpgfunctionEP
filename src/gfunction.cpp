@@ -4,17 +4,19 @@
 // Created by jackcook on 7/11/20.
 //
 
-#include <cpgfunction/gfunction.h>
-#include <chrono>
-#include <cpgfunction/interpolation.h>
 #include <thread>
-#include <blas/blas.h>
+#include <chrono>
 #include <Eigen/Dense>
+#include <blas/blas.h>
+#include <cpgfunction/gfunction.h>
+#include <cpgfunction/interpolation.h>
+#include <cpgfunction/segments.h>
+#include <cpgfunction/heat_transfer.h>
 
 
 using namespace std;  // lots of vectors, only namespace to be used
 
-namespace gt { namespace gfunction {
+namespace gt::gfunction {
     // The uniform borehole wall temperature (UBWHT) g-function calculation.
     // Originally presented in Cimmino and Bernier (2014) and a later paper on
     // speed improvements by Cimmino (2018)
@@ -51,7 +53,7 @@ namespace gt { namespace gfunction {
         int nSum = sum_to_n(nSources);
 
         // Segment Response struct
-        gt::heat_transfer::SegmentResponse SegRes(nSources, nSum, nt);
+        gt::segments::SegmentResponse SegRes(nSources, nSum, nt);
 
         // Split boreholes into segments
         _borehole_segments(SegRes.boreSegments, boreField, nSegments);
@@ -455,7 +457,7 @@ namespace gt { namespace gfunction {
     } // load_history_reconstruction
 
     void _temporal_superposition(vector<double>& Tb_0,
-                                 gt::heat_transfer::SegmentResponse &SegRes,
+                                 gt::segments::SegmentResponse &SegRes,
                                  vector<double> &h_ij,
                                  vector<double> &q_reconstructed,
                                  const int p, int &nSources)
@@ -504,4 +506,4 @@ namespace gt { namespace gfunction {
                             Tb_0, begin_q, n_threads);
         }  // next k
     }  // _temporal_superposition();
-} } // namespace gt::gfunction
+} // namespace gt::gfunction

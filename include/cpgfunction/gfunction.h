@@ -6,9 +6,9 @@
 
 #include <iostream>
 #include <vector>
-#include <cpgfunction/boreholes.h>
-#include <cpgfunction/heat_transfer.h>
 #include <thread>
+#include <cpgfunction/boreholes.h>
+#include <cpgfunction/segments.h>
 
 using namespace std;
 
@@ -51,7 +51,7 @@ namespace gt::gfunction {
                                      vector<vector<double> >& Q,
                                      vector<double>& dt, int p);
     void _temporal_superposition(vector<double>& Tb_0,
-                                 gt::heat_transfer::SegmentResponse &SegRes,
+                                 gt::segments::SegmentResponse &SegRes,
                                  vector<double> &h_ij,
                                  vector<double> &q_reconstructed, int p,
                                  int &nSources);
