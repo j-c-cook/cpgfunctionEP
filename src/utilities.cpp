@@ -3,12 +3,17 @@
 //
 
 #include <algorithm>
+#include <cmath>
 #include <cpgfunction/utilities.h>
 
 using namespace std;
 
 
 namespace gt::utilities {
+
+    double time_scale(const double& H, const double& alpha){
+        return pow(H, 2) / (9 * alpha);
+    }
 
     double hour_to_sec(double& x){
         return x * 3600.;
@@ -27,6 +32,34 @@ namespace gt::utilities {
     double year_to_sec(double& x) {
         double days = x * 365.;
         return day_to_sec(days);
+    }
+
+    double time_to_seconds(double& duration, const string& units) {
+        // define acceptable inputs
+        vector<string> acceptable_arguments{"sec", "hour" "month", "year"};
+        // check if the input string is acceptable
+        bool acceptable = (find(acceptable_arguments.begin(),
+                                acceptable_arguments.end(), units) !=
+                           acceptable_arguments.end());
+
+        if (!acceptable) {
+            throw std::invalid_argument("The unit described (" + units
+                                        + ") is not an available input for "
+                                          "gt::utilities::time_vector().");
+        }
+        // declare a variable for time in seconds
+        double time_in_seconds = 0;
+        // convert the time to seconds if it is not already in seconds
+        if (units == "sec") {
+            time_in_seconds = duration;
+        } else if (units == "hour") {
+            time_in_seconds = hour_to_sec(duration);
+        } else if (units == "month") {
+            time_in_seconds = month_to_sec(duration);
+        } else if (units == "year") {
+            time_in_seconds = year_to_sec(duration);
+        }
+        return time_in_seconds;
     }
 
     vector<double> time_geometric(double dt, double tmax, int Nt) {
@@ -78,7 +111,7 @@ namespace gt::utilities {
         int nt = logtime.size();
         vector<double> time(nt);
 
-        double ts = pow(H, 2) / (9 * alpha);
+        double ts = time_scale(H, alpha);
         for (int i=0; i<nt; i++) {
             time[i] = exp(logtime[i]) * ts;
         }
@@ -110,34 +143,13 @@ namespace gt::utilities {
         }
     } // convert_time
 
-    vector<double> time_vector(double& H, double& alpha, double& duration,
+    vector<double> time_vector_Eskilson(double& H, double& alpha, double& duration,
                                const string& units="sec"){
-        // define acceptable inputs
-        vector<string> acceptable_arguments{"sec", "hour" "month", "year"};
-        // check if the input string is acceptable
-        bool acceptable = (find(acceptable_arguments.begin(),
-                                acceptable_arguments.end(), units) !=
-                                        acceptable_arguments.end());
-
-        if (!acceptable) {
-            throw std::invalid_argument("The unit described (" + units
-                + ") is not an available input for "
-                  "gt::utilities::time_vector().");
-        }
-        // declare a variable for time in seconds
-        double time_in_seconds;
-        // convert the time to seconds if it is not already in seconds
-        if (units == "sec") {
-            time_in_seconds = duration;
-        } else if (units == "hour") {
-            time_in_seconds = hour_to_sec(duration);
-        } else if (units == "month") {
-            time_in_seconds = month_to_sec(duration);
-        } else if (units == "year") {
-            time_in_seconds = year_to_sec(duration);
-        }
         // get Eskilson's 27 points in seconds
         vector<double> time = time_Eskilson(H, alpha);
+
+        double time_in_seconds = time_to_seconds(duration, units);
+
         // loop through points until the time in vector is greater than
         // the duration
         int i = 0;
@@ -158,5 +170,24 @@ namespace gt::utilities {
         // ln(t/ts) = 3.003.
         return time;
     }  // time_vector();
+
+    vector<double> time_vector_constant_expansion(
+            double& H, double& alpha, double& duration,
+            const string& units, const double expansion_constant) {
+        double time_in_seconds = time_to_seconds(duration, units);
+        // find the number of points necessary
+        double log_time_begin = -8.5;
+        double ts = time_scale(H, alpha);
+        double log_time_end = log(time_in_seconds / ts);
+        int n_points = ceil((log_time_end - log_time_begin) /
+                expansion_constant) + 1;
+        vector<double> log_time(n_points, 0);
+        log_time[0] = log_time_begin;
+        for (int i=1; i<n_points;i++) {
+            log_time[i] = log_time_begin + i * expansion_constant;
+        }  // next i
+        vector<double> time = convert_time(log_time, H, alpha);
+        return time;
+    }
 
 } // namespace gt::utilities
