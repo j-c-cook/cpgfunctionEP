@@ -25,9 +25,7 @@ add_library(cpgfunctionEP SHARED
         src/statistics.cpp
         src/blas.cpp)
 
-#include_directories(third_party/eigen-3.3.9)  # Eigen for LU decomposition
-find_package (Eigen3 REQUIRED)
-#target_link_libraries (cpgfunctionEP Eigen3::Eigen)
+find_package (Eigen3 REQUIRED)  # Eigen for LU decomposition
 include_directories(${EIGEN3_INCLUDE_DIR})
 
 # It depends on threads
