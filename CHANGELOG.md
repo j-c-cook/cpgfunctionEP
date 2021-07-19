@@ -27,6 +27,17 @@
   cpgfunctionEP. This is done because EnergyPlus will use this as a third party
   subdirectory, and will not want to run the tests located in this library. 
   
+### Maintenance
+
+* [Issue 26](https://github.com/j-c-cook/cpgfunctionEP/issues/26) - The size 
+  (number of files) of the Eigen dependency is minimized by only including the 
+  necesary files to execute the LU decomposition.
+  
+* [Issue 28](https://github.com/j-c-cook/cpgfunctionEP/issues/28) - The third
+  party library `nlohmann` json now only makes use of the single json.hpp 
+  header include. This has been done to reduce the number of files in this 
+  project. 
+  
 ### Changes
 
 * [Issue 8](https://github.com/j-c-cook/cpgfunctionEP/issues/8) - The uniform 
