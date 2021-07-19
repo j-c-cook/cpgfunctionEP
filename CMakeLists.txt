@@ -12,7 +12,6 @@ endif()
 # Everything will need to access this
 include_directories(include)
 # Third party includes
-include_directories(third_party/eigen-3.3.9)  # Eigen for LU decomposition
 include_directories(third_party/qdt-master)
 
 # Create a DLL with an API
@@ -25,6 +24,10 @@ add_library(cpgfunctionEP SHARED
         src/coordinates.cpp
         src/statistics.cpp
         src/blas.cpp)
+
+#include_directories(third_party/eigen-3.3.9)  # Eigen for LU decomposition
+find_package (Eigen3 3.3 REQUIRED)
+target_link_libraries (cpgfunctionEP Eigen3::Eigen)
 
 # It depends on threads
 find_package(Threads REQUIRED)
