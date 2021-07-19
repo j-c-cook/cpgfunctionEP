@@ -19,7 +19,7 @@ jobs:
         python -m pip install --upgrade pip
         pip install aqtinstall
 
-    - name: Install Python dependencies
+    - name: Install brew dependencies
       run: |
         ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)" < /dev/null 2> /dev/null
         brew install eigen
