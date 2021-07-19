@@ -27,7 +27,8 @@ add_library(cpgfunctionEP SHARED
 
 #include_directories(third_party/eigen-3.3.9)  # Eigen for LU decomposition
 find_package (Eigen3 REQUIRED)
-target_link_libraries (cpgfunctionEP Eigen3::Eigen)
+#target_link_libraries (cpgfunctionEP Eigen3::Eigen)
+include_directories(${EIGEN3_INCLUDE_DIR})
 
 # It depends on threads
 find_package(Threads REQUIRED)
