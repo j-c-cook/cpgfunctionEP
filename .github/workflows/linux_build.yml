@@ -15,9 +15,6 @@ jobs:
         with:
           python-version: 3.7
 
-      - name: Install Apt Dependencies
-        run: sudo apt-get install libeigen3-dev
-
       - name: Create Build Directory
         run: cmake -E make_directory ./build/
 
