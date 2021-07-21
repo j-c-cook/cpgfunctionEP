@@ -4,7 +4,7 @@
 
 #include <iostream>
 #include <vector>
-#include <unordered_map>
+#include <map>
 #include <cpgfunction/boreholes.h>
 
 using namespace std;
@@ -42,11 +42,7 @@ namespace gt::segments {
     struct adaptive {
         ~adaptive() = default;  // destructor
 
-        unordered_map<double, int> heights = { {24, 0},
-                                               {48, 1},
-                                               {96, 2},
-                                               {192, 3},
-                                               {384, 4}};
+        vector<double> heights = { 24, 48, 96, 192, 384};
         vector<vector<double > > drilling_depths {
                 {96,600,1536,2904,3456,4056,4704,5400,6144,6936,7776,8664,9600,
                  10584,11616,12696,13824,15000,16224,17496,18816,20184,21600,
