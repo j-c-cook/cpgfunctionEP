@@ -2,6 +2,13 @@
 
 ## Current version
 
+### Changes
+
+* [Issue 30](https://github.com/j-c-cook/cpgfunctionEP/issues/30) - An interp1d
+  function is modified to perform nearest value extrapolation. The function now
+  also returns a double rather than having to pass the double in by reference to
+  be modified. 
+
 ### Enhancements
 
 * [Issue 16](https://github.com/j-c-cook/cpgfunctionEP/issues/16) - An adaptive
