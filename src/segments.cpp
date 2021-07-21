@@ -72,7 +72,6 @@ namespace gt::segments {
                                                         ideal_segment_lengths[upper]);
             nq = jcc::interpolation::linterp(height, height_low, nq_low,
                                              height_up, nq_up);
-            int a = 1;
         } else {  // (height >= heights[-1])
             nq = jcc::interpolation::interp1d(drilling_depth,
                                               drilling_depths[n1],
