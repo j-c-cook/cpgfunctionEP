@@ -65,7 +65,6 @@ int main() {
                                                              alpha,
                                                              nSegments,
                                                              true,
-                                                             true,
                                                              n_Threads,
                                                              false);
     auto end = std::chrono::steady_clock::now();
