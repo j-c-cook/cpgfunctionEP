@@ -4,10 +4,12 @@
 
 #include <iostream>
 #include <vector>
+#include <chrono>
 #include <cpgfunction/coordinates.h>
 #include <cpgfunction/boreholes.h>
 #include <cpgfunction/utilities.h>
 #include <cpgfunction/segments.h>
+#include <cpgfunction/gfunction.h>
 
 int main(){
     // ---------------------------------------------------------
@@ -46,6 +48,27 @@ int main(){
     // Create borehole field
     std::vector<gt::boreholes::Borehole> boreField =
             gt::boreholes::boreField(coordinates, r_b, H, D);
+    // Detect number of threads (default uses all available threads)
+    int n_Threads = int(thread::hardware_concurrency());
+    // Compute (and time) the g-Function
+    auto start = std::chrono::steady_clock::now();
+    std::vector<double> gFunction =
+            gt::gfunction::uniform_borehole_wall_temperature(boreField,
+                                                             time,
+                                                             alpha,
+                                                             nSegments,
+                                                             true,
+                                                             n_Threads,
+                                                             false);
+    auto end = std::chrono::steady_clock::now();
+    double seconds = std::chrono::duration_cast<
+            std::chrono::milliseconds>(end - start).count() / 1000.;
+    std::cout << "g-Function calculation duration: " << seconds << " seconds"
+              << std::endl;
+
+    for (double i : gFunction) {
+        std::cout << i << std::endl;
+    }
 
     return 0;
 }  // main();
