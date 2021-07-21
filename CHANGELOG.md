@@ -1,6 +1,6 @@
 # History of changes - cpgfunctionEP
 
-## Current version
+## Version 0.2 (2021-07-20)
 
 ### Removes
 
@@ -45,7 +45,7 @@
   boolean argument for multi-threading is taken away. The number of threads is 
   still an argument, and the default is all available threads on the processor. 
 
-## Version 0.1.0 (2021-07-08)
+## Version 0.1 (2021-07-08)
 
 ### Maintenance
   
