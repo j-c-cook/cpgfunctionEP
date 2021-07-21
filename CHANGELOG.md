@@ -8,6 +8,13 @@
   function is modified to perform nearest value extrapolation. The function now
   also returns a double rather than having to pass the double in by reference to
   be modified. 
+  
+* [Issue 31](https://github.com/j-c-cook/cpgfunctionEP/issues/31) - The 
+  g-function API is changed. The boolean argument for adaptive discretization is
+  removed. This is done because the number of segments is already an input. 
+  Having both arguments is redundant. The adaptive discretization object can
+  obtain the number of segments necessary for the ideal UBHWT and then be 
+  passed into the g-function calculation. 
 
 ### Enhancements
 
