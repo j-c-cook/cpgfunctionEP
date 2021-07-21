@@ -1,6 +1,6 @@
 # History of changes - cpgfunctionEP
 
-## Current version
+## Version 0.3 (2021-07-21)
 
 ### Changes
 
