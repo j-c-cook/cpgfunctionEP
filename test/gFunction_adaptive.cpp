@@ -1,60 +1,53 @@
+//
+// Created by jackcook on 7/15/21.
+//
+
 #include <iostream>
-#include <cpgfunction/boreholes.h>
 #include <vector>
-#include <cmath>
-#include <cpgfunction/utilities.h>
-#include <cpgfunction/gfunction.h>
-#include <cpgfunction/coordinates.h>
 #include <chrono>
+#include <cpgfunction/coordinates.h>
+#include <cpgfunction/boreholes.h>
+#include <cpgfunction/utilities.h>
+#include <cpgfunction/segments.h>
+#include <cpgfunction/gfunction.h>
 
-
-int main() {
+int main(){
     // ---------------------------------------------------------
-    // Simulation parameters
+    // Inputs
     // ---------------------------------------------------------
 
     // Borehole dimensions
-    float D = 4.0;             // Borehole buried depth (m)
-    float H = 100.;            // Borehole length (m)
-    float r_b = 0.075;         // Borehole radius (m)
-    float B = 7.5;             // Borehole spacing (m)
+    double D = 4.0;             // Borehole buried depth (m)
+    double H = 100.;            // Borehole length (m)
+    double r_b = 0.075;         // Borehole radius (m)
+    double B = 7.5;             // Borehole spacing (m)
 
     // Thermal properties
     double alpha = 1.0e-6;      // Ground thermal diffusivity (m2/s)
 
-    // Number of segments per borehole
-    int nSegments = 12;
-
-    // Geometrically expanding time vector.
-    float dt = 100*3600.;                   // Time step
-    double tmax = 3000. * 8760. * 3600.;    // Maximum time
-    int Nt = 30;                             // Number of time steps
-    double ts = pow(H, 2)/(9.*alpha);    // Bore field characteristic time
-
-    std::vector<double> time = gt::utilities::time_geometric(dt, tmax, Nt);
-
-    // ---------------------------------------------------------
-    // Borehole fields
-    // ---------------------------------------------------------
-
     // Field of 3x4 (n=12) boreholes
     int n1 = 3;
     int n2 = 4;
+    int nbh = n1 * n2;
+
+    // Number of segments per borehole
+    // adaptive discretization
+    double drilling_depth = nbh * H;
+    gt::segments::adaptive adpt_disc;
+    int nSegments = adpt_disc.discretize(H, drilling_depth);
+
+    // Total time duration (in sec, hour, month or year)
+    std::string time_units = "year";
+    double duration = 20.;
+    std::vector<double> time = gt::utilities::time_vector_constant_expansion(
+            H, alpha, duration, time_units);
 
     // Coordinates
     std::vector<std::tuple<double, double>> coordinates =
             gt::coordinates::rectangle(n1, n2, B, B);
-
-    // Move boreholes slightly off of symmetric
-    std::get<0>(coordinates[1]) += 2;  // move position 1 borehole x
-    std::get<0>(coordinates[2]) -= 1;  // move position 2 borehole x
-    std::get<1>(coordinates[2]) -= 1;  // move position 2 borehole y
-    std::get<1>(coordinates[3]) -= 1;  // move position 3 borehole y
-
     // Create borehole field
     std::vector<gt::boreholes::Borehole> boreField =
             gt::boreholes::boreField(coordinates, r_b, H, D);
-
     // Detect number of threads (default uses all available threads)
     int n_Threads = int(thread::hardware_concurrency());
     // Compute (and time) the g-Function
@@ -71,11 +64,11 @@ int main() {
     double seconds = std::chrono::duration_cast<
             std::chrono::milliseconds>(end - start).count() / 1000.;
     std::cout << "g-Function calculation duration: " << seconds << " seconds"
-    << std::endl;
+              << std::endl;
 
     for (double i : gFunction) {
         std::cout << i << std::endl;
     }
 
     return 0;
-}
+}  // main();

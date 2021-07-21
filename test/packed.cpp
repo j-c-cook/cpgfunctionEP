@@ -2,8 +2,7 @@
 // Created by jackcook on 6/28/21.
 //
 
-#include <cpgfunction/heat_transfer.h>
-#include <vector>
+#include <cpgfunction/segments.h>
 
 auto sum_to_n = [](const int n) {
     return n * (n + 1) / 2;
@@ -14,7 +13,7 @@ int main(){
     int nSum = sum_to_n(nSources);
     int nt = 5;
 
-    gt::heat_transfer::SegmentResponse SegRes(nSources, nSum, nt);
+    gt::segments::SegmentResponse SegRes(nSources, nSum, nt);
 
     int index;
     for (int i=0; i<nSources; i++) {
