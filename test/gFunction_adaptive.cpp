@@ -7,6 +7,7 @@
 #include <cpgfunction/coordinates.h>
 #include <cpgfunction/boreholes.h>
 #include <cpgfunction/utilities.h>
+#include <cpgfunction/segments.h>
 
 int main(){
     // ---------------------------------------------------------
@@ -28,7 +29,10 @@ int main(){
     int nbh = n1 * n2;
 
     // Number of segments per borehole
-    // TODO: Add in function for this
+    // adaptive discretization
+    double drilling_depth = nbh * H;
+    gt::segments::adaptive adpt_disc;
+    int nSegments = adpt_disc.discretize(H, drilling_depth);
 
     // Total time duration (in sec, hour, month or year)
     std::string time_units = "year";
