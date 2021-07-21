@@ -12,7 +12,7 @@ namespace jcc::interpolation {
         double yp;
         yp = y0 + ((y1-y0) / (x1-x0)) * (xp-x0);
         return yp;
-    } // interp
+    } // linterp
 
     void interp1d(vector<double>& xp, vector<double>& yp, vector<double>& x,
                   vector<double>& y) {
@@ -35,24 +35,32 @@ namespace jcc::interpolation {
         } // next i
     } // interp1d
 
-    void interp1d(double &xp, double &yp, vector<double>& x,
-                  vector<double>& y) {
+    double interp1d(double &xp, vector<double>& x, vector<double>& y) {
+        // this function takes in an x point, an x-vector and a y-vector
+        // a linear interpolation occurs over the y-vector
         int counter = 0;
+        double yp = 0;
 
-        if (xp < x[0] || xp > x[x.size()-1]) {
-            throw invalid_argument("Need to add extrapolation");
+        if ( xp < x[0] ) {
+            yp = y[0];  // return the first member of the list
+            return yp;
+        } else if ( xp > x[x.size()-1] ) {
+            yp = y[x.size()-1];  // return the last member of the list
+            return yp;
         }
+
         for (int j = counter; j<y.size();j++) {
             if (xp - x[j] < 1e-07) {
                 yp = y[j];
-                return;
+                return yp;
             } else if (xp >= x[j] && xp <= x[j+1]) {
                 yp = linterp(xp, x[j], y[j], x[j + 1], y[j + 1]);
-                return;
+                return yp;
             } else {
                 counter++;
             } // fi
         } // next j
+        return yp;  // this function should never reach this point
     } // interp1d
 
     void interp1d(double &xp, double &yp, vector<double> &time,
@@ -88,22 +96,6 @@ namespace jcc::interpolation {
             }  // else()
         }  // next k
     }  // interp1d();
-
-    double bilinterp1d(double q11, double q12, double q21, double q22,
-                       double x1, double x2, double y1, double y2,
-                       double x, double y) {
-        // https://helloacm.com/cc-function-to-compute-the-bilinear-interpolation/
-        double x2x1, y2y1, x2x, y2y, yy1, xx1;
-        x2x1 = x2 - x1;
-        y2y1 = y2 - y1;
-        x2x = x2 - x;
-        y2y = y2 - y;
-        yy1 = y - y1;
-        xx1 = x - x1;
-        return 1.0 / (x2x1 * y2y1) * ( q11 * x2x * y2y +
-        q21 * xx1 * y2y + q12 * x2x * yy1 + q22 * xx1 * yy1);
-
-    }  // bilinterp1d();
 
 } // jcc::interpolation
 
