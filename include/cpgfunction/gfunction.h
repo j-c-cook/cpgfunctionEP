@@ -38,7 +38,7 @@ namespace gt::gfunction {
     vector<double> uniform_borehole_wall_temperature(
             vector<gt::boreholes::Borehole> &boreField,
             vector<double> &time, double alpha, int nSegments=12,
-            bool use_similarities=true, bool adaptive=true,
+            bool use_similarities=true,
             int n_Threads=int(thread::hardware_concurrency()),
             bool display=false);
 
