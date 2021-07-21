@@ -3,7 +3,6 @@
 //
 
 #include <cpgfunction/interpolation.h>
-#include <csignal>
 
 using namespace std;
 
@@ -15,7 +14,8 @@ namespace jcc::interpolation {
         return yp;
     } // interp
 
-    void interp1d(vector<double>& xp, vector<double>& yp, vector<double>& x, vector<double>& y) {
+    void interp1d(vector<double>& xp, vector<double>& yp, vector<double>& x,
+                  vector<double>& y) {
         int counter = 0;
         for (int i=0; i<yp.size(); i++) {
             if (xp[i] < x[0] || xp[i] > x[x.size()-1]) {
@@ -35,7 +35,8 @@ namespace jcc::interpolation {
         } // next i
     } // interp1d
 
-    void interp1d(double &xp, double &yp, vector<double>& x, vector<double>& y) {
+    void interp1d(double &xp, double &yp, vector<double>& x,
+                  vector<double>& y) {
         int counter = 0;
 
         if (xp < x[0] || xp > x[x.size()-1]) {
@@ -55,12 +56,15 @@ namespace jcc::interpolation {
     } // interp1d
 
     void interp1d(double &xp, double &yp, vector<double> &time,
-                  gt::segments::SegmentResponse &SegRes, int &i, int &j, int &k) {
-        // if the x point is out of bounds, then tell the user that extrapolation is not possible
+                  gt::segments::SegmentResponse &SegRes,
+                  int &i, int &j, int &k) {
+        // if the x point is out of bounds, then tell the user that
+        // extrapolation is not possible
         if (xp < 0 || xp > time[time.size()-1]) {
             throw invalid_argument("Need to add extrapolation");
         }
-        // if the time value falls in between 0 and the first time value, then interpolate 0 to t1
+        // if the time value falls in between 0 and the first time value,
+        // then interpolate 0 to t1
         if (0 < xp && xp < time[0]) {
             double h;
             SegRes.get_h_value(h, i, j, k);
@@ -82,9 +86,24 @@ namespace jcc::interpolation {
                 h1 = h2;
                 SegRes.get_h_value(h2, i, j, counter+1);
             }  // else()
-
         }  // next k
     }  // interp1d();
+
+    double bilinterp1d(double q11, double q12, double q21, double q22,
+                       double x1, double x2, double y1, double y2,
+                       double x, double y) {
+        // https://helloacm.com/cc-function-to-compute-the-bilinear-interpolation/
+        double x2x1, y2y1, x2x, y2y, yy1, xx1;
+        x2x1 = x2 - x1;
+        y2y1 = y2 - y1;
+        x2x = x2 - x;
+        y2y = y2 - y;
+        yy1 = y - y1;
+        xx1 = x - x1;
+        return 1.0 / (x2x1 * y2y1) * ( q11 * x2x * y2y +
+        q21 * xx1 * y2y + q12 * x2x * yy1 + q22 * xx1 * yy1);
+
+    }  // bilinterp1d();
 
 } // jcc::interpolation
 
