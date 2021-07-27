@@ -12,6 +12,7 @@ endif()
 # Everything will need to access this
 include_directories(include)
 # Third party includes
+include_directories(third_party/eigen-3.3.9)  # Eigen for LU decomposition
 include_directories(third_party/qdt-master)
 
 # Create a DLL with an API
@@ -41,7 +42,6 @@ ENDIF()
 
 # if we are only building cpgfnctionEP
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
-    include_directories(third_party/eigen-3.3.9)  # Eigen for LU decomposition
     include_directories(third_party/nlohmann-3.9.1)
     # Turn on testing
     enable_testing()
@@ -83,8 +83,4 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     add_test(NAME RunTest6 COMMAND ${CMAKE_BINARY_DIR}/gFunction_tests)
     add_test(NAME RunTest7 COMMAND ${CMAKE_BINARY_DIR}/packed)
     add_test(NAME RunTest8 COMMAND ${CMAKE_BINARY_DIR}/gFunction_adaptive)
-else()
-    # If we are building from EnergyPlus then use their Eigen
-    find_package (Eigen3 3.3 REQUIRED)
-    target_link_libraries (example Eigen3::Eigen)
 endif()
