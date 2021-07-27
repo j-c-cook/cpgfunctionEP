@@ -36,11 +36,11 @@ int main(){
     gt::segments::adaptive adpt_disc;
     int nSegments = adpt_disc.discretize(H, drilling_depth);
 
-    // Total time duration (month or year)
+    // Total time duration (in sec, hour, month or year)
     std::string time_units = "year";
-    double duration = 300.;
-    // Geometrically growing time vector for duration
-    std::vector<double> time = gt::utilities::time_geometric_auto(duration, time_units);
+    double duration = 20.;
+    std::vector<double> time = gt::utilities::time_vector_constant_expansion(
+            H, alpha, duration, time_units);
 
     // Coordinates
     std::vector<std::tuple<double, double>> coordinates =
