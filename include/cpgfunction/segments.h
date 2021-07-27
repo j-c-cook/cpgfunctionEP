@@ -26,9 +26,9 @@ namespace gt::segments {
                         int nSum,
                         int nt) :
                 nSources(nSources),
+                nSum(nSum),
                 boreSegments(nSources),
-                h_ij(nSum, vector<double>(nt, 0)),
-                nSum(nSum)
+                h_ij(nSum, vector<double>(nt, 0))
         {} // constructor
 
         // storage_mode = 1 is the reduced segment response vector
@@ -76,7 +76,7 @@ namespace gt::segments {
 
         adaptive() = default; // constructor
 
-        int discretize(double& height, double& drilling_depth);
+        int discretize(double height, double& drilling_depth);
 
     };
 
