@@ -2,6 +2,8 @@
 
 ## Version 0.3.2 (2021-07-27)
 
+### Fixes
+
 * [Issue 38](https://github.com/j-c-cook/cpgfunctionEP/issues/38) - The investigation of this issue reopened 
   [Issue 35](https://github.com/j-c-cook/cpgfunctionEP/issues/35). There was a bug that occurred when the time value in
   the interpolation function fell between 0 and t1. This bug had not propagated because time steps that small in the 
