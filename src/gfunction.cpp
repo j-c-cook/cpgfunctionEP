@@ -251,7 +251,7 @@ namespace gt::gfunction {
             // A needs filled each loop because the _gsl partial pivot
             // decomposition modifies the matrix
             // TODO: Look into reducing the number of times A is built given that Eigen is now being used
-//            # pragma omp parallel for num_threads(n_Threads)
+            # pragma omp parallel for num_threads(n_Threads)
             for (int i=0; i<SIZE; i++) {
                 _fillA(i, p, SIZE);
             }  // next i

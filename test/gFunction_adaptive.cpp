@@ -32,10 +32,9 @@ int main(){
 
     // Number of segments per borehole
     // adaptive discretization
-//    double drilling_depth = nbh * H;
-//    gt::segments::adaptive adpt_disc;
-//    int nSegments = adpt_disc.discretize(H, drilling_depth);
-    int nSegments = 4;
+    double drilling_depth = nbh * H;
+    gt::segments::adaptive adpt_disc;
+    int nSegments = adpt_disc.discretize(H, drilling_depth);
 
     // Total time duration (in sec, hour, month or year)
     std::string time_units = "year";
