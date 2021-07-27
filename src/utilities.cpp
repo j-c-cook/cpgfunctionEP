@@ -88,6 +88,22 @@ namespace gt::utilities {
         return time;
     } // vector<double> time_geometric
 
+    vector<double> time_geometric_auto(double duration, const string& units) {
+        double time_in_seconds = time_to_seconds(duration, units);
+
+        double dt = 100. * 3600.;
+
+        int Nt = ceil(time_in_seconds / dt);
+        if (Nt < 5) {
+            Nt = 5;
+        } else if (Nt > 30) {
+            Nt = 30;
+        }
+
+        vector<double> time = time_geometric(dt, time_in_seconds, Nt);
+        return time;
+    }
+
     vector<double> Eskilson_original_points() {
         // Eskilsons original 27 time steps
         vector<double> logtime = {-8.5, -7.8, -7.2, -6.5, -5.9, -5.2, -4.5,
