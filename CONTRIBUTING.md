@@ -78,6 +78,9 @@ Resolves: #123
 See also: #456, #789
 ```
 
+Here is [torvalds](https://github.com/torvalds/linux/pull/17#issuecomment-5661185)
+addressing the 50/72 rule.
+
 #### Subject Line Standard Terminology
 
 First Word | Meaning

@@ -1,5 +1,13 @@
 # History of changes - cpgfunctionEP
 
+## Version 0.3.1 (2021-07-26)
+
+### Fixes
+
+* [Issue 35](https://github.com/j-c-cook/cpgfunctionEP/issues/35) - The adaptive g-function calculation is fixed by 
+  replacing the constant log time vector expansion function with a geometric expansion. The constant log time vector
+  expansion is removed from the library because it is incompatible with Cimmino's load history reconstruction scheme.
+
 ## Version 0.3 (2021-07-21)
 
 ### Changes
