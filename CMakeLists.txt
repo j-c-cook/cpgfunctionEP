@@ -29,16 +29,17 @@ add_library(cpgfunctionEP SHARED
 
 # It depends on threads
 find_package(Threads REQUIRED)
-target_link_libraries(cpgfunctionEP ${CMAKE_THREAD_LIBS_INIT})
+target_link_libraries(cpgfunctionEP INTERFACE Threads::Threads)
 
-OPTION (USE_OpenMP "Use OpenMP" ON)
-IF(USE_OpenMP)
-    FIND_PACKAGE(OpenMP)
-    IF(OPENMP_FOUND)
-        SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
-        SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
-    ENDIF()
-ENDIF()
+option (USE_OpenMP "Use OpenMP" ON)
+if(USE_OpenMP)
+    find_package(OpenMP)
+    if(OpenMP_CXX_FOUND)
+        target_link_libraries(cpgfunctionEP PRIVATE OpenMP::OpenMP_CXX)
+    else()
+        message(AUTHOR_WARNING "OpenMP_CXX not found")
+    endif()
+endif()
 
 # if we are only building cpgfnctionEP
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
