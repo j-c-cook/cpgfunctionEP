@@ -16,8 +16,7 @@ include_directories(third_party/eigen-3.3.9)  # Eigen for LU decomposition
 include_directories(third_party/qdt-master)
 
 # Create a DLL with an API
-add_library(cpgfunctionEP SHARED
-        src/boreholes.cpp
+add_library(cpgfunctionEP  src/boreholes.cpp
         src/gfunction.cpp
         src/heat_transfer.cpp
         src/interpolation.cpp
