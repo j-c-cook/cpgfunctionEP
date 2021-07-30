@@ -1,18 +1,15 @@
 cmake_minimum_required(VERSION 3.6)
 project(cpgfunctionEP)
 
-set(CMAKE_CXX_STANDARD 17)
 if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++17")
 else()
     set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
-    add_compile_definitions(_USE_MATH_DEFINES)
 endif()
 
 # Everything will need to access this
 include_directories(include)
 # Third party includes
-include_directories(third_party/eigen-3.3.9)  # Eigen for LU decomposition
 include_directories(third_party/qdt-master)
 
 # Create a DLL with an API
@@ -42,6 +39,8 @@ endif()
 
 # if we are only building cpgfnctionEP
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+    # local eigen if not in EnergyPlus third_party/
+    include_directories(third_party/eigen-3.3.9)  # Eigen for LU decomposition
     include_directories(third_party/nlohmann-3.9.1)
     # Turn on testing
     enable_testing()
@@ -83,4 +82,6 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     add_test(NAME RunTest6 COMMAND ${CMAKE_BINARY_DIR}/gFunction_tests)
     add_test(NAME RunTest7 COMMAND ${CMAKE_BINARY_DIR}/packed)
     add_test(NAME RunTest8 COMMAND ${CMAKE_BINARY_DIR}/gFunction_adaptive)
+else()
+    include_directories(../third_party/eigen)  # Eigen for LU decomposition
 endif()
