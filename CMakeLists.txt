@@ -11,6 +11,8 @@ endif()
 include_directories(include)
 # Third party includes
 include_directories(third_party/qdt-master)
+add_subdirectory(third_party/LU-Decomposition-0.1)
+include_directories(third_party/LU-Decomposition-0.1/include)
 
 # Create a DLL with an API
 add_library(cpgfunctionEP  src/boreholes.cpp
@@ -22,6 +24,8 @@ add_library(cpgfunctionEP  src/boreholes.cpp
         src/statistics.cpp
         src/segments.cpp
         src/blas.cpp)
+
+target_link_libraries(cpgfunctionEP INTERFACE LU-Decomposition)
 
 # It depends on threads
 find_package(Threads REQUIRED)
@@ -82,6 +86,4 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     add_test(NAME RunTest6 COMMAND ${CMAKE_BINARY_DIR}/gFunction_tests)
     add_test(NAME RunTest7 COMMAND ${CMAKE_BINARY_DIR}/packed)
     add_test(NAME RunTest8 COMMAND ${CMAKE_BINARY_DIR}/gFunction_adaptive)
-else()
-    include_directories(../third_party/eigen)  # Eigen for LU decomposition
 endif()
