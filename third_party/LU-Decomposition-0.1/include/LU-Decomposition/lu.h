@@ -5,17 +5,19 @@
 #include <vector>
 #include <cmath>
 #include <stdexcept>
-using namespace std;
 
 #ifndef LU_DECOMPOSITION_LU_H
 #define LU_DECOMPOSITION_LU_H
 
 namespace jcc {
-    void decomposition(vector<vector<double> > &A, int &n, vector<int> &indx,
-                       double &d);
 
-    void back_substitution(vector<vector<double> > &A, int &n, vector<int> indx,
-                           vector<double> &b);
+    void CheckSingularity(std::vector<double> &A, int &n);
+
+    void CroutDecomposition(std::vector<double> &A, int &n, std::vector<int> &indx);
+
+    void CroutSolve(std::vector<double> &LU, std::vector<double> &b, int &n,
+                    std::vector<int> &indx);
+
 }
 
 #endif //LU_DECOMPOSITION_LU_H

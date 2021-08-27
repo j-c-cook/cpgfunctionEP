@@ -3,83 +3,134 @@
 //
 
 #include <LU-Decomposition/lu.h>
+#include <algorithm>
 
+void jcc::CheckSingularity(std::vector<double> &A, int &n) {
 
-void jcc::decomposition(vector<vector<double> > &A, int &n, vector<int> &indx,
-                   double &d) {
-    const double TINY = 1.0e-20;  // a small number
-    int i, imax, j, k;
-    double big, dum, sum, temp;
+    int i;
+    std::vector<double>::iterator begin;
+    std::vector<double>::iterator end;
 
-    vector<double> vv(n); // vv stores the implicit scaling of each row
-    d = 1.0; // No row interchanges yet
-    for (i=0; i<n;i++){  // loop over rows to get implicit scaling formation
-        big = 0.0;
-        for (j=0; j<n;j++) {
-            if (fabs(A[i][j]) > big) big = fabs(A[i][j]);
-        } // next j
-        if (big == 0.0) throw invalid_argument("Singular matrix in routine "
-                                               "decomposition");
-        // No nonzero biggest element
-        vv[i] = 1.0/big; // save the scaling
+    double _min;
+    double _max;
+    bool singular = false;
+    for (i=0; i<n; i++) {
+        // Get the maximum and minimum element in row i
+        begin = A.begin() + (i  * n);
+        end = A.begin() + (i * n + n);
+        auto [min, max] = std::minmax_element(begin, end);
+        _min = fabs(*min);
+        _max = *max;
+        singular = (_min + _max < 1.0e-6);
     } // next i
+    // Make sure the matrix is not singular
+    if (singular) throw std::invalid_argument("The matrix is singular. One of the"
+                                         "rows contains all values less than"
+                                         "1.0e-6.");
+}
 
-    for (j=0; j<n;j++) { // This is the loop over columns of Crout's method
-        for (i=0; i<j; i++) {  // this is equation (2.3.12) except for i=j
-            sum = A[i][j];
-            for (k=0; k<i; k++) sum -= A[i][k] * A[k][j];
-            A[i][j] = sum;
-        } // next i
-        big = 0.0;
-        for (i=j; i<n; i++){
-            sum = A[i][j];
-            for (k=0; k<j;k++) sum -= A[i][k] * A[k][j];
-            A[i][j] = sum;
-            if (fabs(sum) >= big) {
-                big = fabs(sum);
-                imax = i;
-            } // end if()
-        } // next i
-        if (j != imax) {
-            for (k=0; k<n; k++) {
-                dum = A[imax][k];
-                A[imax][k] = A[j][k];
-                A[j][k] = dum;
+void jcc::CroutDecomposition(std::vector<double > &A, int &n, std::vector<int> &indx) {
+
+    int i, j, k, i_piv;
+    double summation, pivot, largest;
+
+    // A * x = (L U) * x = L (U x) = b (2.3.3)
+    // Perform the decomposition
+
+    // Crout's algorithm with implicit pivoting
+
+    // check to make sure the matrix is non-singular
+    std::vector<double>::iterator begin;
+    std::vector<double>::iterator end;
+    std::vector<double>::iterator begin_2;
+
+    // L_ii = 1 for i = 0,..., N-1 (2.3.11)
+    for (j=0; j<n; j++) {
+        // for i = 0, 1,...,j use (2.3.8), (2.3.9) and (2.3.11)
+        // U_ij = A_ij - sum_{k=0}^{i-1} L_ik U_kj (2.3.12)
+        for (i=0; i<j; i++) {
+            summation = 0;
+            for (k=0; k<i; k++) {
+                summation += A[n*i+k] * A[n*k+j];
             } // next k
-            d = -d;
-            vv[imax] = vv[j];
-        } // end if()
-        indx[j] = imax;
-        if (A[j][j] == 0.0) A[j][j] = TINY;
+            A[n*i+j] -= summation;
+        } // next i
+
+        // for i = j+1, j+2,...,n-1 use (2.3.10)
+        // L_ij = 1 / U_jj (A[i][j] - sum_{k=0}^{j-1} A[i][k] A[k][j])
+        // Save the pivot term for later
+        i_piv = j;
+        largest = 0.;
+        for (i=j; i<n; i++) {
+            summation = 0.;
+            for (k=0; k<j; k++) {
+                summation += A[n*i+k] * A[n*k+j];
+            } // next k
+            A[n*i+j] -= summation;
+            pivot = A[n*i+j];
+            // store the row in which the largest pivot occurs
+            if (pivot > largest) {
+                largest = pivot;
+                i_piv = i;
+            }
+        } // next i
+
+        // if the pivot term changed from the diagonal, swap rows
+        if ( i_piv != j) {
+            // swap row i_piv with row j
+            begin = A.begin() + i_piv * n;
+            end = A.begin() + i_piv * n + n;
+            begin_2 = A.begin() + j * n;
+            swap_ranges(begin, end, begin_2);
+        } // end if
+        indx[j] = i_piv;
         if (j != (n-1)) {
-            dum = 1.0 / A[j][j];
-            for (i=j+1; i<n; i++) A[i][j] *= dum;
+            // Make sure the pivot element is non-zero
+            if (A[j*n + j] == 0.) A[j*n + j] = 1.0e-10;
+            pivot = 1. / A[j * n + j];
+            for (i=j+1; i<n; i++) {
+                A[n*i+j] *= pivot;
+            } // next i
         }
     } // next j
 
-} // decomposition()
+} // jcc::CroutDecomposition
 
-void jcc::back_substitution(vector<vector<double> > &A, int &n, vector<int> indx,
-                       vector<double> &b) {
-    int i, ii=0, ip, j;
-    double sum;
+void jcc::CroutSolve(std::vector<double> &LU, std::vector<double> &b, int &n,
+                     std::vector<int> &indx) {
+    // L * y = b    (2.3.4)
+    // U * x = y    (2.3.5)
 
-    for (i=0; i<n; i++) {
-        ip = indx[i];
-        sum=b[ip];
-        b[ip]=b[i];
-        if (ii != 0) {
-            for (j=ii-1; j<i; j++) sum -= A[i][j] * b[j];
-        } else if (sum != 0.0) {
-            ii = i+1;
+    int i, j;
+    double summation, inv;
+
+    // Forward substitution
+    // y_0 = b_0 / L_00
+    std::swap(b[0], b[indx[0]]); // work with implicit pivot
+    // y_i = 1 / L_ii * (b_i - sum_{j=0}^{i-1} A[i][j] * y[j])
+    // i = 1,2,...,N-1
+    for (i=1; i<n; i++) {
+        std::swap(b[i], b[indx[i]]);
+        summation = 0.;
+        for (j=0; j<i; j++) {
+            summation += LU[n*i+j] * b[j];
+        } // next j
+        b[i] -= summation;
+    } // next i
+
+    // Backward substitution
+    // x[n-1] = y[n-1] / (LU[n-1][n-1])
+    b[n-1] = b[n-1] / LU[n*n-1];
+    // x_i = 1 / LU_ii * (y_i - sum_{j=i+1}^{N-1} LU[i][j] * x[j])
+    // i = N-1, N-3,...,0
+    for (i=(n-2); i>=0; i--) {
+        summation = 0.;
+        for (j=i+1; j<n; j++) {
+            summation += LU[n*i+j] * b[j];
         }
-        b[i] = sum;
-    } // next i
+        inv = 1 / LU[n*i+i];
+        b[i] -= summation;
+        b[i] *= inv;
+    }
 
-    for (i=n-1; i>=0;i--) {
-        sum=b[i];
-        for (j=i+1;j<n;j++) sum -= A[i][j]*b[j];
-        b[i]=sum/A[i][i];
-    } // next i
-
-} // back_substitution
+} // jcc::CroutSolve
