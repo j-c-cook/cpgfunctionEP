@@ -302,8 +302,8 @@ namespace gt::gfunction {
             // ----- LU decomposition -----
             start = std::chrono::steady_clock::now();
             vector<int> indx(SIZE, 0);
-            jcc::CroutDecomposition(A, n, indx);
-            jcc::CroutSolve(A, B, n, indx);
+            jcc::CroutDecomposition(A, n, indx, n_Threads);
+            jcc::CroutSolve(A, B, n, indx, n_Threads);
 
 //            for (int i=0; i<SIZE; i++) {
 //                x[i] = X(i, 0);
