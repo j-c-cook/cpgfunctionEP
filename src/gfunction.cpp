@@ -187,7 +187,7 @@ namespace gt::gfunction {
          * **/
 
         int SIZE = nSources + 1;
-        vector<vector<double> > A(SIZE, vector<double> (SIZE, 0));
+        vector<double> A(SIZE * SIZE, 0);
         vector<double> B (SIZE, 0);
 
         // Fill A
@@ -230,19 +230,19 @@ namespace gt::gfunction {
                 for (int j=0; j<SIZE; j++) {
                     if (i == n) { // then we are referring to Hb
                         if (j==n) {
-                            A[i][n] = 0;
+                            A[i+j*SIZE] = 0;
                         } else {
-                            A[i][j] = Hb[j];
+                            A[i+j*SIZE] = Hb[j];
                         } // fi
                     } else {
                         if (j==SIZE-1) {
-                            A[i][j] = -1;
+                            A[i+j*SIZE] = -1;
                         } else {
                             xp = dt[p];
                             jcc::interpolation::interp1d(xp, yp,
                                                          time, SegRes,
                                                          i, j, p);
-                            A[i][j] = yp;
+                            A[i+j*SIZE] = yp;
                         } // fi
                     } // fi
                 } // next k
@@ -302,9 +302,8 @@ namespace gt::gfunction {
             // ----- LU decomposition -----
             start = std::chrono::steady_clock::now();
             vector<int> indx(SIZE, 0);
-            double d;
-            jcc::decomposition(A, SIZE, indx, d);
-            jcc::back_substitution(A, SIZE, indx, B);
+            jcc::CroutDecomposition(A, n, indx, n_Threads);
+            jcc::CroutSolve(A, B, n, indx, n_Threads);
 
 //            for (int i=0; i<SIZE; i++) {
 //                x[i] = X(i, 0);

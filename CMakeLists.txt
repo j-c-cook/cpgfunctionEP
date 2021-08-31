@@ -11,8 +11,8 @@ endif()
 include_directories(include)
 # Third party includes
 include_directories(third_party/qdt-master)
-add_subdirectory(third_party/LU-Decomposition-0.1)
-include_directories(third_party/LU-Decomposition-0.1/include)
+add_subdirectory(third_party/LU-Decomposition-0.2)
+include_directories(third_party/LU-Decomposition-0.2/include)
 
 # Create a DLL with an API
 add_library(cpgfunctionEP  src/boreholes.cpp
@@ -58,6 +58,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     add_executable(gFunction_tests test/gFunction_tests.cpp)
     add_executable(packed test/packed.cpp)
     add_executable(gFunction_adaptive test/gFunction_adaptive.cpp)
+    add_executable(gFunctionTiming test/gFunctionTimings.cpp)
 
     target_link_libraries(gFunction_minimal PRIVATE cpgfunctionEP)
     target_link_libraries(interpolation PRIVATE cpgfunctionEP)
@@ -67,6 +68,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     target_link_libraries(gFunction_tests PRIVATE cpgfunctionEP)
     target_link_libraries(packed PRIVATE cpgfunctionEP)
     target_link_libraries(gFunction_adaptive PRIVATE cpgfunctionEP)
+    target_link_libraries(gFunctionTiming PRIVATE cpgfunctionEP)
 
     # Copy validation files to build directory so tests can open
     file(GLOB JsonValidation test/validation/*.json)
@@ -86,4 +88,5 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
     add_test(NAME RunTest6 COMMAND ${CMAKE_BINARY_DIR}/gFunction_tests)
     add_test(NAME RunTest7 COMMAND ${CMAKE_BINARY_DIR}/packed)
     add_test(NAME RunTest8 COMMAND ${CMAKE_BINARY_DIR}/gFunction_adaptive)
+    add_test(NAME RunTest9 COMMAND ${CMAKE_BINARY_DIR}/gFunctionTiming)
 endif()
