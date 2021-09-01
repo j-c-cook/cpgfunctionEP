@@ -1,5 +1,11 @@
 # History of changes - cpgfunctionEP
 
+## Version 0.6 (2021-09-01)
+
+### Enhancements 
+
+* [Issue 48](https://github.com/j-c-cook/cpgfunctionEP/issues/48) - The finite line source integration is replaced with an approximation presented by Cimmino (2021).  
+
 ## Version 0.5 (2021-08-17)
 
 ### Changes
