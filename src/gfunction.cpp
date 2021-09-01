@@ -453,7 +453,8 @@ namespace gt::gfunction {
                 // dh_ij = h(k)
                 std::copy(begin_it_1, end_it_1, dh_ij.begin());
             } else {
-                begin_2 = (k-1) * gauss_sum;
+//                begin_2 = (k-1) * gauss_sum;
+                begin_2 = 0;
                 // h_1 -> dh_ij
                 std::copy(begin_it_1, end_it_1, dh_ij.begin());
                 // dh_ij = -1 * h(k) + h(k-1)

@@ -9,7 +9,6 @@
 #include <cpgfunction/coordinates.h>
 
 
-
 int main() {
     // ---------------------------------------------------------
     // Simulation parameters
@@ -31,7 +30,7 @@ int main() {
     float dt = 100*3600.;                   // Time step
     double tmax = 3000. * 8760. * 3600.;    // Maximum time
     int Nt = 30;                             // Number of time steps
-    double ts = pow(H, 2)/(9.*alpha);    // Bore field characteristic time
+    double ts = std::pow(H, 2)/(9.*alpha);    // Bore field characteristic time
 
     std::vector<double> time = gt::utilities::time_geometric(dt, tmax, Nt);
 
