@@ -14,6 +14,8 @@
 #include <stdexcept>
 #include <chrono>
 
+using namespace std;
+
 void export_gFunction(std::string output_path, std::vector<double> logtime,
                       std::vector<double> gFunction);
 std::vector<std::tuple<double, double>> import_gFunction(std::string input_path);

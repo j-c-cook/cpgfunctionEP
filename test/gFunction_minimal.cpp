@@ -1,11 +1,13 @@
 #include <iostream>
-#include <cpgfunction/boreholes.h>
 #include <vector>
 #include <cmath>
+#include <chrono>
+#include <thread>
+#include <cpgfunction/boreholes.h>
 #include <cpgfunction/utilities.h>
 #include <cpgfunction/gfunction.h>
 #include <cpgfunction/coordinates.h>
-#include <chrono>
+
 
 
 int main() {
@@ -56,7 +58,7 @@ int main() {
             gt::boreholes::boreField(coordinates, r_b, H, D);
 
     // Detect number of threads (default uses all available threads)
-    int n_Threads = int(thread::hardware_concurrency());
+    int n_Threads = int(std::thread::hardware_concurrency());
     // Compute (and time) the g-Function
     auto start = std::chrono::steady_clock::now();
     std::vector<double> gFunction =
