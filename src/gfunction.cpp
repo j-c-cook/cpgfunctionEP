@@ -4,7 +4,6 @@
 // Created by jackcook on 7/11/20.
 //
 
-#include <thread>
 #include <chrono>
 #include <LU-Decomposition/lu.h>
 #include <blas/blas.h>
@@ -68,7 +67,7 @@ vector<double> gt::gfunction::uniform_borehole_wall_temperature(
 
     if (display) {
         std::cout << "Building and solving system of equations ..."
-            << std::endl;
+                  << std::endl;
     }
     // ---------------------------------------------------------------------
     // Build a system of equation [A]*[X] = [B] for the evaluation of the
@@ -93,7 +92,7 @@ vector<double> gt::gfunction::uniform_borehole_wall_temperature(
     // ------ Segment lengths -------
     start = std::chrono::steady_clock::now();
     std::vector<float> Hb(nSources);
-    # pragma omp parallel for num_threads(n_Threads)
+# pragma omp parallel for num_threads(n_Threads)
     for (int b=0; b<nSources; b++) {
         Hb[b] = SegRes.boreSegments[b].H;
     } // next b
@@ -110,7 +109,7 @@ vector<double> gt::gfunction::uniform_borehole_wall_temperature(
     std::vector<double> _time(time.size()+1);
     std::vector<double> dt(time.size()+1);
 
-    # pragma omp parallel for num_threads(n_Threads)
+# pragma omp parallel for num_threads(n_Threads)
     for (int i=0; i<_time.size(); i++) {
         if (i==0) {
             _time[0] = 0;
@@ -187,7 +186,7 @@ vector<double> gt::gfunction::uniform_borehole_wall_temperature(
     // Restructured load history
     // create interpolation object for accumulated heat extraction
     std::vector<std::vector<double>>
-        q_reconstructed (nSources, std::vector<double> (nt));
+            q_reconstructed (nSources, std::vector<double> (nt));
     std::vector<double> q_r(nSources * nt, 0);
 
     for (int p=0; p<nt; p++) {
@@ -220,7 +219,7 @@ vector<double> gt::gfunction::uniform_borehole_wall_temperature(
         };
         // A needs filled each loop because the _gsl partial pivot
         // decomposition modifies the matrix
-        # pragma omp parallel for num_threads(n_Threads)
+# pragma omp parallel for num_threads(n_Threads)
         for (int i=0; i<SIZE; i++) {
             _fillA(i, p, SIZE);
         }  // next i
@@ -243,7 +242,8 @@ vector<double> gt::gfunction::uniform_borehole_wall_temperature(
                                 SegRes,
                                 q_r,
                                 p,
-                                nSources);
+                                nSources,
+                                n_Threads);
         // fill b with -Tb
         B[SIZE-1] = Hb_sum;
         for (int i=0; i<Tb_0.size(); i++) {
@@ -336,7 +336,7 @@ vector<double> gt::gfunction::uniform_borehole_wall_temperature(
 namespace gt::gfunction {
 
     void _borehole_segments(std::vector<gt::boreholes::Borehole>& boreSegments,
-            std::vector<gt::boreholes::Borehole>& boreholes, const int nSegments) {
+                            std::vector<gt::boreholes::Borehole>& boreholes, const int nSegments) {
         double H;
         double D;
         int count = 0;
@@ -353,8 +353,8 @@ namespace gt::gfunction {
     } // void _borehole_segments
 
     void load_history_reconstruction(std::vector<double>& q_reconstructed,
-            vector<double>& time, vector<double>& _time,
-            vector<vector<double> >& Q, vector<double>& dt, const int p) {
+                                     vector<double>& time, vector<double>& _time,
+                                     vector<vector<double> >& Q, vector<double>& dt, const int p) {
         // for s in range p+1
         int nSources = Q.size();
 
@@ -371,7 +371,7 @@ namespace gt::gfunction {
         for (int i=1; i<=p+1; i++) {
             t_reconstructed[i] = t_reconstructed[i] + t_reconstructed[i-1];
         }
-         // local time vector
+        // local time vector
         std::vector<double> t(p+3);
         for (int i=0; i<t.size(); i++) {
             if (i==t.size()-1) {
@@ -398,7 +398,7 @@ namespace gt::gfunction {
         } // next i
 
         auto _interpolate = [&Q_dt, &q_reconstructed, &t, &t_reconstructed,
-                             &dt_reconstructed, &p, &nSources](const int i) {
+                &dt_reconstructed, &p, &nSources](const int i) {
             int n = t.size();
             std::vector<double> y(n);
             for (int j=0; j<n; j++) {
@@ -425,15 +425,12 @@ namespace gt::gfunction {
     void _temporal_superposition(vector<double>& Tb_0,
                                  gt::segments::SegmentResponse &SegRes,
                                  vector<double> &q_reconstructed,
-                                 const int p, int &nSources)
-            {
+                                 const int p, int &nSources, int n_threads)
+    {
         // This function performs equation (37) of Cimmino (2017)
         std::fill(Tb_0.begin(), Tb_0.end(), 0);
         // Number of time steps
         int nt = p + 1;
-
-        const auto processor_count = thread::hardware_concurrency();
-        int n_threads = int(processor_count);
 
         int gauss_sum = nSources * (nSources + 1) / 2;  // Number of positions in packed symmetric matrix
         // Storage of h_ij differences
