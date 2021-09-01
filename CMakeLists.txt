@@ -10,7 +10,6 @@ endif()
 # Everything will need to access this
 include_directories(include)
 # Third party includes
-include_directories(third_party/qdt-master)
 add_subdirectory(third_party/LU-Decomposition-0.2)
 include_directories(third_party/LU-Decomposition-0.2/include)
 
