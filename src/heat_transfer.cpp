@@ -12,6 +12,92 @@
 using namespace gt;
 using namespace std;
 
+std::vector<double> gt::heat_transfer::FLSApproximation::construct_dm(
+        gt::boreholes::Borehole &segment_i, gt::boreholes::Borehole &segment_j) {
+    // Fill d_m vector (equation 13)
+    std::vector<double> d_(8, 0);
+
+    // Real source portion (equation 13)
+    d_[0] = segment_i.D - segment_j.D + segment_i.H;
+    d_[1] = segment_i.D - segment_j.D;
+    d_[2] = segment_i.D - segment_j.D - segment_j.H;
+    d_[3] = segment_i.D - segment_j.D + segment_i.H - segment_j.H;
+    // Mirror (Image) source portion (equation 13)
+    d_[4] = segment_i.D + segment_j.D + segment_i.H;
+    d_[5] = segment_i.D + segment_j.D;
+    d_[6] = segment_i.D + segment_j.D + segment_j.H;
+    d_[7] = segment_i.D + segment_j.D + segment_i.H + segment_j.H;
+
+    return d_;
+}
+
+double gt::heat_transfer::FLSApproximation::finite_line_source(
+        double &time, double &alpha, gt::boreholes::Borehole &segment_i,
+        gt::boreholes::Borehole &segment_j, std::vector<double> &d_,
+        bool reaSource, bool imgSource) {
+
+    int m_start;
+    int m_stop;
+    if (reaSource && !imgSource) {
+        m_start = 0;
+        m_stop = 4;
+    } else if (!reaSource && imgSource) {
+        m_start = 4;
+        m_stop = 8;
+    } else if (reaSource && imgSource) {
+        m_start = 0;
+        m_stop = 8;
+    } else {
+        throw std::invalid_argument("Real and Mirror sources should not both"
+                                    "be set to false for "
+                                    "gt::heat_transfer::FLSApproximation::finite_line_source.");
+    }
+
+
+    double r_ij = segment_i.distance(segment_j);
+    double G1;
+    double G3;
+
+    int n, m;
+
+    double c_m, d_m, num, ratio;
+    double den = 4. * alpha * time;
+    double r_ij2 = std::pow(r_ij, 2);
+    double sqPI = std::sqrt(M_PI);
+
+    double h_ij = 0.;
+    double summation;
+    for (n=0; n<=N;n++) {
+        summation = 0.;
+        for (m=m_start; m<m_stop; m++) {
+            c_m = std::pow(-1., m);
+            d_m = d_[m];
+            num = r_ij2 + b_erf[n] * std::pow(d_m, 2);
+            ratio = num / den;
+            G1 = 0.5 * std::expint(-ratio);
+            summation += c_m * std::fabs(d_m) * G1;
+        } // next m
+        h_ij += a_erf[n] * summation;
+    } // next n
+    h_ij *= 1. / (2. * segment_i.H);
+
+    summation = 0;
+    double val;
+    for (m=m_start; m<m_stop; m++) {
+        val = r_ij2 + std::pow(d_[m], 2);
+
+        G3 = std::sqrt(den) * std::exp(- val / den) - std::sqrt(val) * sqPI
+                * std::erfc(std::sqrt(val / den));
+
+        summation += std::pow(-1., m) * G3;
+    }
+    h_ij += - 1. / (2. * std::sqrt(M_PI) * segment_i.H) * summation;
+
+    return -h_ij;
+}
+
+
+
 namespace gt::heat_transfer {
 
     double finite_line_source(const double time_, const double alpha,
