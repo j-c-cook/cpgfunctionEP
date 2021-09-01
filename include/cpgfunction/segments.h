@@ -28,7 +28,7 @@ namespace gt::segments {
                 nSources(nSources),
                 nSum(nSum),
                 boreSegments(nSources),
-                h_ij(nSum, vector<double>(nt, 0))
+                h_ij(nt, vector<double>(nSum, 0))
         {} // constructor
 
         // storage_mode = 1 is the reduced segment response vector
