@@ -11,6 +11,7 @@
 #include <cpgfunction/utilities.h>
 #include <cpgfunction/gfunction.h>
 
+using namespace std;
 
 int main() {
     // -- Borehole geometry --

@@ -14,6 +14,8 @@
 #include <stdexcept>
 #include <chrono>
 
+using namespace std;
+
 void export_gFunction(std::string output_path, std::vector<double> logtime,
                       std::vector<double> gFunction);
 std::vector<std::tuple<double, double>> import_gFunction(std::string input_path);
@@ -114,6 +116,8 @@ int main(){
     // Ground properties
     double alpha = 1.0e-06;  // ground thermal diffusivity
 
+    int n_Threads = int(std::thread::hardware_concurrency());
+
     // -- Time definition --
     // Eskilson's original 27 time steps (in seconds)
     std::vector<double> time = gt::utilities::time_Eskilson(H, alpha);
@@ -153,7 +157,7 @@ int main(){
                                                                  time, alpha,
                                                                  12,
                                                                  true,
-                                                                 true);
+                                                                 n_Threads);
         auto end = std::chrono::steady_clock::now();
         auto milli = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
         double seconds = double(milli) / 1000;

@@ -2,11 +2,11 @@
 // Created by jackcook on 7/11/20.
 //
 
+#include <cmath>
+#include <cpgfunction/boreholes.h>
 #include <cpgfunction/heat_transfer.h>
 #include <stdexcept>
 #include <thread>
-#include <cpgfunction/boreholes.h>
-#include <cmath>
 
 using namespace gt;
 using namespace std;
@@ -86,7 +86,7 @@ double gt::heat_transfer::FLSApproximation::finite_line_source(
         val = r_ij2 + std::pow(d_[m], 2);
 
         G3 = std::sqrt(den) * std::exp(- val / den) - std::sqrt(val) * sqPI
-                * std::erfc(std::sqrt(val / den));
+                                                      * std::erfc(std::sqrt(val / den));
 
         summation += std::pow(-1., m) * G3;
     }
@@ -140,21 +140,12 @@ namespace gt::heat_transfer {
 } // namespace gt::heat_transfer
 
 void gt::heat_transfer::thermal_response_factors(gt::segments::SegmentResponse &SegRes,
-                              vector<double> &time, const double alpha,
-                              bool use_similaries, bool disp) {
+                                                 vector<double> &time, const double alpha,
+                                                 bool use_similaries, bool disp, int n_Threads) {
     // total number of line sources
     int nSources = SegRes.boreSegments.size();
     // number of time values
     int nt = time.size();
-
-    // Open up processes here
-    // Create a vector of threads
-    //may return 0 when not able to detect
-    const auto processor_count = thread::hardware_concurrency();
-    if (disp) {
-        cout << "\tDetected " << processor_count
-        << " as the number of available threads" << endl;
-    }
 
     gt::boreholes::SimilaritiesType SimReal; // positive
     gt::boreholes::SimilaritiesType SimImage; // negative
@@ -186,7 +177,7 @@ void gt::heat_transfer::thermal_response_factors(gt::segments::SegmentResponse &
         // lambda function for calculating h at each time step
         auto _calculate_h = [&SegRes, &splitRealAndImage, &time, &alpha, &nt, &FLSApprox]
                 (boreholes::SimilaritiesType &SimReal, int s, bool reaSource,
-                        bool imgSource) {
+                 bool imgSource) {
             // begin function
             int n1;
             int n2;
@@ -202,8 +193,8 @@ void gt::heat_transfer::thermal_response_factors(gt::segments::SegmentResponse &
             if (splitRealAndImage) {
                 for (int k=0; k<nt; k++) {
                     hPos[k] = FLSApprox.finite_line_source(time[k],
-                                                 const_cast<double &>(alpha), b1,
-                                                 b2, d_, reaSource, imgSource);
+                                                           const_cast<double &>(alpha), b1,
+                                                           b2, d_, reaSource, imgSource);
                 }  // next k
                 int i;
                 int j;
@@ -243,7 +234,7 @@ void gt::heat_transfer::thermal_response_factors(gt::segments::SegmentResponse &
                     chrono::milliseconds>(end - start).count();
             double seconds = double(milli) / 1000;
             std::cout << "Elapsed time in seconds : " << seconds
-            << " sec" << std::endl;
+                      << " sec" << std::endl;
             std::cout << "Calculating segment to segment response "
                          "factors ..." << std::endl;
         } // end if
@@ -251,7 +242,7 @@ void gt::heat_transfer::thermal_response_factors(gt::segments::SegmentResponse &
         // inputs
         bool reaSource;
         bool imgSource;
-        # pragma omp parallel for num_threads(processor_count)
+# pragma omp parallel for num_threads(n_Threads)
         for (int s=0; s<SimReal.nSim; s++) {
             reaSource = true;
             imgSource = false;
@@ -260,7 +251,7 @@ void gt::heat_transfer::thermal_response_factors(gt::segments::SegmentResponse &
         if (splitRealAndImage) {
             reaSource = false;
             imgSource = true;
-            # pragma omp parallel for num_threads(processor_count)
+# pragma omp parallel for num_threads(n_Threads)
             for (int s=0; s<SimImage.nSim; s++) {
                 _calculate_h(SimImage, s, reaSource, imgSource);
             }
@@ -283,7 +274,7 @@ void gt::heat_transfer::thermal_response_factors(gt::segments::SegmentResponse &
         bool otherSegment;
 
         auto _fill_line = [&SegRes, &time](const int i, const int j,
-                const double alpha, bool sameSegment, bool otherSegment) {
+                                           const double alpha, bool sameSegment, bool otherSegment) {
             double h;
             int index;
             gt::boreholes::Borehole b1;
@@ -306,7 +297,7 @@ void gt::heat_transfer::thermal_response_factors(gt::segments::SegmentResponse &
                 SegRes.h_ij[index][k] = h;
             }; // end for
         }; // auto _fill_line
-        #pragma omp parallel for num_threads(processor_count)
+#pragma omp parallel for num_threads(n_Threads)
         for (int i = 0; i < nSources; i++) {
             // Segment to same-segment thermal response factor
             // FLS solution for combined real and image sources

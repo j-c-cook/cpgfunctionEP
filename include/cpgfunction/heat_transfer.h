@@ -2,18 +2,15 @@
 // Created by jackcook on 7/11/20.
 //
 
+#ifndef CPPGFUNCTION_HEAT_TRANSFER_H
+#define CPPGFUNCTION_HEAT_TRANSFER_H
+
+#include <cmath>
 #include <iostream>
 #include <vector>
-#include <cmath>
 #include <algorithm>
 #include <cpgfunction/boreholes.h>
 #include <cpgfunction/segments.h>
-
-using namespace std;
-using namespace gt;
-
-#ifndef CPPGFUNCTION_HEAT_TRANSFER_H
-#define CPPGFUNCTION_HEAT_TRANSFER_H
 
 namespace gt::heat_transfer {
 
@@ -86,7 +83,7 @@ namespace gt::heat_transfer {
             a_erf[0] = 1.;
             double a_scale = -2.;
             std::transform(a_Q[N-1].begin(), a_Q[N-1].end(),
-                      a_erf.begin()+1, [a_scale](double &c){ return c*a_scale; });
+                           a_erf.begin()+1, [a_scale](double &c){ return c*a_scale; });
             b_erf[0] = 0.;
             double b_scale = 2.;
             std::transform(b_Q[N-1].begin(), b_Q[N-1].end(),
@@ -110,8 +107,9 @@ namespace gt::heat_transfer {
                               boreholes::Borehole& b1, boreholes::Borehole& b2,
                               bool reaSource=true, bool imgSource=true);
     void thermal_response_factors(gt::segments::SegmentResponse &SegRes,
-                                  vector<double>& time, double alpha,
-                                  bool use_similaries, bool disp=false);
+                                  std::vector<double>& time, double alpha,
+                                  bool use_similarities, bool disp=false,
+                                  int numThreads=1);
 
 } // namespace gt::heat_transfer
 

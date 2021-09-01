@@ -26,7 +26,7 @@ jobs:
       - name: Build
         working-directory: ./build
         shell: bash
-        run: cmake --build . -j 2
+        run: cmake --build . -j 16
         
       - name: listFiles
         working-directory: ./build
