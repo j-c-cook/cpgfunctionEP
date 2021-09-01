@@ -4,6 +4,8 @@
 
 #include <algorithm>
 #include <cmath>
+#include <stdexcept>
+#include <string>
 #include <cpgfunction/utilities.h>
 
 using namespace std;
