@@ -173,7 +173,7 @@ int main(){
             double rmse = gt::statistics::root_mean_square_error(gFunctionReference, gFunction);
             rmse *= 100;
 
-            if (rmse > 1.0E-3) {
+            if (rmse > 1.0E-2) {
                 throw std::invalid_argument("The root mean square error is more than 0.");
             }
 
