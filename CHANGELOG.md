@@ -4,7 +4,8 @@
 
 ### Enhancements 
 
-* [Issue 48](https://github.com/j-c-cook/cpgfunctionEP/issues/48) - The finite line source integration is replaced with an approximation presented by Cimmino (2021).  
+* [Issue 48](https://github.com/j-c-cook/cpgfunctionEP/issues/48) - The finite line source integration is replaced with an approximation presented by Cimmino (2021).
+* [Issue 49](https://github.com/j-c-cook/cpgfunctionEP/issues/49) - An additional segment response packed matrix had previously been introduced for purposes of interfacing with `BLAS`. At the time, that was a quick resolution to get the code working. The final solution has been to transpose `h_ij` from `[nSum x nt]` to `[nt x nSum]` so that `BLAS` functions can be readily made use of. The 1D solution will not work due to a maximum size that can be allocated to `std::vector`. 
 
 ## Version 0.5 (2021-08-17)
 

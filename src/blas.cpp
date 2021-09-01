@@ -11,7 +11,7 @@ namespace jcc::blas {
         // y = a*x + y
         #pragma omp parallel for num_threads(n_threads)
         for (int i=0; i<n; i++) {
-            y[i] = a * x[i+start] + y[i];
+            y[i] = a * x[i] + y[i];
         }
     }  // axpy();
 

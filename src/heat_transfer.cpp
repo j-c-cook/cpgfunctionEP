@@ -220,11 +220,11 @@ void gt::heat_transfer::thermal_response_factors(gt::segments::SegmentResponse &
                                 // we want to store n2, n1
                                 SegRes.get_index_value(index, i, j);
                                 // non-critical race condition
-                                SegRes.h_ij[index][t] += b2.H / b1.H * hPos[t];
+                                SegRes.h_ij[t][index] += b2.H / b1.H * hPos[t];
                             } else {
                                 SegRes.get_index_value(index, j, i);
                                 // non-critical race condition
-                                SegRes.h_ij[index][t] += hPos[t];
+                                SegRes.h_ij[t][index] += hPos[t];
                             }  // else ()
                         }  // next t
                     }  // next k
