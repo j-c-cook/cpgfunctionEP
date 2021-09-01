@@ -2,10 +2,11 @@
 // Created by jackcook on 7/15/21.
 //
 
-#include <iostream>
 #include <cmath>
-#include <cpgfunction/segments.h>
 #include <cpgfunction/interpolation.h>
+#include <cpgfunction/segments.h>
+#include <iostream>
+#include <stdexcept>
 
 using namespace std;
 
@@ -49,7 +50,7 @@ namespace gt::segments {
             nq = jcc::interpolation::interp1d(drilling_depth,
                                               drilling_depths[0],
                                               ideal_segment_lengths[0]);
-        } else if(heights[0] < height < heights[n1]) {
+        } else if(heights[0] < height && height < heights[n1]) {
             // do bilinear interpolation
             // find the lower and upper height values
             bool finished = false;
