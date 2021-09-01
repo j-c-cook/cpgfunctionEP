@@ -4,6 +4,8 @@
 
 #include <blas/blas.h>
 
+using namespace std;
+
 namespace jcc::blas {
 
     void axpy(int &n, double &a, vector<double> &x, vector<double> &y,
@@ -11,7 +13,7 @@ namespace jcc::blas {
         // y = a*x + y
         #pragma omp parallel for num_threads(n_threads)
         for (int i=0; i<n; i++) {
-            y[i] = a * x[i] + y[i];
+            y[i] = a * x[i+start] + y[i];
         }
     }  // axpy();
 
