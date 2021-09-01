@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.6)
 project(cpgfunctionEP)
 
 set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED on)
 set(CMAKE_WINDOWS_EXPORT_ALL_SYMBOLS ON)
 if (MSVC)
     add_compile_definitions(_USE_MATH_DEFINES)
