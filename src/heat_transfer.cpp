@@ -2,10 +2,10 @@
 // Created by jackcook on 7/11/20.
 //
 
-#include <cpgfunction/boreholes.h>
-#include <cpgfunction/heat_transfer.h>
 #include <stdexcept>
 #include <thread>
+#include <cpgfunction/boreholes.h>
+#include <cpgfunction/heat_transfer.h>
 
 std::vector<double> gt::heat_transfer::FLSApproximation::construct_dm(
         gt::boreholes::Borehole &segment_i, gt::boreholes::Borehole &segment_j) {
@@ -59,7 +59,6 @@ double gt::heat_transfer::FLSApproximation::finite_line_source(
     double den = 4. * alpha * time;
     double r_ij2 = std::pow(r_ij, 2);
     double sqPI = std::sqrt(M_PI);
-    double _G;
 
     double h_ij = 0.;
     double summation;
@@ -70,11 +69,7 @@ double gt::heat_transfer::FLSApproximation::finite_line_source(
             d_m = d_[m];
             num = r_ij2 + b_erf[n] * std::pow(d_m, 2);
             ratio = num / den;
-//            G1 = 0.5 * std::expint(-ratio);
             G1 = 0.5 * gt::heat_transfer::E1(ratio);
-//            if (std::abs(_G-G1) > 1.0e-06) {
-//                int a = 1;
-//            }
             summation += c_m * std::fabs(d_m) * G1;
         } // next m
         h_ij += a_erf[n] * summation;
