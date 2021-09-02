@@ -7,68 +7,6 @@
 #include <cpgfunction/heat_transfer.h>
 #include <stdexcept>
 #include <thread>
-//#include <stdlib/exp_integral.h>
-
-using namespace gt;
-using namespace std;
-
-//namespace stdlib {
-//    template<typename _Tp>
-//    inline typename __gnu_cxx::__promote<_Tp>::__type
-//    expint(_Tp __x)
-//    {
-//        typedef typename __gnu_cxx::__promote<_Tp>::__type __type;
-//        return __detail::__expint<__type>(__x);
-//    }
-//}
-
-//namespace stdlib {
-//
-//    template<typename _Tp>
-//    _Tp
-//    __expint_E1(_Tp __x)
-//    {
-//        if (__x < _Tp(0))
-//            return -__expint_Ei(-__x);
-//        else if (__x < _Tp(1))
-//            return __expint_E1_series(__x);
-//        else if (__x < _Tp(100))  //  TODO: Find a good asymptotic switch point.
-//            return __expint_En_cont_frac(1, __x);
-//        else
-//            return __expint_E1_asymp(__x);
-//    }
-//
-//    template<typename _Tp>
-//    _Tp
-//    __expint_Ei(_Tp __x)
-//    {
-//        if (__x < _Tp(0))
-//            return -__expint_E1(-__x);
-//        else if (__x < -std::log(std::numeric_limits<_Tp>::epsilon()))
-//            return __expint_Ei_series(__x);
-//        else
-//            return __expint_Ei_asymp(__x);
-//    }
-//
-//    template<typename _Tp>
-//    inline _Tp
-//    __expint(_Tp __x)
-//    {
-//        if (__isnan(__x))
-//            return std::numeric_limits<_Tp>::quiet_NaN();
-//        else
-//            return __expint_Ei(__x);
-//    }
-//
-//    template<typename _Tp>
-//    inline typename __gnu_cxx::__promote<_Tp>::__type
-//    expint(_Tp __x)
-//    {
-//        typedef typename __gnu_cxx::__promote<_Tp>::__type __type;
-//        return __detail::__expint<__type>(__x);
-//    }
-//
-//}
 
 std::vector<double> gt::heat_transfer::FLSApproximation::construct_dm(
         gt::boreholes::Borehole &segment_i, gt::boreholes::Borehole &segment_j) {
@@ -93,33 +31,6 @@ double gt::heat_transfer::FLSApproximation::finite_line_source(
         double &time, double &alpha, gt::boreholes::Borehole &segment_i,
         gt::boreholes::Borehole &segment_j, std::vector<double> &d_,
         bool reaSource, bool imgSource) {
-
-//    auto Ei = [](double z, int n=10){
-//        // Puiseux series of Ei(x)
-//        // https://mathworld.wolfram.com/ExponentialIntegral.html
-//        // Euler-Mascheroni (https://en.wikipedia.org/wiki/Euler%E2%80%93Mascheroni_constant)
-//        // Factorial as tgamma https://stackoverflow.com/a/50132998/11637415
-//        // https://www.cplusplus.com/reference/cmath/tgamma/
-//        double gamma = 0.577215664901532860606512090082;
-//        double summation = 0.;
-//        double num, den;
-////        for (int k=1; k<n; k++) {
-////            num = std::pow(-z, k);
-////            den = k * std::tgamma(k+1);
-////            summation += num / den;
-////        }
-//
-//        for (int k=1; k<n; k++) {
-//            num = std::pow(-1., k+1) * std::pow(z, k);
-//            den = k * std::tgamma(k+1);
-//            summation += num / den;
-//        }
-//
-//        num = gamma + std::log(z) - summation;
-//
-////        num = gamma + std::log(z) + summation;
-//        return num;
-//    };
 
     int m_start;
     int m_stop;
@@ -160,8 +71,11 @@ double gt::heat_transfer::FLSApproximation::finite_line_source(
             d_m = d_[m];
             num = r_ij2 + b_erf[n] * std::pow(d_m, 2);
             ratio = num / den;
-            G1 = 0.5 * std::expint(-ratio);
-//            _G = 0.5 * stdlib::expint(-ratio);
+//            G1 = 0.5 * std::expint(-ratio);
+            G1 = 0.5 * gt::heat_transfer::E1(ratio);
+//            if (std::abs(_G-G1) > 1.0e-06) {
+//                int a = 1;
+//            }
             summation += c_m * std::fabs(d_m) * G1;
         } // next m
         h_ij += a_erf[n] * summation;
@@ -228,7 +142,7 @@ namespace gt::heat_transfer {
 } // namespace gt::heat_transfer
 
 void gt::heat_transfer::thermal_response_factors(gt::segments::SegmentResponse &SegRes,
-                                                 vector<double> &time, const double alpha,
+                                                 std::vector<double> &time, const double alpha,
                                                  bool use_similaries, bool disp, int n_Threads) {
     // total number of line sources
     int nSources = SegRes.boreSegments.size();
@@ -245,7 +159,7 @@ void gt::heat_transfer::thermal_response_factors(gt::segments::SegmentResponse &
         auto start = std::chrono::steady_clock::now();
         // Calculations with similarities
         if (disp) {
-            cout << "Identifying similarities..." << endl;
+            std::cout << "Identifying similarities..." << std::endl;
         }
         bool splitRealAndImage = true;
         double disTol = 0.1;
@@ -272,12 +186,12 @@ void gt::heat_transfer::thermal_response_factors(gt::segments::SegmentResponse &
             gt::boreholes::Borehole b1;
             gt::boreholes::Borehole b2;
             // begin thread
-            n1 = get<0>(SimReal.Sim[s][0]);
-            n2 = get<1>(SimReal.Sim[s][0]);
+            n1 = std::get<0>(SimReal.Sim[s][0]);
+            n2 = std::get<1>(SimReal.Sim[s][0]);
             b1 = SegRes.boreSegments[n1];
             b2 = SegRes.boreSegments[n2];
             std::vector<double> d_ = FLSApprox.construct_dm(b1, b2);
-            vector<double> hPos(nt);
+            std::vector<double> hPos(nt);
             if (splitRealAndImage) {
                 for (int k=0; k<nt; k++) {
                     hPos[k] = FLSApprox.finite_line_source(time[k],
@@ -290,8 +204,8 @@ void gt::heat_transfer::thermal_response_factors(gt::segments::SegmentResponse &
                     // will loop through every (i, j), will combine real+image
                     int index;
                     for (std::size_t k=0; k<SimReal.Sim[s].size(); k++) {
-                        i = get<0>(SimReal.Sim[s][k]);
-                        j = get<1>(SimReal.Sim[s][k]);
+                        i = std::get<0>(SimReal.Sim[s][k]);
+                        j = std::get<1>(SimReal.Sim[s][k]);
                         for (std::size_t t=0; t<time.size(); t++){
                             // must consider real and image source separate
                             // when combining
@@ -318,8 +232,8 @@ void gt::heat_transfer::thermal_response_factors(gt::segments::SegmentResponse &
         };
         auto end = std::chrono::steady_clock::now();
         if (disp) {
-            auto milli = chrono::duration_cast<
-                    chrono::milliseconds>(end - start).count();
+            auto milli = std::chrono::duration_cast<
+                    std::chrono::milliseconds>(end - start).count();
             double seconds = double(milli) / 1000;
             std::cout << "Elapsed time in seconds : " << seconds
                       << " sec" << std::endl;
@@ -411,3 +325,120 @@ void gt::heat_transfer::thermal_response_factors(gt::segments::SegmentResponse &
         // Iterate over the thread vector
     } // fi similarity
 } // void thermal_response_factors
+
+
+double gt::heat_transfer::E1(double &z, const int max_iter){
+    // Exponential integral (see quotient difference algorithm)
+    //
+    // Note: This is only valid for z>= 0, if z > 0, then Ei needs to be
+    // computed from the relation -E1(x) = Ei(-x)
+    //
+    // References:
+    //  (1) ISO C++ 14882 TR1:5.2 Special functions by Edward Smith-Rowland
+    //  (2) Numerical Recipes in C++ 2nd Ed. by Press et al. (2002).
+    //  (3) Exponential Integral Wikipedia
+    //      https://en.wikipedia.org/wiki/Exponential_integral
+    //  (4) Digital Library of Mathematical Functions, 6.12
+    //      Asymptotic Expansions. https://dlmf.nist.gov/6.12
+
+    double old_val=99999.;
+    double expint;
+    // Convergence criteria
+    const double criteria = 1.0e-06;
+    double error = 999999.;
+    double factorial = 1.;
+    // Euler-Mascheroni
+    // (https://en.wikipedia.org/wiki/Euler%E2%80%93Mascheroni_constant)
+    double gamma = 0.577215664901532860606512090082;
+
+    int m=1;
+    double summation;
+    // Small value that is not zero
+    const double near_0 = std::numeric_limits<double>::min();
+
+    if (z == 0.0) expint = 1.;
+    else if (z <= 1) {
+        // Series representation
+        summation = 0.;
+        while (error >= criteria && m < max_iter) {
+            factorial *= m;
+            summation += std::pow(-z, m) / (m * factorial);
+            // Obtain current error
+            error = std::abs(old_val - summation) / std::abs(old_val);
+            // Store value for old next iteration
+            old_val = summation;
+            // increment iteration
+            m++;
+        }
+        expint = gamma + std::log(z) + summation;
+    } else if (z <= 100) {
+        // Continued fraction equation by modified Lentz's method
+        unsigned int n = 1;  // E1 rather than En
+        double bj = z + n;
+        double aj;
+        // Start Lentz's algorithm smarter by propagating through one time
+        // to help reduce precision errors
+        // set f0 = b0 if b0=0 set f0 near 0
+        // set c0 = f0
+        // set D0 = 0
+        // Now propagate through algorithm
+        // Dj = bj + a_jD_{j-1}, therefore, D = 1 / b now
+        double D = 1. / bj;
+        // Cj = bj + aj/C_{j-1} -> infinity
+        double C = 1. / near_0;
+        // f = f * delta_j = f * C * D = 1 / infty * infty * 1 / bj = D
+        double f = D;
+        double delta_j = 99999;
+        //       b       a
+        // 1    z+n      1
+        // 2   b1+2     -1*n
+        // 3   b2+2    -2*(n+1)
+        // 4   b3+2    -4*(n+1)
+        // Therefore,
+        // a = - (m * ((n-1) + m))
+        // b0 = z + n and bj = b_{j-1} + 2
+        // For j  = 1,2,...
+        while ( std::abs(delta_j - 1.) > criteria && m < max_iter ) {
+            bj += 2.;
+            aj = - (m * ((n-1.) + m));
+            // set Dj = bj + ajD_j-1
+            D = bj + aj * D;
+            // if Dj =0, set Dj=near 0
+            if (D == 0.0) D = near_0;
+            // set Cj = bj + aj/C_{j-1}
+            C = bj + (aj / C);
+            if (C == 0.0) C = near_0;
+            // Set Dj = 1/Dj
+            D = 1 / D;
+            // Set delta_j = CjDj
+            delta_j = C * D;
+            // Set fj = f_{j-1} * delta_j
+            f = f * delta_j;
+            m++;
+        }
+        expint = -f * std::exp(-z);
+    } else if (z > 100) {
+        // Asymptotic expansion
+        factorial = 1.;
+        summation = 1.;
+        while (error >= criteria && m < max_iter) {
+            factorial *= m;
+            summation += std::pow(-1, m) * factorial / std::pow(z, m);
+            // Obtain current error
+            error = std::abs(old_val - summation) / std::abs(old_val);
+            // Store value for old next iteration
+            old_val = summation;
+            // increment iteration
+            m++;
+        }
+        expint = std::exp(-z) / z * summation;
+    } else {
+        throw std::invalid_argument("This exponential integral function E1 "
+                                    "only handles values greater than 0. "
+                                    "The Ei function needs implemented to "
+                                    "handle values less than 0.");
+    }
+
+    return expint;
+
+};
