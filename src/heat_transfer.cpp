@@ -2,7 +2,6 @@
 // Created by jackcook on 7/11/20.
 //
 
-#include <tr1/cmath>
 #include <cpgfunction/boreholes.h>
 #include <cpgfunction/heat_transfer.h>
 #include <stdexcept>
