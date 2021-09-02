@@ -2,14 +2,73 @@
 // Created by jackcook on 7/11/20.
 //
 
-#include <cmath>
+#include <tr1/cmath>
 #include <cpgfunction/boreholes.h>
 #include <cpgfunction/heat_transfer.h>
 #include <stdexcept>
 #include <thread>
+//#include <stdlib/exp_integral.h>
 
 using namespace gt;
 using namespace std;
+
+//namespace stdlib {
+//    template<typename _Tp>
+//    inline typename __gnu_cxx::__promote<_Tp>::__type
+//    expint(_Tp __x)
+//    {
+//        typedef typename __gnu_cxx::__promote<_Tp>::__type __type;
+//        return __detail::__expint<__type>(__x);
+//    }
+//}
+
+//namespace stdlib {
+//
+//    template<typename _Tp>
+//    _Tp
+//    __expint_E1(_Tp __x)
+//    {
+//        if (__x < _Tp(0))
+//            return -__expint_Ei(-__x);
+//        else if (__x < _Tp(1))
+//            return __expint_E1_series(__x);
+//        else if (__x < _Tp(100))  //  TODO: Find a good asymptotic switch point.
+//            return __expint_En_cont_frac(1, __x);
+//        else
+//            return __expint_E1_asymp(__x);
+//    }
+//
+//    template<typename _Tp>
+//    _Tp
+//    __expint_Ei(_Tp __x)
+//    {
+//        if (__x < _Tp(0))
+//            return -__expint_E1(-__x);
+//        else if (__x < -std::log(std::numeric_limits<_Tp>::epsilon()))
+//            return __expint_Ei_series(__x);
+//        else
+//            return __expint_Ei_asymp(__x);
+//    }
+//
+//    template<typename _Tp>
+//    inline _Tp
+//    __expint(_Tp __x)
+//    {
+//        if (__isnan(__x))
+//            return std::numeric_limits<_Tp>::quiet_NaN();
+//        else
+//            return __expint_Ei(__x);
+//    }
+//
+//    template<typename _Tp>
+//    inline typename __gnu_cxx::__promote<_Tp>::__type
+//    expint(_Tp __x)
+//    {
+//        typedef typename __gnu_cxx::__promote<_Tp>::__type __type;
+//        return __detail::__expint<__type>(__x);
+//    }
+//
+//}
 
 std::vector<double> gt::heat_transfer::FLSApproximation::construct_dm(
         gt::boreholes::Borehole &segment_i, gt::boreholes::Borehole &segment_j) {
@@ -34,6 +93,33 @@ double gt::heat_transfer::FLSApproximation::finite_line_source(
         double &time, double &alpha, gt::boreholes::Borehole &segment_i,
         gt::boreholes::Borehole &segment_j, std::vector<double> &d_,
         bool reaSource, bool imgSource) {
+
+//    auto Ei = [](double z, int n=10){
+//        // Puiseux series of Ei(x)
+//        // https://mathworld.wolfram.com/ExponentialIntegral.html
+//        // Euler-Mascheroni (https://en.wikipedia.org/wiki/Euler%E2%80%93Mascheroni_constant)
+//        // Factorial as tgamma https://stackoverflow.com/a/50132998/11637415
+//        // https://www.cplusplus.com/reference/cmath/tgamma/
+//        double gamma = 0.577215664901532860606512090082;
+//        double summation = 0.;
+//        double num, den;
+////        for (int k=1; k<n; k++) {
+////            num = std::pow(-z, k);
+////            den = k * std::tgamma(k+1);
+////            summation += num / den;
+////        }
+//
+//        for (int k=1; k<n; k++) {
+//            num = std::pow(-1., k+1) * std::pow(z, k);
+//            den = k * std::tgamma(k+1);
+//            summation += num / den;
+//        }
+//
+//        num = gamma + std::log(z) - summation;
+//
+////        num = gamma + std::log(z) + summation;
+//        return num;
+//    };
 
     int m_start;
     int m_stop;
@@ -63,6 +149,7 @@ double gt::heat_transfer::FLSApproximation::finite_line_source(
     double den = 4. * alpha * time;
     double r_ij2 = std::pow(r_ij, 2);
     double sqPI = std::sqrt(M_PI);
+    double _G;
 
     double h_ij = 0.;
     double summation;
@@ -74,6 +161,7 @@ double gt::heat_transfer::FLSApproximation::finite_line_source(
             num = r_ij2 + b_erf[n] * std::pow(d_m, 2);
             ratio = num / den;
             G1 = 0.5 * std::expint(-ratio);
+//            _G = 0.5 * stdlib::expint(-ratio);
             summation += c_m * std::fabs(d_m) * G1;
         } // next m
         h_ij += a_erf[n] * summation;
