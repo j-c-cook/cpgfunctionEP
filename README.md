@@ -1,4 +1,6 @@
 # cpgfunctionEP
+A fork of cpgfunction that has been tailored for NREL's [EnergyPlus][3]. 
+
 An open source low level (C++) implementation of [Massimo Cimmino][1]'s
 g-function methodology. The g-function calculation has to do with the distribution
 of heat in a ground heat exchanger (GHE). The g-function, after computed,
@@ -35,6 +37,7 @@ is a checklist of boundary conditions contained in this library:
 
 [1]: https://github.com/MassimoCimmino
 [2]: https://github.com/MassimoCimmino/pygfunction
+[3]: https://github.com/NREL/EnergyPlus/tree/develop/third_party/cpgfunctionEP-0.6
 
 # Build
 
