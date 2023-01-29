@@ -37,7 +37,7 @@ is a checklist of boundary conditions contained in this library:
 
 [1]: https://github.com/MassimoCimmino
 [2]: https://github.com/MassimoCimmino/pygfunction
-[3]: https://github.com/NREL/EnergyPlus/tree/develop/third_party/cpgfunctionEP-0.6
+[3]: https://github.com/NREL/EnergyPlus/tree/develop/third_party/cpgfunctionEP
 
 # Build
 
